@@ -435,31 +435,36 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
                     
                     {/* Post Card - 드래그 가능 */}
                     <div 
-                      className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg cursor-pointer"
+                      className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg"
                       style={{
                         transform: `translateX(${dragOffset[post.id] || 0}px)`,
-                        transition: dragStartX === null ? 'transform 0.3s ease' : 'none'
+                        transition: dragStartX === null ? 'transform 0.3s ease' : 'none',
+                        touchAction: 'pan-y'
                       }}
                       onTouchStart={(e) => {
+                        console.log('Touch start on card');
                         handleTouchStart(e, post.id, post);
-                        e.stopPropagation();
                       }}
                       onTouchMove={(e) => {
+                        console.log('Touch move on card');
                         handleTouchMove(e, post.id, post);
-                        e.stopPropagation();
                       }}
                       onTouchEnd={() => {
+                        console.log('Touch end on card');
                         handleTouchEnd(post.id, post);
                       }}
-                      onClick={() => handlePostClick(post.id)}
                     >
-                      <div className="w-full h-full">
+                      <button
+                        onClick={() => handlePostClick(post.id)}
+                        className="w-full h-full"
+                        style={{ pointerEvents: dragStartX !== null ? 'none' : 'auto' }}
+                      >
                         <ImageWithFallback
                           src={post.image}
                           alt="Community post"
                           className="w-full h-full object-cover bg-gray-100"
                         />
-                      </div>
+                      </button>
 
                       {/* 리액션 모드 오버레이 */}
                       {selectedPostForReaction === post.id && (
