@@ -226,6 +226,7 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
     
     const touch = e.touches[0];
     setDragStartX(touch.clientX);
+    console.log('Touch start:', touch.clientX);
   };
 
   const handleTouchMove = (e: React.TouchEvent, postId: number, post: any) => {
@@ -236,11 +237,13 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
     const currentX = touch.clientX;
     const diff = currentX - dragStartX;
     
+    console.log('Touch move:', diff);
+    
     // 왼쪽으로만 드래그 가능 (음수 값만)
     if (diff < 0) {
       setDragOffset({ ...dragOffset, [postId]: diff });
       // 드래그 중에는 스크롤 방지
-      e.preventDefault();
+      e.stopPropagation();
     }
   };
 
@@ -249,6 +252,8 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
     if (post.userName !== currentUser.userName || dragStartX === null) return;
     
     const offset = dragOffset[postId] || 0;
+    
+    console.log('Touch end, offset:', offset);
     
     // 100px 이상 드래그하면 삭제 확인 모달 표시
     if (offset < -100) {
@@ -259,6 +264,13 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
     // 드래그 오프셋 초기화
     setDragOffset({ ...dragOffset, [postId]: 0 });
     setDragStartX(null);
+  };
+
+  const handlePostClick = (postId: number) => {
+    // 드래그 중이 아닐 때만 리액션 모드 활성화
+    if (dragStartX === null) {
+      setSelectedPostForReaction(postId);
+    }
   };
 
   const handleConfirmDelete = () => {
@@ -431,6 +443,7 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
                       onTouchStart={(e) => handleTouchStart(e, post.id, post)}
                       onTouchMove={(e) => handleTouchMove(e, post.id, post)}
                       onTouchEnd={() => handleTouchEnd(post.id, post)}
+                      onClick={() => handlePostClick(post.id)}
                     >
                       <button
                         onClick={() => setSelectedPostForReaction(post.id)}

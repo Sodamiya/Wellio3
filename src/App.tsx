@@ -365,8 +365,8 @@ export default function App() {
             onBack={() => setCurrentPage("home")}
             onUploadClick={() => setCurrentPage("upload")}
             onNotificationClick={() => setCurrentPage("notifications")}
-            posts={posts}
             onDeletePost={handleDeletePost}
+            posts={posts}
           />
         )}
         {/* 👇 3. '준비중' 텍스트 대신 ProfilePage 컴포넌트로 교체 */}
