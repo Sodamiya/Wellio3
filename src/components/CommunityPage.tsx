@@ -75,8 +75,8 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
 
   // 현재 사용자 정보
   const currentUser = {
-    userName: "나",
-    userAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"
+    userName: "김건강",
+    userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
   };
 
   // 각 포스트별 추가된 댓글 관리
@@ -190,7 +190,12 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
     
     [...original, ...added].forEach(reaction => {
       if (merged[reaction.emoji]) {
-        merged[reaction.emoji] = [...merged[reaction.emoji], ...reaction.users];
+        // 중복 사용자 제거 - userName 기준
+        const existingUsers = merged[reaction.emoji];
+        const newUsers = reaction.users.filter(
+          (newUser: any) => !existingUsers.some((existingUser: any) => existingUser.userName === newUser.userName)
+        );
+        merged[reaction.emoji] = [...existingUsers, ...newUsers];
       } else {
         merged[reaction.emoji] = [...reaction.users];
       }
@@ -418,198 +423,376 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
                   {/* Drag Delete Container - 내가 작성한 게시물만 */}
                   <div className="relative h-[85%] w-full">
                     {/* 휴지통 배경 - 드래그 시 노출 */}
-                    {post.userName === currentUser.userName && (dragOffset[post.id] || 0) < 0 && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-red-500 rounded-2xl">
-                        <Trash2 size={48} className="text-white" />
+                    {post.userName === currentUser.userName && (
+                      <div className="absolute inset-0 flex items-center justify-end pr-6 bg-red-500 rounded-2xl z-0">
+                        <Trash2 size={32} className="text-white" />
                       </div>
                     )}
                     
-                    {/* Post Card - 드래그 가능 */}
-                    <div 
-                      className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg cursor-pointer"
-                      style={{
-                        transform: `translateX(${dragOffset[post.id] || 0}px)`,
-                        transition: dragStartX === null ? 'transform 0.3s ease' : 'none'
-                      }}
-                      onTouchStart={(e) => {
-                        console.log('Touch start!', post.userName, currentUser.userName);
-                        handleTouchStart(e, post.id, post);
-                      }}
-                      onTouchMove={(e) => {
-                        console.log('Touch move!');
-                        handleTouchMove(e, post.id, post);
-                      }}
-                      onTouchEnd={() => {
-                        console.log('Touch end!');
-                        handleTouchEnd(post.id, post);
-                      }}
-                      onClick={(e) => {
-                        console.log('Click!');
-                        handleCardClick(e, post.id);
-                      }}
-                    >
-                      <ImageWithFallback
-                        src={post.image}
-                        alt="Community post"
-                        className="w-full h-full object-cover bg-gray-100 pointer-events-none"
-                      />
-
-                      {/* 리액션 모드 오버레이 */}
-                      {selectedPostForReaction === post.id && (
-                        <div 
-                          className="absolute inset-0 bg-black/70 z-10 flex flex-col cursor-pointer"
-                          onClick={() => setSelectedPostForReaction(null)}
+                    {/* Post Card - 드래그 가능 (내가 작성한 글만) */}
+                    {post.userName === currentUser.userName ? (
+                      <motion.div 
+                        className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg z-10"
+                        drag="x"
+                        dragConstraints={{ left: -120, right: 0 }}
+                        dragElastic={0.1}
+                        onDragStart={() => {
+                          // Swiper 비활성화
+                          setDragStartX(1); // null이 아닌 값으로 설정
+                        }}
+                        onDragEnd={(event, info) => {
+                          // 왼쪽으로 100px 이상 드래그하면 삭제 확인
+                          if (info.offset.x < -100) {
+                            setPostToDelete(post.id);
+                            setShowDeleteModal(true);
+                          }
+                          // Swiper 다시 활성화
+                          setDragStartX(null);
+                        }}
+                      >
+                        <div
+                          onClick={() => setSelectedPostForReaction(post.id)}
+                          className="w-full h-full cursor-pointer"
                         >
-                          {/* 오른쪽 상단: 감정표현/프로필 형태로 표시 */}
-                          {getAllReactions(post.id, post.reactions).length > 0 && (
-                            <div 
-                              className="absolute top-4 right-4 flex flex-wrap gap-2 justify-end max-w-[60%] z-20"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {getAllReactions(post.id, post.reactions).flatMap(reaction =>
-                                reaction.users.map((user, userIdx) => (
-                                  <div
-                                    key={`${reaction.emoji}-${userIdx}`}
-                                    className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1.5 flex items-center gap-1.5"
-                                  >
-                                    <span className="text-base">{reaction.emoji}</span>
-                                    <ImageWithFallback
-                                      src={user.userAvatar}
-                                      alt={user.userName}
-                                      className="w-6 h-6 rounded-full border border-white"
-                                    />
-                                  </div>
-                                ))
-                              )}
-                            </div>
-                          )}
+                          <ImageWithFallback
+                            src={post.image}
+                            alt="Community post"
+                            className="w-full h-full object-cover bg-gray-100"
+                          />
+                        </div>
 
-                          {/* 하단 왼쪽: 작성자 텍스트 */}
-                          {post.textOverlay && (
-                            <div 
-                              className="absolute bottom-4 left-4 max-w-[70%] z-20"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm">
-                                <ImageWithFallback
-                                  src={post.userAvatar}
-                                  alt={post.userName}
-                                  className="w-7 h-7 rounded-full object-cover"
-                                />
-                                <p className="text-sm text-gray-900 whitespace-nowrap">{post.textOverlay}</p>
+                        {/* 리액션 모드 오버레이 */}
+                        {selectedPostForReaction === post.id && (
+                          <div 
+                            className="absolute inset-0 bg-black/70 z-10 flex flex-col cursor-pointer"
+                            onClick={() => setSelectedPostForReaction(null)}
+                          >
+                            {/* 오른쪽 상단: 감정표현/프로필 형태로 표시 */}
+                            {getAllReactions(post.id, post.reactions).length > 0 && (
+                              <div 
+                                className="absolute top-4 right-4 flex flex-wrap gap-2 justify-end max-w-[60%] z-20"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {getAllReactions(post.id, post.reactions).flatMap(reaction =>
+                                  reaction.users.map((user, userIdx) => (
+                                    <div
+                                      key={`${reaction.emoji}-${user.userName}-${userIdx}`}
+                                      className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1.5 flex items-center gap-1.5"
+                                    >
+                                      <span className="text-base">{reaction.emoji}</span>
+                                      <ImageWithFallback
+                                        src={user.userAvatar}
+                                        alt={user.userName}
+                                        className="w-6 h-6 rounded-full border border-white"
+                                      />
+                                    </div>
+                                  ))
+                                )}
                               </div>
-                            </div>
-                          )}
+                            )}
 
-                          {/* 댓글 목록: 작성자 텍스트 바로 위, 우측 정렬 */}
-                          {getAllComments(post.id, post.comments).length > 0 && (
-                            <div 
-                              className="absolute bottom-20 right-4 flex flex-col gap-2 items-end max-w-[70%] max-h-[50vh] overflow-y-auto z-20"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {getAllComments(post.id, post.comments).map((comment, idx) => {
-                                const isOwnComment = comment.userName === currentUser.userName;
-                                
-                                return (
-                                  <div
-                                    key={idx}
-                                    className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm"
-                                  >
-                                    <p className="text-sm text-gray-900 whitespace-nowrap">{comment.text}</p>
-                                    
-                                    <ImageWithFallback
-                                      src={comment.userAvatar}
-                                      alt={comment.userName}
-                                      className="w-7 h-7 rounded-full object-cover"
-                                    />
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      )}
+                            {/* 하단 왼쪽: 작성자 텍스트 */}
+                            {post.textOverlay && (
+                              <div 
+                                className="absolute bottom-4 left-4 max-w-[70%] z-20"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm">
+                                  <ImageWithFallback
+                                    src={post.userAvatar}
+                                    alt={post.userName}
+                                    className="w-7 h-7 rounded-full object-cover"
+                                  />
+                                  <p className="text-sm text-gray-900 whitespace-nowrap">{post.textOverlay}</p>
+                                </div>
+                              </div>
+                            )}
 
-                      {/* 왼쪽 상단 정보 오버레이 (위치/날씨/시간/건강) - 리액션 모드가 아닐 때만 */}
-                      {selectedPostForReaction !== post.id && (post.location ||
-                        post.weather ||
-                        post.time ||
-                        post.health) && (
-                        <div className="absolute top-4 left-4 flex flex-col gap-2">
-                          {post.location && (
-                            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                              <MapPin
-                                size={16}
-                                className="text-white"
-                              />
-                              <span className="text-white text-sm">
-                                {post.location}
-                              </span>
-                            </div>
-                          )}
-                          {post.weather && (
-                            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                              <Cloud size={16} className="text-white" />
-                              <span className="text-white text-sm">
-                                {post.weather}
-                              </span>
-                            </div>
-                          )}
-                          {post.time && (
-                            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                              <Clock size={16} className="text-white" />
-                              <span className="text-white text-sm">
-                                {post.time}
-                              </span>
-                            </div>
-                          )}
-                          {post.health && (
-                            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                              <Heart size={16} className="text-white" />
-                              <span className="text-white text-sm">
-                                {post.health}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Badge (기존 배지가 있을 때만 표시) - 리액션 모드가 아닐 때만 */}
-                      {selectedPostForReaction !== post.id && post.badge &&
-                        !post.location &&
-                        !post.weather &&
-                        !post.time &&
-                        !post.health && (
-                          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1 text-sm font-medium">
-                            <span>{post.badge}</span>
+                            {/* 댓글 목록: 작성자 텍스트 바로 위, 우측 정렬 */}
+                            {getAllComments(post.id, post.comments).length > 0 && (
+                              <div 
+                                className="absolute bottom-20 right-4 flex flex-col gap-2 items-end max-w-[70%] max-h-[50vh] overflow-y-auto z-20"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {getAllComments(post.id, post.comments).map((comment, idx) => {
+                                  const isOwnComment = comment.userName === currentUser.userName;
+                                  
+                                  return (
+                                    <div
+                                      key={`comment-${post.id}-${idx}-${comment.userName}-${comment.timestamp}`}
+                                      className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm"
+                                    >
+                                      <p className="text-sm text-gray-900 whitespace-nowrap">{comment.text}</p>
+                                      
+                                      <ImageWithFallback
+                                        src={comment.userAvatar}
+                                        alt={comment.userName}
+                                        className="w-7 h-7 rounded-full object-cover"
+                                      />
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         )}
 
-                      {/* User Profile + Caption + +N Batch - 리액션 모드가 아닐 때만 */}
-                      {selectedPostForReaction !== post.id && (
-                        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <ImageWithFallback
-                              src={post.userAvatar}
-                              alt={post.userName}
-                              className="w-8 h-8 rounded-full border-2 border-white"
-                            />
+                        {/* 왼쪽 상단 정보 오버레이 (위치/날씨/시간/건강) - 리액션 모드가 아닐 때만 */}
+                        {selectedPostForReaction !== post.id && (post.location ||
+                          post.weather ||
+                          post.time ||
+                          post.health) && (
+                          <div className="absolute top-4 left-4 flex flex-col gap-2">
+                            {post.location && (
+                              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                <MapPin
+                                  size={16}
+                                  className="text-white"
+                                />
+                                <span className="text-white text-sm">
+                                  {post.location}
+                                </span>
+                              </div>
+                            )}
+                            {post.weather && (
+                              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                <Cloud size={16} className="text-white" />
+                                <span className="text-white text-sm">
+                                  {post.weather}
+                                </span>
+                              </div>
+                            )}
+                            {post.time && (
+                              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                <Clock size={16} className="text-white" />
+                                <span className="text-white text-sm">
+                                  {post.time}
+                                </span>
+                              </div>
+                            )}
+                            {post.health && (
+                              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                <Heart size={16} className="text-white" />
+                                <span className="text-white text-sm">
+                                  {post.health}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Badge (기존 배지가 있을 때만 표시) - 리액션 모드가 아닐 때만 */}
+                        {selectedPostForReaction !== post.id && post.badge &&
+                          !post.location &&
+                          !post.weather &&
+                          !post.time &&
+                          !post.health && (
+                            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1 text-sm font-medium">
+                              <span>{post.badge}</span>
+                            </div>
+                          )}
+
+                        {/* User Profile + Caption + +N Batch - 리액션 모드가 아닐 때만 */}
+                        {selectedPostForReaction !== post.id && (
+                          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <ImageWithFallback
+                                src={post.userAvatar}
+                                alt={post.userName}
+                                className="w-8 h-8 rounded-full border-2 border-white"
+                              />
+                              {post.textOverlay && (
+                                <span className="text-white font-semibold text-sm line-clamp-1">
+                                  {post.textOverlay}
+                                </span>
+                              )}
+                            </div>
+                            {/* +N 알림 배지 - 댓글 개수 동적 표시 */}
+                            <div className="bg-gray-100 rounded-full px-2.5 py-1 text-xs font-bold text-gray-800 flex items-center justify-center relative">
+                              +{getAllComments(post.id, post.comments).length}
+                              {getAllComments(post.id, post.comments).length > 0 && (
+                                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    ) : (
+                      <div 
+                        className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg"
+                        style={{
+                          transform: `translateX(${dragOffset[post.id] || 0}px)`,
+                          transition: dragStartX === null ? 'transform 0.3s ease' : 'none'
+                        }}
+                      >
+                        <button
+                          onClick={() => setSelectedPostForReaction(post.id)}
+                          className="w-full h-full"
+                        >
+                          <ImageWithFallback
+                            src={post.image}
+                            alt="Community post"
+                            className="w-full h-full object-cover bg-gray-100"
+                          />
+                        </button>
+
+                        {/* 리액션 모드 오버레이 */}
+                        {selectedPostForReaction === post.id && (
+                          <div 
+                            className="absolute inset-0 bg-black/70 z-10 flex flex-col cursor-pointer"
+                            onClick={() => setSelectedPostForReaction(null)}
+                          >
+                            {/* 오른쪽 상단: 감정표현/프로필 형태로 표시 */}
+                            {getAllReactions(post.id, post.reactions).length > 0 && (
+                              <div 
+                                className="absolute top-4 right-4 flex flex-wrap gap-2 justify-end max-w-[60%] z-20"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {getAllReactions(post.id, post.reactions).flatMap(reaction =>
+                                  reaction.users.map((user, userIdx) => (
+                                    <div
+                                      key={`${reaction.emoji}-${user.userName}-${userIdx}`}
+                                      className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1.5 flex items-center gap-1.5"
+                                    >
+                                      <span className="text-base">{reaction.emoji}</span>
+                                      <ImageWithFallback
+                                        src={user.userAvatar}
+                                        alt={user.userName}
+                                        className="w-6 h-6 rounded-full border border-white"
+                                      />
+                                    </div>
+                                  ))
+                                )}
+                              </div>
+                            )}
+
+                            {/* 하단 왼쪽: 작성자 텍스트 */}
                             {post.textOverlay && (
-                              <span className="text-white font-semibold text-sm line-clamp-1">
-                                {post.textOverlay}
-                              </span>
+                              <div 
+                                className="absolute bottom-4 left-4 max-w-[70%] z-20"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm">
+                                  <ImageWithFallback
+                                    src={post.userAvatar}
+                                    alt={post.userName}
+                                    className="w-7 h-7 rounded-full object-cover"
+                                  />
+                                  <p className="text-sm text-gray-900 whitespace-nowrap">{post.textOverlay}</p>
+                                </div>
+                              </div>
                             )}
-                          </div>
-                          {/* +N 알림 배지 - 댓글 개수 동적 표시 */}
-                          <div className="bg-gray-100 rounded-full px-2.5 py-1 text-xs font-bold text-gray-800 flex items-center justify-center relative">
-                            +{getAllComments(post.id, post.comments).length}
+
+                            {/* 댓글 목록: 작성자 텍스트 바로 위, 우측 정렬 */}
                             {getAllComments(post.id, post.comments).length > 0 && (
-                              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                              <div 
+                                className="absolute bottom-20 right-4 flex flex-col gap-2 items-end max-w-[70%] max-h-[50vh] overflow-y-auto z-20"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {getAllComments(post.id, post.comments).map((comment, idx) => {
+                                  const isOwnComment = comment.userName === currentUser.userName;
+                                  
+                                  return (
+                                    <div
+                                      key={`comment-${post.id}-${idx}-${comment.userName}-${comment.timestamp}`}
+                                      className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm"
+                                    >
+                                      <p className="text-sm text-gray-900 whitespace-nowrap">{comment.text}</p>
+                                      
+                                      <ImageWithFallback
+                                        src={comment.userAvatar}
+                                        alt={comment.userName}
+                                        className="w-7 h-7 rounded-full object-cover"
+                                      />
+                                    </div>
+                                  );
+                                })}
+                              </div>
                             )}
                           </div>
-                        </div>
-                      )}
-                    </div>
+                        )}
+
+                        {/* 왼쪽 상단 정보 오버레이 (위치/날씨/시간/건강) - 리액션 모드가 아닐 때만 */}
+                        {selectedPostForReaction !== post.id && (post.location ||
+                          post.weather ||
+                          post.time ||
+                          post.health) && (
+                          <div className="absolute top-4 left-4 flex flex-col gap-2">
+                            {post.location && (
+                              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                <MapPin
+                                  size={16}
+                                  className="text-white"
+                                />
+                                <span className="text-white text-sm">
+                                  {post.location}
+                                </span>
+                              </div>
+                            )}
+                            {post.weather && (
+                              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                <Cloud size={16} className="text-white" />
+                                <span className="text-white text-sm">
+                                  {post.weather}
+                                </span>
+                              </div>
+                            )}
+                            {post.time && (
+                              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                <Clock size={16} className="text-white" />
+                                <span className="text-white text-sm">
+                                  {post.time}
+                                </span>
+                              </div>
+                            )}
+                            {post.health && (
+                              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                <Heart size={16} className="text-white" />
+                                <span className="text-white text-sm">
+                                  {post.health}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Badge (기존 배지가 있을 때만 표시) - 리액션 모드가 아닐 때만 */}
+                        {selectedPostForReaction !== post.id && post.badge &&
+                          !post.location &&
+                          !post.weather &&
+                          !post.time &&
+                          !post.health && (
+                            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1 text-sm font-medium">
+                              <span>{post.badge}</span>
+                            </div>
+                          )}
+
+                        {/* User Profile + Caption + +N Batch - 리액션 모드가 아닐 때만 */}
+                        {selectedPostForReaction !== post.id && (
+                          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <ImageWithFallback
+                                src={post.userAvatar}
+                                alt={post.userName}
+                                className="w-8 h-8 rounded-full border-2 border-white"
+                              />
+                              {post.textOverlay && (
+                                <span className="text-white font-semibold text-sm line-clamp-1">
+                                  {post.textOverlay}
+                                </span>
+                              )}
+                            </div>
+                            {/* +N 알림 배지 - 댓글 개수 동적 표시 */}
+                            <div className="bg-gray-100 rounded-full px-2.5 py-1 text-xs font-bold text-gray-800 flex items-center justify-center relative">
+                              +{getAllComments(post.id, post.comments).length}
+                              {getAllComments(post.id, post.comments).length > 0 && (
+                                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* 댓글 입력창 - 🚨 max-w-[360px] 제거 🚨 */}
@@ -625,7 +808,7 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
                                 const pos = generateRandomPosition();
                                 return (
                                   <motion.div
-                                    key={i}
+                                    key={`heart-${post.id}-${i}`}
                                     initial={{ opacity: 0, scale: 0, x: `${pos.x}vw`, y: `${pos.y}vh` }}
                                     animate={{ 
                                       opacity: [0, 1, 1, 0], 
@@ -652,7 +835,7 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
                                 const distance = 200 + Math.random() * 200;
                                 return (
                                   <motion.div
-                                    key={i}
+                                    key={`thumbs-${post.id}-${i}`}
                                     initial={{ 
                                       opacity: 0, 
                                       scale: 0, 
