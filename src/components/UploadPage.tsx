@@ -556,40 +556,16 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                   {[...filters, ...filters, ...filters].map((filter, index) => {
                     const isSelected = selectedFilter === filter.name;
                     return (
-                      <SwiperSlide key={`${filter.name}-${index}`} style={{ width: 'auto' }}>
+                      <SwiperSlide key={`filter-${index}-${filter.name}`} style={{ width: 'auto' }}>
                         <button
-                          onClick={() => {
-                            setSelectedFilter(filter.name);
-                          }}
-                          className="flex flex-col items-center gap-2 pt-2"
+                          onClick={() => setSelectedFilter(filter.name)}
+                          className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all ${
+                            isSelected
+                              ? "bg-[#36D2C5] text-white"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }`}
                         >
-                          {/* 필터 미리보기 */}
-                          <div
-                            className={`rounded-full overflow-hidden transition-all ${
-                              isSelected 
-                                ? 'w-20 h-20' 
-                                : 'w-16 h-16 opacity-60'
-                            }`}
-                          >
-                            {selectedImage ? (
-                              <ImageWithFallback
-                                src={selectedImage}
-                                alt={filter.name}
-                                className="w-full h-full object-cover"
-                                style={{ filter: filter.filter }}
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300" />
-                            )}
-                          </div>
-                          {/* 필터 이름 */}
-                          <span 
-                            className={`text-xs transition-colors ${
-                              isSelected ? 'text-[#36D2C5]' : 'text-gray-600'
-                            }`}
-                          >
-                            {filter.name}
-                          </span>
+                          {filter.name}
                         </button>
                       </SwiperSlide>
                     );

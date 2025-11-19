@@ -54,9 +54,10 @@ interface CommunityPageProps {
       }>;
     }>;
   }>;
+  currentUserName: string; // 👈 새로 추가된 prop
 }
 
-export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDeletePost, posts }: CommunityPageProps) {
+export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDeletePost, posts, currentUserName }: CommunityPageProps) { // 👈 prop 받기
   const [selectedGroup, setSelectedGroup] =
     useState("우리가족");
   const [isGridView, setIsGridView] = useState(false);
@@ -73,9 +74,9 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
 
-  // 현재 사용자 정보
+  // 현재 사용자 정보 (하드코딩 제거, prop 사용)
   const currentUser = {
-    userName: "김건강",
+    userName: currentUserName, // 👈 prop 사용
     userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
   };
 

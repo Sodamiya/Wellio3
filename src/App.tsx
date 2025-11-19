@@ -367,6 +367,7 @@ export default function App() {
             onNotificationClick={() => setCurrentPage("notifications")}
             onDeletePost={handleDeletePost}
             posts={posts}
+            currentUserName={userName} // 👈 현재 로그인된 사용자 이름 전달
           />
         )}
         {/* 👇 3. '준비중' 텍스트 대신 ProfilePage 컴포넌트로 교체 */}
