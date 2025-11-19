@@ -435,26 +435,31 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
                     
                     {/* Post Card - 드래그 가능 */}
                     <div 
-                      className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg"
+                      className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg cursor-pointer"
                       style={{
                         transform: `translateX(${dragOffset[post.id] || 0}px)`,
                         transition: dragStartX === null ? 'transform 0.3s ease' : 'none'
                       }}
-                      onTouchStart={(e) => handleTouchStart(e, post.id, post)}
-                      onTouchMove={(e) => handleTouchMove(e, post.id, post)}
-                      onTouchEnd={() => handleTouchEnd(post.id, post)}
+                      onTouchStart={(e) => {
+                        handleTouchStart(e, post.id, post);
+                        e.stopPropagation();
+                      }}
+                      onTouchMove={(e) => {
+                        handleTouchMove(e, post.id, post);
+                        e.stopPropagation();
+                      }}
+                      onTouchEnd={() => {
+                        handleTouchEnd(post.id, post);
+                      }}
                       onClick={() => handlePostClick(post.id)}
                     >
-                      <button
-                        onClick={() => setSelectedPostForReaction(post.id)}
-                        className="w-full h-full"
-                      >
+                      <div className="w-full h-full">
                         <ImageWithFallback
                           src={post.image}
                           alt="Community post"
                           className="w-full h-full object-cover bg-gray-100"
                         />
-                      </button>
+                      </div>
 
                       {/* 리액션 모드 오버레이 */}
                       {selectedPostForReaction === post.id && (
