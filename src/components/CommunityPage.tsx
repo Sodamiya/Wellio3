@@ -226,7 +226,6 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
     
     const touch = e.touches[0];
     setDragStartX(touch.clientX);
-    console.log('Touch start:', touch.clientX);
   };
 
   const handleTouchMove = (e: React.TouchEvent, postId: number, post: any) => {
@@ -237,13 +236,9 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
     const currentX = touch.clientX;
     const diff = currentX - dragStartX;
     
-    console.log('Touch move:', diff);
-    
     // 왼쪽으로만 드래그 가능 (음수 값만)
     if (diff < 0) {
       setDragOffset({ ...dragOffset, [postId]: diff });
-      // 드래그 중에는 스크롤 방지
-      e.stopPropagation();
     }
   };
 
@@ -252,8 +247,6 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
     if (post.userName !== currentUser.userName || dragStartX === null) return;
     
     const offset = dragOffset[postId] || 0;
-    
-    console.log('Touch end, offset:', offset);
     
     // 100px 이상 드래그하면 삭제 확인 모달 표시
     if (offset < -100) {
@@ -266,11 +259,9 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
     setDragStartX(null);
   };
 
-  const handlePostClick = (postId: number) => {
-    // 드래그 중이 아닐 때만 리액션 모드 활성화
-    if (dragStartX === null) {
-      setSelectedPostForReaction(postId);
-    }
+  const handleCardClick = (e: React.MouseEvent, postId: number) => {
+    // 드래그가 아닐 때만 리액션 모드 활성화
+    setSelectedPostForReaction(postId);
   };
 
   const handleConfirmDelete = () => {
@@ -435,36 +426,33 @@ export function CommunityPage({ onBack, onUploadClick, onNotificationClick, onDe
                     
                     {/* Post Card - 드래그 가능 */}
                     <div 
-                      className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg"
+                      className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg cursor-pointer"
                       style={{
                         transform: `translateX(${dragOffset[post.id] || 0}px)`,
-                        transition: dragStartX === null ? 'transform 0.3s ease' : 'none',
-                        touchAction: 'pan-y'
+                        transition: dragStartX === null ? 'transform 0.3s ease' : 'none'
                       }}
                       onTouchStart={(e) => {
-                        console.log('Touch start on card');
+                        console.log('Touch start!', post.userName, currentUser.userName);
                         handleTouchStart(e, post.id, post);
                       }}
                       onTouchMove={(e) => {
-                        console.log('Touch move on card');
+                        console.log('Touch move!');
                         handleTouchMove(e, post.id, post);
                       }}
                       onTouchEnd={() => {
-                        console.log('Touch end on card');
+                        console.log('Touch end!');
                         handleTouchEnd(post.id, post);
                       }}
+                      onClick={(e) => {
+                        console.log('Click!');
+                        handleCardClick(e, post.id);
+                      }}
                     >
-                      <button
-                        onClick={() => handlePostClick(post.id)}
-                        className="w-full h-full"
-                        style={{ pointerEvents: dragStartX !== null ? 'none' : 'auto' }}
-                      >
-                        <ImageWithFallback
-                          src={post.image}
-                          alt="Community post"
-                          className="w-full h-full object-cover bg-gray-100"
-                        />
-                      </button>
+                      <ImageWithFallback
+                        src={post.image}
+                        alt="Community post"
+                        className="w-full h-full object-cover bg-gray-100 pointer-events-none"
+                      />
 
                       {/* 리액션 모드 오버레이 */}
                       {selectedPostForReaction === post.id && (
