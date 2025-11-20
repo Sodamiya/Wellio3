@@ -1,3 +1,6 @@
+import image_ba471be49c63bdd07959dbe65d56797ab51ab9a5 from 'figma:asset/ba471be49c63bdd07959dbe65d56797ab51ab9a5.png';
+import image_b5407d732c19e4bd29e79664b6917fd7f26d6faf from 'figma:asset/b5407d732c19e4bd29e79664b6917fd7f26d6faf.png';
+import image_079cd83ca9fe115ba1d0bb01d0a8e56210a3f5af from 'figma:asset/079cd83ca9fe115ba1d0bb01d0a8e56210a3f5af.png';
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -7,7 +10,7 @@ const articles = [
   {
     id: 1,
     imageSrc:
-      "https://images.unsplash.com/photo-1584515933487-9d90070a94b8?w=400&q=80",
+      image_079cd83ca9fe115ba1d0bb01d0a8e56210a3f5af,
     title: "혹시 나도 디스크?",
     description:
       "시도 때도 없이 찌릿거리는 허리, 혹시 디스크가 아닌 지 확인해보세요",
@@ -16,7 +19,7 @@ const articles = [
   {
     id: 2,
     imageSrc:
-      "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80",
+      image_b5407d732c19e4bd29e79664b6917fd7f26d6faf,
     title: "현대인의 편두통",
     description:
       "지긋지긋한 편두통, 간단한 마사지로 완화하는 방법",
@@ -25,7 +28,7 @@ const articles = [
   {
     id: 3,
     imageSrc:
-      "https://images.unsplash.com/photo-1616012613235-2942f7c6773f?w=400&q=80",
+      image_ba471be49c63bdd07959dbe65d56797ab51ab9a5,
     title: "환절기 비염",
     description:
       "코막힘과 재채기, 알레르기 비염 관리법을 알아보세요",
