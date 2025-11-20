@@ -1,8 +1,13 @@
-import { Heart, Star } from "lucide-react";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { toast } from "sonner@2.0.3";
+import React, { useState } from 'react';
+import { Heart, Star, Search, ChevronLeft } from "lucide-react";
+import { ImageWithFallback } from "./figma/ImageWithFallback"; // 경로에 맞게 수정 필요
+import { toast } from "sonner@2.0.3"; // 경로에 맞게 수정 필요
 
-// 카드 데이터 인터페이스 (이전과 동일)
+// ============================================================================
+// 1. HospitalCard 컴포넌트 (병원 카드 UI)
+// ============================================================================
+
+// 데이터 타입 정의
 interface Hospital {
   id: number;
   name: string;
@@ -22,28 +27,36 @@ interface HospitalCardProps {
   isFavorite?: boolean;
   favoriteHospitals?: any[];
   onToggleFavorite?: (hospital: any) => void;
-  isInFavoritePage?: boolean; // 찜한 병원 페이지에서 사용 중인지 여부
-  reviewCount?: number; // 실제 리뷰 개수
+  isInFavoritePage?: boolean;
+  reviewCount?: number;
 }
 
-export function HospitalCard({ hospital, onClick, isFavorite, favoriteHospitals, onToggleFavorite, isInFavoritePage, reviewCount }: HospitalCardProps) {
-  // isFavorite prop이 전달되면 그것을 사용, 아니면 favoriteHospitals에서 확인
+export function HospitalCard({ 
+  hospital, 
+  onClick, 
+  isFavorite, 
+  favoriteHospitals, 
+  onToggleFavorite, 
+  isInFavoritePage, 
+  reviewCount 
+}: HospitalCardProps) {
+  
   const isHospitalFavorite = isFavorite !== undefined 
     ? isFavorite 
     : favoriteHospitals?.some(h => h.id === hospital.id) || false;
 
-  // reviewCount가 제공되면 사용, 아니면 hospital.reviews 사용
   const displayReviewCount = reviewCount !== undefined ? reviewCount : hospital.reviews;
 
   return (
     <div
       onClick={onClick}
-      className="flex flex-col bg-white p-4 border-b border-gray-100 last:border-b-0 md:border md:rounded-2xl md:shadow-sm md:m-2 cursor-pointer hover:bg-gray-50 transition-colors"
+      // [스타일] 카드형 디자인 (그림자, 둥근 모서리, 좌우 여백)
+      className="flex flex-col bg-white p-5 mx-4 mb-4 rounded-[24px] border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:shadow-md transition-shadow"
     >
-      {/* 1. 상단 정보: 이미지, 이름, 전문의, 하트 */}
-      <div className="flex gap-4">
-        {/* [수정] 이미지 크기 w-12 h-12 (48px)로 변경, 반응형 제거 */}
-        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+      {/* 상단: 썸네일 + 텍스트 */}
+      <div className="flex gap-4 items-start">
+        {/* 썸네일 이미지 */}
+        <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-50">
           <ImageWithFallback
             src={hospital.imageUrl}
             alt={hospital.name}
@@ -51,86 +64,187 @@ export function HospitalCard({ hospital, onClick, isFavorite, favoriteHospitals,
           />
         </div>
 
-        {/* 이름, 전문의, 하트 */}
-        <div className="flex-1 overflow-hidden">
+        {/* 병원 정보 */}
+        <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start">
-            <h3 className="text-lg font-semibold text-[#1A1A1A] mb-1">
-              {hospital.name}
-            </h3>
+            <div className="flex flex-col">
+                <h3 className="text-[17px] font-bold text-[#1A1A1A] leading-tight truncate">
+                {hospital.name}
+                </h3>
+                <p className="text-sm text-gray-500 mt-1 font-medium">
+                {hospital.specialtyText}
+                </p>
+            </div>
+            
+            {/* 찜하기 버튼 */}
             <button
-              className={`transition-colors ${
+              className={`ml-2 p-1 transition-colors ${
                 isHospitalFavorite 
-                  ? "text-red-500 fill-red-500" 
+                  ? "text-red-500" 
                   : "text-gray-300 hover:text-red-500"
               }`}
               onClick={(e) => {
                 e.stopPropagation();
-                
-                // 찜한 병원 페이지에서 찜 해제 시 확인 팝업 표시
-                if (isInFavoritePage && isHospitalFavorite) {
-                  const confirmed = window.confirm(`${hospital.name}을(를) 즐겨찾기에서 삭제하시겠습니까?`);
-                  if (!confirmed) {
-                    return; // 취소하면 아무것도 하지 않음
-                  }
-                  toast.success(`${hospital.name} 즐겨찾기에서 제거되었습니다.`);
-                  onToggleFavorite?.(hospital);
+                // 찜하기 로직 (토스트 메시지 등)
+                if (isHospitalFavorite) {
+                   toast.success("즐겨찾기에서 제거되었습니다.");
                 } else {
-                  // 병원찾기 페이지에서는 바로 추가/제거
-                  if (isHospitalFavorite) {
-                    toast.success(`${hospital.name} 즐겨찾기에서 제거되었습니다.`);
-                  } else {
-                    toast.success(`${hospital.name} 즐겨찾기에 추가되었습니다.`);
-                  }
-                  onToggleFavorite?.(hospital);
+                   toast.success("즐겨찾기에 추가되었습니다.");
                 }
+                onToggleFavorite?.(hospital);
               }}
             >
-              <Heart size={24} className={isHospitalFavorite ? "fill-red-500" : ""} />
+              <Heart size={22} className={isHospitalFavorite ? "fill-red-500" : ""} />
             </button>
           </div>
-          <p className="text-sm text-gray-600">
-            {hospital.specialtyText}
-          </p>
         </div>
       </div>
 
-      {/* 2. 하단 정보: 진료시간, 주소, 별점 */}
-      {/* [수정] pt-4 와 border-t 제거 */}
+      {/* 하단: 진료시간, 위치, 뱃지 */}
       <div className="mt-4">
-        {/* 진료 시간 */}
-        <div className="flex items-center text-sm text-gray-700 mb-2">
-          <span className="font-semibold text-[#1A73E8] mr-2">
-            오늘 진료
-          </span>
-          <span>{hospital.hours}</span>
+        <div className="flex items-center text-[13px] text-gray-800 mb-1.5">
+          <span className="font-bold text-[#3b82f6] mr-2">오늘 진료</span>
+          <span className="font-medium">{hospital.hours}</span>
         </div>
 
-        {/* 거리 + 주소 */}
-        <p className="text-sm text-gray-500 mb-3 truncate">
-          {hospital.distance} | {hospital.address}
+        <p className="text-[13px] text-gray-500 mb-3 truncate font-medium">
+          {hospital.distance} <span className="text-gray-300 mx-1">|</span> {hospital.address}
         </p>
 
-        {/* 태그 + 별점 */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mt-3">
           {hospital.isAvailableNow && (
-            <span className="bg-[#E7F3FF] text-[#2F80ED] text-xs font-semibold px-2 py-1 rounded-full">
+            <span className="bg-[#2DC7B7] text-white text-[11px] font-bold px-2.5 py-[3px] rounded-md">
               즉시 접수 가능
             </span>
           )}
-          <div className="flex items-center gap-0.5 text-sm">
-            <Star
-              size={16}
-              className="text-[#FFB800] fill-[#FFB800]"
-            />
-            <span className="text-[#1A1A1A] font-bold ml-1">
-              {hospital.rating}
-            </span>
-            <span className="text-gray-400">
-              ({displayReviewCount})
-            </span>
+          <div className="flex items-center gap-1 text-[13px]">
+            <Star size={14} className="text-[#FFB800] fill-[#FFB800] mb-[1px]" />
+            <span className="text-[#1A1A1A] font-bold">{hospital.rating}</span>
+            <span className="text-gray-400 font-medium">({displayReviewCount})</span>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// 2. HospitalSearchPage 컴포넌트 (전체 페이지 레이아웃)
+// ============================================================================
+
+export default function HospitalSearchPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('거리순'); 
+
+  // 더미 데이터
+  const dummyHospitals: Hospital[] = [
+    {
+      id: 1,
+      name: "매일건강의원",
+      specialtyText: "가정의학과 전문의 2명",
+      hours: "10:00-20:00",
+      distance: "37m",
+      address: "서울 서초구 서초대로 59번길 19, 201호",
+      isAvailableNow: true,
+      rating: 4.8,
+      reviews: 223,
+      imageUrl: "https://via.placeholder.com/150" 
+    },
+    {
+        id: 2,
+        name: "365클리닉 강남본점",
+        specialtyText: "피부과 전문의 3명",
+        hours: "09:30-20:30",
+        distance: "58m",
+        address: "서울 서초구 서초대로 16가길, 3층",
+        isAvailableNow: true,
+        rating: 4.6,
+        reviews: 12,
+        imageUrl: "https://via.placeholder.com/150"
+    },
+    {
+        id: 3,
+        name: "사랑니쏙쏙 강남본점",
+        specialtyText: "치과 전문의 1명",
+        hours: "10:00-18:00",
+        distance: "167m",
+        address: "서울 서초구 강남대로 102",
+        isAvailableNow: true,
+        rating: 4.7,
+        reviews: 41,
+        imageUrl: "https://via.placeholder.com/150"
+    },
+  ];
+
+  const filters = ['거리순', '진료중', '즉시접수가능', '야간진료', '약국'];
+
+  return (
+    <div className="min-h-screen bg-[#F8F9FA]"> {/* 전체 배경 회색 */}
+      
+      {/* 1. 헤더 */}
+      <div className="sticky top-0 z-10 bg-white">
+        <div className="flex items-center p-4">
+          <button className="p-1 mr-2">
+            <ChevronLeft size={24} color="#1A1A1A" />
+          </button>
+          <h1 className="flex-1 text-center text-[17px] font-bold text-[#1A1A1A] -ml-8">
+            병원찾기
+          </h1>
+        </div>
+
+        {/* 2. 검색창 (이미지 스타일 적용: 민트색 테두리) */}
+        <div className="px-4 pb-2">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 flex items-center bg-white border-2 border-[#2DC7B7] rounded-[8px] px-3 py-2.5 shadow-sm">
+              <Search size={20} className="text-[#2DC7B7] mr-2" />
+              <input
+                type="text"
+                placeholder="진료과, 병원이름을 검색해보세요"
+                className="flex-1 bg-transparent outline-none text-[15px] text-[#1A1A1A] placeholder-gray-400 font-medium"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <button 
+                onClick={() => setSearchTerm('')}
+                className="text-gray-500 text-[15px] font-medium whitespace-nowrap"
+            >
+              취소
+            </button>
+          </div>
+        </div>
+
+        {/* 3. 필터 태그 (가로 스크롤) */}
+        <div className="px-4 py-3 pb-4 flex gap-2 overflow-x-auto scrollbar-hide">
+          {filters.map((filter) => (
+            <button
+              key={filter}
+              onClick={() => setSelectedFilter(filter)}
+              className={`
+                flex-shrink-0 px-3.5 py-[7px] rounded-full text-[13px] font-semibold border transition-all
+                ${selectedFilter === filter
+                  ? 'bg-[#2DC7B7] border-[#2DC7B7] text-white' // 선택됨 (민트색 배경)
+                  : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50' // 선택 안됨 (흰색 배경 + 회색 테두리)
+                }
+              `}
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
+      </div>
+      
+      {/* 4. 병원 리스트 */}
+      <div className="mt-2 pb-10">
+        {dummyHospitals.map((hospital) => (
+          <HospitalCard
+            key={hospital.id}
+            hospital={hospital}
+            onClick={() => console.log(hospital.name)}
+          />
+        ))}
+      </div>
+
     </div>
   );
 }

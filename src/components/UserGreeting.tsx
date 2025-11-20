@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 interface UserGreetingProps {
   userName: string;
 }
@@ -68,8 +70,19 @@ function BackgroundSvg() {
 export function UserGreeting({ userName }: UserGreetingProps) {
   return (
     <div className="relative w-full h-[250px] md:h-[420px] overflow-hidden">
-      {/* 1. SVG 배경 */}
-      <BackgroundSvg />
+      {/* 1. SVG 배경 - 왼쪽에서 오른쪽으로 드러나는 애니메이션 */}
+      <motion.div
+        initial={{ clipPath: "inset(0 100% 0 0)" }}
+        animate={{ clipPath: "inset(0 0% 0 0)" }}
+        transition={{
+          duration: 2,
+          ease: [0.22, 1, 0.36, 1], // 부드러운 easeOutExpo
+          delay: 0.2,
+        }}
+        className="absolute inset-0"
+      >
+        <BackgroundSvg />
+      </motion.div>
 
       {/* 2. 텍스트 */}
       {/* [수정] 텍스트 패딩을 pt-12 (48px) -> pt-20 (80px)로 수정

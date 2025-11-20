@@ -43,6 +43,8 @@ interface HospitalDetailPageProps {
   onBack: () => void;
   onReviewsClick?: () => void;
   reviewCount?: number;
+  averageRating?: number;
+  keywordStats?: Array<{ keyword: string; count: number; percentage: number }>;
 }
 
 export function HospitalDetailPage({
@@ -50,9 +52,42 @@ export function HospitalDetailPage({
   onBack,
   onReviewsClick,
   reviewCount = 0,
+  averageRating = 0,
+  keywordStats = [],
 }: HospitalDetailPageProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+
+  // 샘플 리뷰 데이터 (미리보기용 - 3개만 표시)
+  const userReviews = [
+    {
+      id: 1,
+      name: "김**님",
+      date: "2025.05.22",
+      rating: 5,
+      tags: ["진료 만족해요", "친절해요"],
+      content: "목이 아프고 근육통이 심해서 방문했는데 친절하게 진료 잘 봐주셔서 좋았습니다!",
+      likes: 6,
+    },
+    {
+      id: 2,
+      name: "박**님",
+      date: "2025.01.29",
+      rating: 5,
+      tags: ["진료 만족해요", "재진료 희망해요", "친절해요"],
+      content: "만족스러운 첫 방문! 이사 와서 처음 방문했는데, 앞으로 꾸준히 다닐 것 같습니다.",
+      likes: 15,
+    },
+    {
+      id: 3,
+      name: "이**님",
+      date: "2024.12.10",
+      rating: 4,
+      tags: ["대기시간이 짧아요", "친절해요"],
+      content: "항상 친절하게 맞아주셔서 감사합니다. 대기 시간이 짧아서 바쁜 직장인에게 딱이에요.",
+      likes: 2,
+    },
+  ];
 
   // 1. 카카오맵 스크립트 로드 (표준 방식)
   useEffect(() => {
@@ -196,35 +231,6 @@ export function HospitalDetailPage({
       specialty: "소아청소년과 전문의",
       image:
         "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=200&q=80",
-    },
-  ];
-
-  const reviewKeywords = [
-    { label: "과잉진료가 없어요", percent: 96 },
-    { label: "친절해요", percent: 92 },
-    { label: "재진료 희망해요", percent: 77 },
-  ];
-
-  const userReviews = [
-    {
-      id: 1,
-      name: "김**님",
-      date: "2025.08.04",
-      rating: 5,
-      tags: ["진료 만족해요", "친절해요"],
-      content:
-        "목이 아프고 근육통이 심해서 방문했는데 친절하게 진료 잘 봐주셔서 좋았습니다! 목 상태 확인하시고 간단한 증상 상담 후 약 처방해 주셨어요. 처방받은 약 먹고 한숨 잤더니 한결 개운해졌습니다.\n\n갑자기 아파서 가장 가까운 데로 바로 접수 후에 대기 없이 진료받을 수 있었어요. 기운 없었는데 빨리 진료 끝나서 만족합니다. 서초동 근처에 병원 찾으시면 추천해요 ㅎㅎ",
-      likes: 10,
-    },
-    {
-      id: 2,
-      name: "이**님",
-      date: "2025.08.01",
-      rating: 5,
-      tags: ["진료 만족해요", "재진료 희망해요", "친절해요"],
-      content:
-        "고혈압 증상으로 처음 방문했는데 원장님이 제 이야기 끝까지 들어주시고 고혈압 관리 방법도 상세히 알려주셔서 불안했던 마음이 많이 괜찮아졌어요 ㅠㅠ\n\n이제 주기적으로 약 복용해야 하는데 생활습관과 식습관 등 주의 사항도 꼼꼼히 알려주셔서 큰 도움 됐습니다. 다음 재진때 뵐게요!",
-      likes: 2,
     },
   ];
 
@@ -406,22 +412,22 @@ export function HospitalDetailPage({
                   className="text-[#FFB800] fill-[#FFB800] mb-1"
                 />
                 <span className="text-3xl font-bold text-gray-900">
-                  4.8
+                  {averageRating}
                 </span>
                 <span className="text-sm text-gray-500">
-                  (223)
+                  ({reviewCount})
                 </span>
               </div>
 
               <div className="flex-1 space-y-3">
-                {reviewKeywords.map((item) => (
-                  <div key={item.label} className="space-y-1">
+                {keywordStats.map((item) => (
+                  <div key={item.keyword} className="space-y-1">
                     <div className="flex justify-between text-xs text-gray-600">
-                      <span>{item.label}</span>
-                      <span>{item.percent}%</span>
+                      <span>{item.keyword}</span>
+                      <span>{item.percentage}%</span>
                     </div>
                     <Progress
-                      value={item.percent}
+                      value={item.percentage}
                       className="h-2 bg-gray-100 [&>div]:bg-[#6DD3CE]"
                     />
                   </div>

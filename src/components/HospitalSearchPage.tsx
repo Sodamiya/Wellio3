@@ -19,6 +19,8 @@ export function HospitalSearchPage({
 }: HospitalSearchPageProps) {
   const [selectedFilter, setSelectedFilter] =
     useState("거리순");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const filters = [
     "거리순",
@@ -104,10 +106,21 @@ export function HospitalSearchPage({
     },
   ];
 
+  // 검색어에 따라 병원 필터링
+  const filteredHospitals = hospitals.filter((hospital) => {
+    if (!searchQuery.trim()) return true; // 검색어가 없으면 모두 표시
+    
+    const query = searchQuery.toLowerCase();
+    const name = hospital.name.toLowerCase();
+    const department = hospital.department.toLowerCase();
+    
+    return name.includes(query) || department.includes(query);
+  });
+
   return (
     <div className="bg-white flex flex-col">
       {/* Header: sticky, z-10, bg-white, border-b 유지 */}
-      <header className="sticky top-0 z-10 bg-white px-4 sm:px-6 md:px-8 pt-4 pb-2 space-y-4 border-b border-gray-100">
+      <header className="sticky top-0 z-10 bg-white px-4 sm:px-6 md:px-8 pt-4 pb-2 space-y-4">
         {/* Title Bar */}
         <div className="flex items-center justify-between pb-2">
           <button onClick={onBack} className="w-10 p-2 -ml-2">
@@ -121,12 +134,18 @@ export function HospitalSearchPage({
 
         {/* Search */}
         <div className="flex items-center gap-3">
-          <div className="flex-1 bg-gray-100 rounded-lg px-4 py-3 flex items-center gap-2">
+          <div className={`flex-1 bg-gray-100 rounded-lg px-4 py-3 flex items-center gap-2 transition-all border-2 ${
+            isSearchFocused ? 'border-[#36D9D9]' : 'border-transparent'
+          }`}>
             <Search size={20} className="text-gray-400" />
             <input
               type="text"
               placeholder="진료과, 병원이름을 검색해보세요"
               className="flex-1 bg-transparent outline-none text-[#1A1A1A] placeholder:text-gray-400"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
             />
           </div>
           <button className="text-[#1A1A1A] text-sm font-medium">
@@ -155,7 +174,7 @@ export function HospitalSearchPage({
       {/* Hospital List: 내부 스크롤 방지 유지 */}
       <div className="overflow-y-hidden">
         <div className="grid grid-cols-1">
-          {hospitals.map((hospital) => (
+          {filteredHospitals.map((hospital) => (
             <HospitalCard
               key={hospital.id}
               hospital={hospital}

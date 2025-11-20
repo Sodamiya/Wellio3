@@ -100,6 +100,7 @@ export default function App() {
   
   // 샘플 리뷰 데이터 (모든 병원에 표시될 기본 리뷰)
   const sampleReviews = [
+    // 매일건강의원 (id: 1) - 기존 3개 유지
     {
       id: 9001,
       hospitalId: 1, // 매일건강의원
@@ -145,6 +146,144 @@ export default function App() {
       likes: 2,
       visitType: "재방문",
     },
+    // 365클리닉 강남본점 (id: 2) - 신규 3개
+    {
+      id: 9004,
+      hospitalId: 2,
+      hospitalName: "365클리닉 강남본점",
+      hospitalImage: "https://via.placeholder.com/100x100/E7F3FF/2F80ED?text=Logo",
+      visitDate: "2025.03.15",
+      rating: 5,
+      keywords: ["시술 만족해요", "친절해요", "시설이 깨끗해요"],
+      reviewText: "피부 레이저 시술 받았는데 정말 만족스러워요. 원장님께서 꼼꼼하게 상담해주시고 시술도 세심하게 해주셔서 좋았습니다. 시설도 깨끗하고 직원분들도 친절하세요!",
+      userName: "최**님",
+      userAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80",
+      createdAt: "2025-03-15T11:00:00Z",
+      likes: 8,
+      visitType: "첫방문",
+    },
+    {
+      id: 9005,
+      hospitalId: 2,
+      hospitalName: "365클리닉 강남본점",
+      hospitalImage: "https://via.placeholder.com/100x100/E7F3FF/2F80ED?text=Logo",
+      visitDate: "2025.02.20",
+      rating: 4,
+      keywords: ["재진료 희망해요", "시술 만족해요"],
+      reviewText: "여드름 치료로 몇 번 방문했는데 점점 좋아지고 있어요. 꾸준히 다닐 예정입니다.",
+      userName: "정**님",
+      userAvatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80",
+      createdAt: "2025-02-20T15:30:00Z",
+      likes: 4,
+      visitType: "재방문",
+    },
+    {
+      id: 9006,
+      hospitalId: 2,
+      hospitalName: "365클리닉 강남본점",
+      hospitalImage: "https://via.placeholder.com/100x100/E7F3FF/2F80ED?text=Logo",
+      visitDate: "2025.01.10",
+      rating: 5,
+      keywords: ["친절해요", "시술 만족해요", "대기시간이 짧아요"],
+      reviewText: "예약 시간 잘 지켜주셔서 대기 시간이 거의 없었어요. 피부 상담도 친절하게 해주시고 효과도 좋아서 만족합니다!",
+      userName: "한**님",
+      userAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80",
+      createdAt: "2025-01-10T14:00:00Z",
+      likes: 12,
+      visitType: "첫방문",
+    },
+    // 사랑니쏙쏙 강남본점 (id: 3) - 신규 3개
+    {
+      id: 9007,
+      hospitalId: 3,
+      hospitalName: "사랑니쏙쏙 강남본점",
+      hospitalImage: "https://via.placeholder.com/100x100/E8F8F7/00C2B3?text=Logo",
+      visitDate: "2025.04.05",
+      rating: 5,
+      keywords: ["진료 만족해요", "친절해요", "시설이 깨끗해요"],
+      reviewText: "사랑니 발치 정말 잘 해주셔서 감사합니다. 생각보다 아프지 않았고 회복도 빨랐어요. 원장님이 매우 꼼꼼하시고 친절하셨습니다!",
+      userName: "강**님",
+      userAvatar: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=100&q=80",
+      createdAt: "2025-04-05T10:20:00Z",
+      likes: 10,
+      visitType: "첫방문",
+    },
+    {
+      id: 9008,
+      hospitalId: 3,
+      hospitalName: "사랑니쏙쏙 강남본점",
+      hospitalImage: "https://via.placeholder.com/100x100/E8F8F7/00C2B3?text=Logo",
+      visitDate: "2025.03.12",
+      rating: 4,
+      keywords: ["진료 만족해요", "대기시간이 짧아요"],
+      reviewText: "예약제라 대기 시간이 짧아서 좋았어요. 사랑니 발치 후 붓기도 적고 통증도 거의 없었습니다.",
+      userName: "윤**님",
+      userAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=80",
+      createdAt: "2025-03-12T16:00:00Z",
+      likes: 5,
+      visitType: "첫방문",
+    },
+    {
+      id: 9009,
+      hospitalId: 3,
+      hospitalName: "사랑니쏙쏙 강남본점",
+      hospitalImage: "https://via.placeholder.com/100x100/E8F8F7/00C2B3?text=Logo",
+      visitDate: "2025.02.28",
+      rating: 5,
+      keywords: ["친절해요", "진료 만족해요", "재진료 희망해요"],
+      reviewText: "처음엔 무서웠는데 원장님이 차근차근 설명해주셔서 안심하고 시술받을 수 있었어요. 다음에 다른 사랑니도 여기서 뽑으려고요!",
+      userName: "임**님",
+      userAvatar: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=100&q=80",
+      createdAt: "2025-02-28T11:30:00Z",
+      likes: 7,
+      visitType: "첫방문",
+    },
+    // 강남예쁜이치과의원 (id: 4) - 신규 3개
+    {
+      id: 9010,
+      hospitalId: 4,
+      hospitalName: "강남예쁜이치과의원",
+      hospitalImage: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop",
+      visitDate: "2025.05.01",
+      rating: 5,
+      keywords: ["시술 만족해요", "친절해요", "시설이 깨끗해요"],
+      reviewText: "라미네이트 시술 받았는데 결과가 정말 만족스러워요. 상담부터 시술까지 모든 과정이 체계적이고 친절했습니다. 가격 대비 효과 최고!",
+      userName: "송**님",
+      userAvatar: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=100&q=80",
+      createdAt: "2025-05-01T13:45:00Z",
+      likes: 18,
+      visitType: "첫방문",
+    },
+    {
+      id: 9011,
+      hospitalId: 4,
+      hospitalName: "강남예쁜이치과의원",
+      hospitalImage: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop",
+      visitDate: "2025.04.20",
+      rating: 5,
+      keywords: ["친절해요", "진료 만족해요", "재진료 희망해요"],
+      reviewText: "임플란트 상담 받으러 갔는데 원장님이 정말 자세하게 설명해주셨어요. 다른 곳보다 훨씬 신뢰가 갑니다. 여기서 진행하기로 결정했어요!",
+      userName: "오**님",
+      userAvatar: "https://images.unsplash.com/photo-1463453091185-61582044d556?w=100&q=80",
+      createdAt: "2025-04-20T10:15:00Z",
+      likes: 9,
+      visitType: "첫방문",
+    },
+    {
+      id: 9012,
+      hospitalId: 4,
+      hospitalName: "강남예쁜이치과의원",
+      hospitalImage: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop",
+      visitDate: "2025.03.28",
+      rating: 4,
+      keywords: ["시설이 깨끗해요", "시술 만족해요"],
+      reviewText: "치아 미백 받았는데 시설이 정말 깨끗하고 좋아요. 효과도 만족스럽습니다. 다만 가격이 조금 있는 편이에요.",
+      userName: "장**님",
+      userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80",
+      createdAt: "2025-03-28T14:50:00Z",
+      likes: 6,
+      visitType: "재방문",
+    },
   ];
 
   // 병원별 리뷰 개수를 계산하는 함수
@@ -152,6 +291,49 @@ export default function App() {
     const sampleCount = sampleReviews.filter(review => review.hospitalId === hospitalId).length;
     const userCount = myReviews.filter(review => review.hospitalId === hospitalId).length;
     return sampleCount + userCount;
+  };
+  
+  // 병원별 평균 별점을 계산하는 함수
+  const getHospitalAverageRating = (hospitalId: number): number => {
+    const hospitalReviews = [
+      ...sampleReviews.filter(review => review.hospitalId === hospitalId),
+      ...myReviews.filter(review => review.hospitalId === hospitalId)
+    ];
+    
+    if (hospitalReviews.length === 0) return 0;
+    
+    const totalRating = hospitalReviews.reduce((sum, review) => sum + review.rating, 0);
+    return Math.round((totalRating / hospitalReviews.length) * 10) / 10; // 소수점 첫째자리까지
+  };
+  
+  // 병원별 키워드 통계를 계산하는 함수
+  const getHospitalKeywordStats = (hospitalId: number): Array<{ keyword: string; count: number; percentage: number }> => {
+    const hospitalReviews = [
+      ...sampleReviews.filter(review => review.hospitalId === hospitalId),
+      ...myReviews.filter(review => review.hospitalId === hospitalId)
+    ];
+    
+    // 모든 키워드 수집
+    const keywordCount: { [key: string]: number } = {};
+    hospitalReviews.forEach(review => {
+      review.keywords.forEach(keyword => {
+        keywordCount[keyword] = (keywordCount[keyword] || 0) + 1;
+      });
+    });
+    
+    // 총 리뷰 개수
+    const totalReviews = hospitalReviews.length;
+    
+    // 키워드 통계 배열 생성 및 정렬 (개수 많은 순)
+    const stats = Object.entries(keywordCount)
+      .map(([keyword, count]) => ({
+        keyword,
+        count,
+        percentage: totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0
+      }))
+      .sort((a, b) => b.count - a.count);
+    
+    return stats;
   };
   
   // 진료내역에서 선택한 진료 기록 관리
@@ -422,6 +604,8 @@ export default function App() {
             onBack={() => setCurrentPage("hospital")}
             onReviewsClick={() => setCurrentPage("hospital-reviews")}
             reviewCount={getHospitalReviewCount(selectedHospital.id)}
+            averageRating={getHospitalAverageRating(selectedHospital.id)}
+            keywordStats={getHospitalKeywordStats(selectedHospital.id)}
           />
         )}
         {currentPage === "community" && (

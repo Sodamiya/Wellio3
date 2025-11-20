@@ -56,7 +56,6 @@ export function OnboardingPage({
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // 마지막 단계에서는 온보딩 완료
       onComplete();
     }
   };
@@ -65,14 +64,12 @@ export function OnboardingPage({
     onComplete();
   };
 
-  // GNB 클릭 이벤트는 온보딩 중에는 무시
   const handlePageChange = (page: PageSlug) => {
     console.log(
       `GNB clicked: ${page}. Ignoring during onboarding.`,
     );
   };
 
-  // 온보딩 배경 페이지 컴포넌트의 onBack, onClick 등의 props 처리를 위한 더미 함수
   const dummyAction = () => {
     console.log("Dummy action called during onboarding.");
   };
@@ -80,7 +77,6 @@ export function OnboardingPage({
   const progressPercentage =
     ((currentStep + 1) / steps.length) * 100;
 
-  // 터치 이벤트 처리
   const handleTouchStart = (e: React.TouchEvent) => {
     const touchStartX = e.touches[0].clientX;
     (e.currentTarget as HTMLElement).setAttribute(
@@ -98,13 +94,10 @@ export function OnboardingPage({
     const touchEndX = e.changedTouches[0].clientX;
     const diff = touchStartX - touchEndX;
 
-    // 스와이프 감지 (50px 이상 움직였을 때)
     if (Math.abs(diff) > 50) {
       if (diff > 0) {
-        // 왼쪽으로 스와이프 - 다음
         handleNext();
       }
-      // 오른쪽 스와이프는 무시 (이전으로 가지 않음)
     }
   };
 
@@ -112,10 +105,9 @@ export function OnboardingPage({
     handleNext();
   };
 
-  // 구멍 뚫기 효과를 위한 상수 정의
-  const holeRadiusPx = 32; // size-16 (64px)의 반지름
-  const gnbCenterFromBottom = 40; // GNB 높이 h-20(80px)의 중앙
-  const spreadDistance = 2000; // 화면을 충분히 덮을 그림자 확산 거리
+  const holeRadiusPx = 32;
+  const gnbCenterFromBottom = 40;
+  const spreadDistance = 2000;
 
   return (
     <div
@@ -127,7 +119,6 @@ export function OnboardingPage({
       {/* -------------------- 1. 배경 페이지 (흐릿하게) -------------------- */}
       <div className="absolute inset-0 pointer-events-none z-0">
         <div className="max-w-[500px] mx-auto min-h-screen flex flex-col">
-          {/* 페이지 콘텐츠: opacity-30 적용 */}
           <div className="flex-1 overflow-auto opacity-30">
             {currentStep === 0 && (
               <HomePage
@@ -160,7 +151,6 @@ export function OnboardingPage({
               />
             )}
           </div>
-          {/* GNB (BottomNav) 배치 */}
           <div className="opacity-100">
             <BottomNav
               currentPage={pageSlugs[currentStep]}
@@ -172,7 +162,6 @@ export function OnboardingPage({
 
       {/* -------------------- 2. 스포트라이트 오버레이 (구멍 뚫기) -------------------- */}
       <div className="fixed inset-0 max-w-[500px] mx-auto z-50 pointer-events-none">
-        {/* [수정] transition 클래스 추가: duration-500 ease-in-out */}
         <div
           className="absolute size-16 rounded-full transition-all duration-500 ease-in-out"
           style={{
@@ -185,7 +174,8 @@ export function OnboardingPage({
           <div
             className="w-full h-full rounded-full"
             style={{
-              boxShadow: `0 0 10px 10px rgba(77, 194, 192, 0.5) inset`,
+              // [수정 1] inset 제거 -> 그림자가 원 밖으로 나감
+              boxShadow: `0 0 15px 5px rgba(77, 194, 192, 0.8)`,
             }}
           />
         </div>
@@ -215,15 +205,21 @@ export function OnboardingPage({
         <div className="flex-1"></div>
 
         <div className="px-5 pt-5 pb-24">
-          <div className="relative bg-[#4dc2c0] rounded-2xl p-5 mb-5">
-            <h2 className="text-xl mb-2">
+          {/* [수정 2] Tailwind 대신 style로 RGBA 강제 적용 */}
+          <div
+            className="relative rounded-2xl p-5 mb-5 backdrop-blur-sm transition-colors duration-300"
+            style={{
+              backgroundColor: "rgba(46, 202, 202, 0.5)",
+            }}
+          >
+            <h2 className="text-xl mb-2 font-bold">
               {steps[currentStep].title}
             </h2>
-            <p className="text-sm leading-relaxed opacity-90">
+            <p className="text-sm leading-relaxed opacity-100">
               {steps[currentStep].description}
             </p>
 
-            {/* [수정] 말풍선 화살표에도 transition 추가하여 원과 함께 움직이도록 설정 */}
+            {/* [수정 3] 말풍선 꼬리도 동일한 RGBA 적용 */}
             <div
               className="absolute transition-all duration-500 ease-in-out"
               style={{
@@ -234,7 +230,7 @@ export function OnboardingPage({
                 height: 0,
                 borderLeft: "10px solid transparent",
                 borderRight: "10px solid transparent",
-                borderTop: "10px solid #4dc2c0",
+                borderTop: "10px solid rgba(46, 202, 202, 0.5)",
               }}
             ></div>
           </div>

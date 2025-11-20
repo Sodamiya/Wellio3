@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
+// --- [타입 정의] ---
 interface Notification {
   id: number;
   type: "hospital" | "family" | "medicine" | "challenge";
@@ -18,10 +19,36 @@ interface NotificationPageProps {
   onDeleteNotification?: (id: number) => void;
 }
 
+// --- [애니메이션 설정 (수정됨)] ---
+// 부모 variants는 제거하고, 자식이 스스로 순서를 계산하도록 변경했습니다.
+
+const itemVariants = {
+  // 숨겨진 상태 (시작)
+  hidden: { opacity: 0, y: 20 },
+  // 보이는 상태 (index를 받아서 딜레이 계산)
+  visible: (index: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: index * 0.1, // 0번째는 0초, 1번째는 0.1초, 2번째는 0.2초 뒤에 실행
+      type: "spring",
+      stiffness: 300,
+      damping: 24,
+    },
+  }),
+  // 삭제될 때 상태
+  exit: {
+    opacity: 0,
+    x: -300,
+    transition: { duration: 0.2 },
+  },
+};
+
 export function NotificationPage({
   onBack,
   onDeleteNotification,
 }: NotificationPageProps) {
+  // --- [데이터 및 상태 관리] ---
   const [notifications, setNotifications] = useState<
     Notification[]
   >([
@@ -78,11 +105,12 @@ export function NotificationPage({
     },
   ]);
 
-  // 드래그 삭제 관련 state
+  // 삭제 모달 관련 상태
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [notificationToDelete, setNotificationToDelete] =
     useState<number | null>(null);
 
+  // --- [이벤트 핸들러] ---
   const handleNotificationClick = (id: number) => {
     setNotifications((prev) =>
       prev.map((notif) =>
@@ -96,7 +124,7 @@ export function NotificationPage({
     info: any,
     notificationId: number,
   ) => {
-    // 왼쪽으로 100px 이상 드래그하면 삭제 확인 모달 표시
+    // 왼쪽으로 100px 이상 드래그하면 삭제 모달 띄우기
     if (info.offset.x < -100) {
       setNotificationToDelete(notificationId);
       setShowDeleteModal(true);
@@ -121,6 +149,7 @@ export function NotificationPage({
     setNotificationToDelete(null);
   };
 
+  // --- [UI 헬퍼 함수] ---
   const getIconAndColor = (type: string) => {
     switch (type) {
       case "hospital":
@@ -157,7 +186,6 @@ export function NotificationPage({
   };
 
   const formatMessage = (message: string) => {
-    // **텍스트** 를 bold로 변환
     const parts = message.split(/(\*\*.*?\*\*)/g);
     return parts.map((part, index) => {
       if (part.startsWith("**") && part.endsWith("**")) {
@@ -171,43 +199,61 @@ export function NotificationPage({
     });
   };
 
+  // --- [화면 렌더링] ---
   return (
     <div className="min-h-screen bg-[#f4f6f8] max-w-[500px] mx-auto">
       {/* 헤더 */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4 flex items-center">
+      <div className="bg-white border-b border-gray-200 px-4 py-4 flex items-center sticky top-0 z-40">
         <button
           type="button"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log("Button clicked!");
             onBack();
           }}
           className="text-[#555] hover:text-[#333] transition-colors mr-5 relative z-50 cursor-pointer p-2 -m-2"
-          style={{ pointerEvents: "auto" }}
         >
           <ArrowLeft size={24} />
         </button>
-        <h1 className="flex-1 text-center text-lg -ml-10">
+        <h1 className="flex-1 text-center text-lg -ml-10 font-bold text-gray-800">
           알림
         </h1>
       </div>
 
-      {/* 알림 리스트 */}
+      {/* 알림 리스트 영역 */}
       <div className="p-4 space-y-3">
-        <AnimatePresence>
-          {notifications.map((notification) => {
-            const { icon, bgColor, textColor } =
-              getIconAndColor(notification.type);
+        <AnimatePresence mode="popLayout">
+          {/* map에 index를 추가해서 애니메이션에 전달합니다 */}
+          {notifications.map((notification, index) => {
+            const { icon, bgColor } = getIconAndColor(
+              notification.type,
+            );
+
             return (
-              <div key={notification.id} className="relative">
-                {/* 휴지통 배경 */}
-                <div className="absolute inset-0.5 flex items-center justify-end pr-6 bg-red-500 rounded-xl">
+              <motion.div
+                key={notification.id}
+                layout // 삭제 시 부드럽게 빈자리 채움
+                custom={index} // [중요] 몇 번째 아이템인지 알려줌
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={itemVariants} // 위에 정의한 variants 사용
+                className="relative"
+              >
+                {/* 1. 뒤에 숨겨진 빨간 휴지통 배경 */}
+                <div className="absolute inset-0.5 flex items-center justify-end pr-6 bg-red-500 rounded-xl z-0">
                   <Trash2 size={24} className="text-white" />
                 </div>
 
-                {/* 드래그 가능한 알림 카드 */}
+                {/* 2. 드래그 가능한 실제 알림 카드 */}
                 <motion.div
+                  whileTap={{ scale: 0.98 }} // 클릭 시 살짝 눌리는 효과
+                  drag="x" // 가로 드래그 허용
+                  dragConstraints={{ left: -100, right: 0 }} // 드래그 범위 제한
+                  dragElastic={0.1}
+                  onDragEnd={(event, info) =>
+                    handleDragEnd(event, info, notification.id)
+                  }
                   onClick={() =>
                     handleNotificationClick(notification.id)
                   }
@@ -215,16 +261,7 @@ export function NotificationPage({
                     notification.isRead
                       ? "bg-white"
                       : "bg-[#E2F7F7]"
-                  } rounded-xl p-4 shadow-sm flex items-start gap-4 cursor-pointer transition-colors hover:shadow-md relative`}
-                  // [수정] 로드 시 애니메이션(initial, animate) 제거하여 빨간 배경 비침 방지
-                  exit={{ opacity: 0, x: -300 }}
-                  transition={{ duration: 0.3 }}
-                  drag="x"
-                  dragConstraints={{ left: -100, right: 0 }}
-                  dragElastic={0.1}
-                  onDragEnd={(event, info) =>
-                    handleDragEnd(event, info, notification.id)
-                  }
+                  } relative z-10 rounded-xl p-4 shadow-sm flex items-start gap-4 cursor-pointer transition-shadow hover:shadow-md`}
                 >
                   {/* 아이콘 */}
                   <div
@@ -234,19 +271,19 @@ export function NotificationPage({
                     <span className="text-xl">{icon}</span>
                   </div>
 
-                  {/* 텍스트 내용 */}
+                  {/* 텍스트 */}
                   <div className="flex-1">
-                    <div className="text-sm mb-1">
+                    <div className="text-sm mb-1 font-medium text-gray-600">
                       {notification.category}
                     </div>
-                    <div className="text-sm leading-relaxed text-[#555] whitespace-pre-line">
+                    <div className="text-sm leading-relaxed text-[#333] whitespace-pre-line">
                       {formatMessage(notification.message)}
                     </div>
                   </div>
 
                   {/* 시간 */}
                   <div
-                    className={`text-xs flex-shrink-0 ${
+                    className={`text-xs flex-shrink-0 font-medium ${
                       notification.time === "지금"
                         ? "text-[#42a5f5]"
                         : "text-[#999]"
@@ -255,17 +292,17 @@ export function NotificationPage({
                     {notification.time}
                   </div>
                 </motion.div>
-              </div>
+              </motion.div>
             );
           })}
         </AnimatePresence>
       </div>
 
-      {/* 삭제 확인 모달 */}
+      {/* 삭제 확인 모달 (팝업) */}
       <AnimatePresence>
         {showDeleteModal && (
           <>
-            {/* 배경 오버레이 */}
+            {/* 검은색 반투명 배경 */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -274,18 +311,19 @@ export function NotificationPage({
               onClick={handleCancelDelete}
             />
 
-            {/* 모달 */}
+            {/* 하얀색 팝업창 */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", duration: 0.5 }}
               className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[320px] bg-white rounded-2xl shadow-2xl z-50 overflow-hidden"
             >
               <div className="p-6 text-center">
                 <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Trash2 size={28} className="text-red-500" />
                 </div>
-                <h3 className="text-lg mb-2">
+                <h3 className="text-lg font-bold mb-2 text-gray-900">
                   알림을 삭제하시겠습니까?
                 </h3>
                 <p className="text-sm text-gray-500 mb-6">
@@ -295,13 +333,13 @@ export function NotificationPage({
                 <div className="flex gap-3">
                   <button
                     onClick={handleCancelDelete}
-                    className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+                    className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
                   >
                     취소
                   </button>
                   <button
                     onClick={handleConfirmDelete}
-                    className="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors"
+                    className="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors font-medium"
                   >
                     삭제
                   </button>
