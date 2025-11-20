@@ -7,9 +7,10 @@ interface FavoriteHospitalsPageProps {
   onBack: () => void;
   favoriteHospitals: any[];
   onToggleFavorite: (hospital: any) => void;
+  getHospitalReviewCount?: (hospitalId: number) => number;
 }
 
-export function FavoriteHospitalsPage({ onBack, favoriteHospitals, onToggleFavorite }: FavoriteHospitalsPageProps) {
+export function FavoriteHospitalsPage({ onBack, favoriteHospitals, onToggleFavorite, getHospitalReviewCount }: FavoriteHospitalsPageProps) {
   return (
     <div className="relative bg-[#F7F7F7] flex flex-col max-w-[500px] mx-auto min-h-screen">
       {/* Header */}
@@ -43,6 +44,7 @@ export function FavoriteHospitalsPage({ onBack, favoriteHospitals, onToggleFavor
               onClick={() => {
                 // 병원 상세 페이지로 이동하는 로직 추가 가능
               }}
+              reviewCount={getHospitalReviewCount ? getHospitalReviewCount(hospital.id) : 0}
             />
           ))
         )}

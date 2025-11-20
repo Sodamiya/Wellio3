@@ -7,6 +7,7 @@ interface HospitalSearchPageProps {
   onHospitalClick: (hospital: any) => void;
   favoriteHospitals: any[];
   onToggleFavorite: (hospital: any) => void;
+  getHospitalReviewCount?: (hospitalId: number) => number;
 }
 
 export function HospitalSearchPage({
@@ -14,6 +15,7 @@ export function HospitalSearchPage({
   onHospitalClick,
   favoriteHospitals,
   onToggleFavorite,
+  getHospitalReviewCount,
 }: HospitalSearchPageProps) {
   const [selectedFilter, setSelectedFilter] =
     useState("거리순");
@@ -160,6 +162,7 @@ export function HospitalSearchPage({
               onClick={() => onHospitalClick(hospital)}
               favoriteHospitals={favoriteHospitals}
               onToggleFavorite={onToggleFavorite}
+              reviewCount={getHospitalReviewCount?.(hospital.id)}
             />
           ))}
         </div>

@@ -14,9 +14,10 @@ import { FavoriteHospitalsPage } from "./components/FavoriteHospitalsPage"; // �
 import { NotificationPage } from "./components/NotificationPage"; // 👈 NotificationPage import
 import { OnboardingPage } from "./components/OnboardingPage"; // 👈 OnboardingPage import
 import { ReviewWritePage } from "./components/ReviewWritePage"; // 👈 ReviewWritePage import
+import { HospitalReviewsPage } from "./components/HospitalReviewsPage"; // 👈 HospitalReviewsPage import
 import { Toaster } from "sonner@2.0.3"; // 👈 Toaster import
 
-type Page = "home" | "community" | "hospital" | "profile" | "hospital-detail" | "upload" | "medical-history" | "my-reviews" | "favorite-hospitals" | "notifications" | "write-review";
+type Page = "home" | "community" | "hospital" | "profile" | "hospital-detail" | "upload" | "medical-history" | "my-reviews" | "favorite-hospitals" | "notifications" | "write-review" | "hospital-reviews";
 
 // 병원 타입 정의
 interface Hospital {
@@ -73,6 +74,8 @@ interface Review {
   userName: string;
   userAvatar: string;
   createdAt: string;
+  likes?: number;
+  visitType?: "첫방문" | "재방문";
 }
 
 export default function App() {
@@ -94,6 +97,62 @@ export default function App() {
   
   // 작성한 리뷰 목록 관리
   const [myReviews, setMyReviews] = useState<Review[]>([]);
+  
+  // 샘플 리뷰 데이터 (모든 병원에 표시될 기본 리뷰)
+  const sampleReviews = [
+    {
+      id: 9001,
+      hospitalId: 1, // 매일건강의원
+      hospitalName: "매일건강의원",
+      hospitalImage: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80",
+      visitDate: "2025.05.22",
+      rating: 5,
+      keywords: ["진료 만족해요", "친절해요"],
+      reviewText: "목이 아프고 근육통이 심해서 방문했는데 친절하게 진료 잘 봐주셔서 좋았습니다! 목 상태 확인하시고 간단한 증상 상담 후 약 처방해 주셨어요. 처방받은 약 먹고 한숨 잤더니 한결 개운해졌습니다.\n\n갑자기 아파서 가장 가까운 데로 바로 접수 후에 대기 없이 진료받을 수 있었어요. 기운 없었는데 빨리 진료 끝나서 만족합니다. 서초동 근처에 병원 찾으시면 추천해요 ㅎㅎ",
+      userName: "김**님",
+      userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
+      createdAt: "2025-05-22T10:30:00Z",
+      likes: 6,
+      visitType: "첫방문",
+    },
+    {
+      id: 9002,
+      hospitalId: 1, // 매일건강의원
+      hospitalName: "매일건강의원",
+      hospitalImage: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80",
+      visitDate: "2025.01.29",
+      rating: 5,
+      keywords: ["진료 만족해요", "재진료 희망해요", "친절해요"],
+      reviewText: "만족스러운 첫 방문! 이사 와서 처음 방문했는데, 앞으로 꾸준히 다닐 것 같습니다. 제 건강을 믿고 맡길 수 있는 주치의를 만난 것 같아 든든해요.",
+      userName: "박**님",
+      userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80",
+      createdAt: "2025-01-29T14:20:00Z",
+      likes: 15,
+      visitType: "첫방문",
+    },
+    {
+      id: 9003,
+      hospitalId: 1, // 매일건강의원
+      hospitalName: "매일건강의원",
+      hospitalImage: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80",
+      visitDate: "2024.12.10",
+      rating: 4,
+      keywords: ["대기시간이 짧아요", "친절해요"],
+      reviewText: "항상 친절하게 맞아주셔서 감사합니다. 대기 시간이 짧아서 바쁜 직장인에게 딱이에요.",
+      userName: "이**님",
+      userAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
+      createdAt: "2024-12-10T16:45:00Z",
+      likes: 2,
+      visitType: "재방문",
+    },
+  ];
+
+  // 병원별 리뷰 개수를 계산하는 함수
+  const getHospitalReviewCount = (hospitalId: number): number => {
+    const sampleCount = sampleReviews.filter(review => review.hospitalId === hospitalId).length;
+    const userCount = myReviews.filter(review => review.hospitalId === hospitalId).length;
+    return sampleCount + userCount;
+  };
   
   // 진료내역에서 선택한 진료 기록 관리
   const [selectedMedicalRecord, setSelectedMedicalRecord] = useState<{
@@ -344,6 +403,8 @@ export default function App() {
             userName={userName}
             currentPage={currentPage}
             onPageChange={setCurrentPage}
+            onHospitalClick={handleHospitalClick}
+            getHospitalReviewCount={getHospitalReviewCount}
           />
         )}
         {currentPage === "hospital" && (
@@ -352,12 +413,15 @@ export default function App() {
             onHospitalClick={handleHospitalClick}
             favoriteHospitals={favoriteHospitals}
             onToggleFavorite={toggleFavorite}
+            getHospitalReviewCount={getHospitalReviewCount}
           />
         )}
         {currentPage === "hospital-detail" && selectedHospital && (
           <HospitalDetailPage
             hospital={selectedHospital}
             onBack={() => setCurrentPage("hospital")}
+            onReviewsClick={() => setCurrentPage("hospital-reviews")}
+            reviewCount={getHospitalReviewCount(selectedHospital.id)}
           />
         )}
         {currentPage === "community" && (
@@ -420,6 +484,7 @@ export default function App() {
             onBack={() => setCurrentPage("home")}
             favoriteHospitals={favoriteHospitals}
             onToggleFavorite={toggleFavorite}
+            getHospitalReviewCount={getHospitalReviewCount}
           />
         )}
         {/* 👇 8. '알림' 페이지 추가 */}
@@ -456,6 +521,45 @@ export default function App() {
             hospitalName={selectedMedicalRecord.hospitalName}
             visitDate={`${selectedMedicalRecord.visitDate} ${selectedMedicalRecord.visitTime}`}
             hospitalId={selectedMedicalRecord.id}
+          />
+        )}
+        {/* 👇 10. '병원 리뷰' 페이지 추가 */}
+        {currentPage === "hospital-reviews" && selectedHospital && (
+          <HospitalReviewsPage
+            onBack={() => setCurrentPage("hospital-detail")}
+            hospitalName={selectedHospital.name}
+            reviews={[
+              // 샘플 리뷰 먼저
+              ...sampleReviews
+                .filter(review => review.hospitalId === selectedHospital.id)
+                .map(review => ({
+                  id: review.id,
+                  author: review.userName,
+                  date: review.visitDate,
+                  visitType: review.visitType || "첫방문",
+                  rating: review.rating,
+                  likes: review.likes || 0,
+                  tags: review.keywords,
+                  content: review.reviewText,
+                })),
+              // 사용자가 작성한 리뷰 추가
+              ...myReviews
+                .filter(review => review.hospitalId === selectedHospital.id)
+                .map(review => ({
+                  id: review.id,
+                  author: review.userName,
+                  date: new Date(review.createdAt).toLocaleDateString('ko-KR', { 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit' 
+                  }).replace(/\. /g, '.').replace(/\.$/, ''),
+                  visitType: review.visitType || "재방문",
+                  rating: review.rating,
+                  likes: review.likes || 0,
+                  tags: review.keywords,
+                  content: review.reviewText,
+                }))
+            ]}
           />
         )}
       </div>

@@ -23,9 +23,10 @@ interface HospitalCardProps {
   favoriteHospitals?: any[];
   onToggleFavorite?: (hospital: any) => void;
   isInFavoritePage?: boolean; // 찜한 병원 페이지에서 사용 중인지 여부
+  reviewCount?: number; // 실제 리뷰 개수
 }
 
-export function HospitalCard({ hospital, onClick, isFavorite, favoriteHospitals, onToggleFavorite, isInFavoritePage }: HospitalCardProps) {
+export function HospitalCard({ hospital, onClick, isFavorite, favoriteHospitals, onToggleFavorite, isInFavoritePage, reviewCount }: HospitalCardProps) {
   // isFavorite prop이 전달되면 그것을 사용, 아니면 favoriteHospitals에서 확인
   const isHospitalFavorite = isFavorite !== undefined 
     ? isFavorite 
@@ -122,7 +123,7 @@ export function HospitalCard({ hospital, onClick, isFavorite, favoriteHospitals,
               {hospital.rating}
             </span>
             <span className="text-gray-400">
-              ({hospital.reviews})
+              ({reviewCount || hospital.reviews})
             </span>
           </div>
         </div>

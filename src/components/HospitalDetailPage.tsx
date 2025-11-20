@@ -38,11 +38,15 @@ interface Hospital {
 interface HospitalDetailPageProps {
   hospital: Hospital;
   onBack: () => void;
+  onReviewsClick?: () => void;
+  reviewCount?: number;
 }
 
 export function HospitalDetailPage({
   hospital,
   onBack,
+  onReviewsClick,
+  reviewCount = 0,
 }: HospitalDetailPageProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
@@ -463,8 +467,9 @@ export function HospitalDetailPage({
             <Button
               variant="outline"
               className="w-full mt-6 h-12 text-gray-600 border-gray-200 rounded-xl hover:bg-gray-50"
+              onClick={onReviewsClick}
             >
-              223개 리뷰 더보기
+              {reviewCount}개 리뷰 더보기
             </Button>
           </div>
         </div>

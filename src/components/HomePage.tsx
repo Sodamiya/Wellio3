@@ -13,12 +13,16 @@ interface HomePageProps {
   onPageChange: (
     page: "home" | "community" | "hospital" | "profile" | "medical-history",
   ) => void;
+  onHospitalClick?: (hospital: any) => void;
+  getHospitalReviewCount?: (hospitalId: number) => number;
 }
 
 export function HomePage({
   userName,
   currentPage,
   onPageChange,
+  onHospitalClick,
+  getHospitalReviewCount,
 }: HomePageProps) {
   return (
     <>
