@@ -265,11 +265,6 @@ export function OnboardingPage({
             ></div>
             {/* 👆 말풍선 화살표 */}
           </div>
-
-          {/* 하단 바 (스크롤 핸들) */}
-          <div className="flex justify-center">
-            <div className="w-[130px] h-[5px] bg-white rounded-full"></div>
-          </div>
         </div>
       </div>
     </div>

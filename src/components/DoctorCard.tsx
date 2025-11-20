@@ -14,7 +14,8 @@ interface DoctorCardProps {
 
 export function DoctorCard({ doctor }: DoctorCardProps) {
   return (
-    <button className="w-[263px] h-[93px] bg-white rounded-2xl p-5 flex items-center justify-between shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-transparent hover:border-gray-100 hover:bg-gray-50 transition-all text-left">
+    // [수정] w-[263px] -> w-full (반응형 대응을 위해 꽉 차게 변경)
+    <button className="w-full h-[93px] bg-white rounded-2xl p-5 flex items-center justify-between shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-transparent hover:border-gray-100 hover:bg-gray-50 transition-all text-left">
       <div className="flex items-center gap-4 overflow-hidden">
         {/* 의사 사진 (원형) */}
         <div className="w-[52px] h-[52px] rounded-full overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-50">

@@ -131,7 +131,6 @@ export function HospitalDetailPage({
     );
   };
 
-  // 시안에 맞춘 의사 정보 데이터
   const doctors = [
     {
       id: 1,
@@ -287,7 +286,7 @@ export function HospitalDetailPage({
           </div>
         </div>
 
-        {/* 2. 의사 정보 */}
+        {/* 2. 의사 정보 - PC/모바일 구분 없이 항상 Swiper 사용 */}
         <div className="mt-8">
           <div className="px-4 sm:px-6 md:px-8 mb-3 ml-1">
             <h3 className="text-lg font-bold text-gray-900">
@@ -295,7 +294,8 @@ export function HospitalDetailPage({
             </h3>
           </div>
 
-          <div className="md:hidden">
+          {/* [수정] md:hidden 제거하여 항상 Swiper 렌더링 */}
+          <div>
             <Swiper
               slidesPerView="auto"
               spaceBetween={12}
@@ -310,12 +310,6 @@ export function HospitalDetailPage({
                 </SwiperSlide>
               ))}
             </Swiper>
-          </div>
-
-          <div className="hidden md:grid md:grid-cols-2 gap-4 px-4 sm:px-6 md:px-8">
-            {doctors.map((doctor) => (
-              <DoctorCard key={doctor.id} doctor={doctor} />
-            ))}
           </div>
         </div>
 
