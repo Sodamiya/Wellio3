@@ -22,7 +22,7 @@ import { useEffect, useRef, useState } from "react";
 import { Progress } from "./ui/progress";
 import { Button } from "./ui/button";
 
-// 👇 발급받은 카카오 JavaScript 키를 여기에 입력하세요
+// 👇 발급받은 키를 여기에 유지해주세요
 const KAKAO_MAP_API_KEY = "ee7ef6c37b67c27768d7dcb2f13f0a83";
 
 interface Hospital {
@@ -54,9 +54,13 @@ export function HospitalDetailPage({
   const mapRef = useRef<HTMLDivElement>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
 
-  // 1. 카카오맵 스크립트 로드 (libraries=services 추가됨!)
+  // 1. 카카오맵 스크립트 로드 (표준 방식)
   useEffect(() => {
-    if (window.kakao && window.kakao.maps) {
+    if (
+      window.kakao &&
+      window.kakao.maps &&
+      window.kakao.maps.services
+    ) {
       setIsMapLoaded(true);
       return;
     }
@@ -65,7 +69,11 @@ export function HospitalDetailPage({
     const existingScript = document.getElementById(scriptId);
 
     if (existingScript) {
-      if (window.kakao && window.kakao.maps) {
+      if (
+        window.kakao &&
+        window.kakao.maps &&
+        window.kakao.maps.services
+      ) {
         setIsMapLoaded(true);
       } else {
         existingScript.addEventListener("load", () =>
@@ -77,7 +85,6 @@ export function HospitalDetailPage({
 
     const script = document.createElement("script");
     script.id = scriptId;
-    // 👇 여기에 &libraries=services 가 추가되었습니다.
     script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_MAP_API_KEY}&autoload=false&libraries=services`;
     script.async = true;
 
@@ -90,19 +97,16 @@ export function HospitalDetailPage({
     document.head.appendChild(script);
   }, []);
 
-  // 2. 맵 그리기 (주소 검색 기능 적용)
+  // 2. 맵 그리기 & 주소 검색 (디버그 로그 제거됨)
   useEffect(() => {
     if (!isMapLoaded || !mapRef.current) return;
 
-    // 1) 지도 기본 생성 (일단 서울시청이나 기본 좌표로 생성)
-    const defaultLat = 37.566826;
-    const defaultLng = 126.9786567;
-
+    // 지도 생성
     const mapOption = {
       center: new window.kakao.maps.LatLng(
-        defaultLat,
-        defaultLng,
-      ),
+        37.566826,
+        126.9786567,
+      ), // 기본값
       level: 3,
     };
     const map = new window.kakao.maps.Map(
@@ -110,61 +114,42 @@ export function HospitalDetailPage({
       mapOption,
     );
 
-    // 2) 주소로 좌표 검색 (Geocoding)
-    // services 라이브러리가 로드되었는지 확인
-    if (
-      window.kakao.maps.services &&
-      window.kakao.maps.services.Geocoder
-    ) {
+    // 주소 검색 (Geocoding)
+    if (window.kakao.maps.services) {
       const geocoder =
         new window.kakao.maps.services.Geocoder();
 
       geocoder.addressSearch(
         hospital.address,
         function (result: any, status: any) {
-          // 정상적으로 검색이 완료됐으면
           if (status === window.kakao.maps.services.Status.OK) {
             const coords = new window.kakao.maps.LatLng(
               result[0].y,
               result[0].x,
             );
 
-            // 마커를 표시합니다
             const marker = new window.kakao.maps.Marker({
               map: map,
               position: coords,
             });
 
-            // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
             map.setCenter(coords);
-          }
-          // 주소 검색 실패 시 (기존 좌표가 있다면 사용)
-          else if (hospital.latitude && hospital.longitude) {
-            const coords = new window.kakao.maps.LatLng(
-              hospital.latitude,
-              hospital.longitude,
-            );
-            new window.kakao.maps.Marker({
-              map: map,
-              position: coords,
-            });
-            map.setCenter(coords);
+          } else {
+            // 검색 실패 시 데이터 좌표 사용
+            if (hospital.latitude && hospital.longitude) {
+              const coords = new window.kakao.maps.LatLng(
+                hospital.latitude,
+                hospital.longitude,
+              );
+              new window.kakao.maps.Marker({
+                map: map,
+                position: coords,
+              });
+              map.setCenter(coords);
+            }
           }
         },
       );
-    } else {
-      // services 라이브러리가 없을 경우 (혹시 모를 예외 처리)
-      if (hospital.latitude && hospital.longitude) {
-        const coords = new window.kakao.maps.LatLng(
-          hospital.latitude,
-          hospital.longitude,
-        );
-        new window.kakao.maps.Marker({
-          map: map,
-          position: coords,
-        });
-        map.setCenter(coords);
-      }
     }
   }, [
     isMapLoaded,
@@ -174,7 +159,6 @@ export function HospitalDetailPage({
   ]);
 
   const handleDirections = () => {
-    // 길찾기는 좌표가 있으면 좌표로, 없으면 이름으로 시도
     const lat = hospital.latitude;
     const lng = hospital.longitude;
 
@@ -184,7 +168,6 @@ export function HospitalDetailPage({
         "_blank",
       );
     } else {
-      // 좌표가 없으면 검색어로 길찾기
       window.open(
         `https://map.kakao.com/link/to/${encodeURIComponent(hospital.name)}`,
         "_blank",
@@ -354,9 +337,7 @@ export function HospitalDetailPage({
               의사 정보
             </h3>
           </div>
-
-          {/* 모바일: Swiper (배경색 제거) */}
-          <div className="md:hidden">
+          <div>
             <Swiper
               slidesPerView="auto"
               spaceBetween={12}
@@ -371,13 +352,6 @@ export function HospitalDetailPage({
                 </SwiperSlide>
               ))}
             </Swiper>
-          </div>
-
-          {/* [수정] 태블릿/데스크톱: 1열 리스트로 변경 (500px 폭 대응) */}
-          <div className="hidden md:grid grid-cols-1 gap-4 px-4 sm:px-6 md:px-8">
-            {doctors.map((doctor) => (
-              <DoctorCard key={doctor.id} doctor={doctor} />
-            ))}
           </div>
         </div>
 

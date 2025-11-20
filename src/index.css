@@ -3044,12 +3044,6 @@
   }
 
   @media (width >= 48rem) {
-    .md\:grid {
-      display: grid;
-    }
-  }
-
-  @media (width >= 48rem) {
     .md\:hidden {
       display: none;
     }
