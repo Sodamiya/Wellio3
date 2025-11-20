@@ -46,13 +46,11 @@ export function HospitalDetailPage({
   // 카카오맵 스크립트 동적 로딩
   useEffect(() => {
     const loadKakaoMap = () => {
-      // 이미 로드되어 있는 경우
       if (window.kakao && window.kakao.maps) {
         setIsMapLoaded(true);
         return;
       }
 
-      // 스크립트가 이미 추가되어 있는 경우
       const existingScript = document.querySelector(
         'script[src*="dapi.kakao.com"]',
       );
@@ -74,13 +72,11 @@ export function HospitalDetailPage({
         return;
       }
 
-      // 새 스크립트 추가
       const script = document.createElement("script");
       script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=ee7ef6c37b67c27768d7dcb2f13f0a83&autoload=false`;
       script.type = "text/javascript";
 
       script.onload = () => {
-        // kakao.maps.load를 사용하여 로드
         if (window.kakao && window.kakao.maps) {
           window.kakao.maps.load(() => {
             setIsMapLoaded(true);
@@ -175,6 +171,7 @@ export function HospitalDetailPage({
 
   return (
     <div className="relative min-h-screen bg-[#F7F7F7] flex flex-col">
+      {/* Header */}
       <header className="sticky top-0 z-20 bg-white px-4 sm:px-6 md:px-8 py-4 flex items-center border-b border-gray-100">
         <button
           onClick={onBack}
@@ -187,7 +184,8 @@ export function HospitalDetailPage({
         </h1>
       </header>
 
-      <main className="flex-1 pb-24 overflow-y-auto">
+      <main className="flex-1 pb-32 overflow-y-auto">
+        {/* Top Image Area */}
         <div className="w-full h-[240px] md:h-[320px] overflow-hidden bg-gray-200">
           <ImageWithFallback
             src={hospital.imageUrl}
@@ -196,6 +194,7 @@ export function HospitalDetailPage({
           />
         </div>
 
+        {/* Hospital Main Info Card */}
         <div className="relative z-10 mx-4 sm:mx-6 md:mx-8 -mt-16">
           <div className="bg-white rounded-2xl shadow-lg p-5">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -243,6 +242,7 @@ export function HospitalDetailPage({
           </div>
         </div>
 
+        {/* Insurance Banner */}
         <div className="mx-4 sm:mx-6 md:mx-8 mt-4 bg-[#E7F3FF] rounded-2xl p-5 flex items-center justify-between shadow-sm">
           <div>
             <h3 className="font-semibold text-gray-900 mb-1">
@@ -255,38 +255,40 @@ export function HospitalDetailPage({
           <ClipboardList size={24} className="text-blue-500" />
         </div>
 
-        <div className="mt-6 bg-white py-6">
-          <div className="px-4 sm:px-6 md:px-8 mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
-              진료 과목
-            </h3>
-          </div>
-          <div className="flex gap-2 px-4 sm:px-6 md:px-8 overflow-x-auto scrollbar-hide">
-            {[
-              "내과",
-              "소아청소년과",
-              "피부과",
-              "정형외과",
-              "이비인후과",
-            ].map((subject) => (
-              <span
-                key={subject}
-                className="bg-gray-100 text-gray-700 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap"
-              >
-                {subject}
-              </span>
-            ))}
+        {/* 1. 진료 과목 (카드형) */}
+        <div className="mt-8 px-4 sm:px-6 md:px-8">
+          <h3 className="text-lg font-bold text-gray-900 mb-3 ml-1">
+            진료 과목
+          </h3>
+          <div className="bg-white rounded-2xl p-5 shadow-sm">
+            <div className="flex flex-wrap gap-2">
+              {[
+                "내과",
+                "소아청소년과",
+                "피부과",
+                "정형외과",
+                "이비인후과",
+              ].map((subject) => (
+                <span
+                  key={subject}
+                  className="bg-gray-100 text-gray-700 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap"
+                >
+                  {subject}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="mt-6 bg-white py-6">
-          <div className="px-4 sm:px-6 md:px-8 mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
+        {/* 2. 의료진 소개 (타이틀 밖으로, 카드 유지) */}
+        <div className="mt-8">
+          <div className="px-4 sm:px-6 md:px-8 mb-3 ml-1">
+            <h3 className="text-lg font-bold text-gray-900">
               의료진 소개
             </h3>
           </div>
-          
-          {/* 모바일: Swiper */}
+
+          {/* 모바일: Swiper (배경색 제거) */}
           <div className="md:hidden">
             <Swiper
               slidesPerView="auto"
@@ -294,7 +296,10 @@ export function HospitalDetailPage({
               className="!px-4 sm:!px-6"
             >
               {doctors.map((doctor) => (
-                <SwiperSlide key={doctor.id} style={{ width: '263px' }}>
+                <SwiperSlide
+                  key={doctor.id}
+                  style={{ width: "263px" }}
+                >
                   <DoctorCard doctor={doctor} />
                 </SwiperSlide>
               ))}
@@ -309,45 +314,48 @@ export function HospitalDetailPage({
           </div>
         </div>
 
-        <div className="mt-6 bg-white py-6">
-          <div className="px-4 sm:px-6 md:px-8 mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
-              오시는 길
-            </h3>
-          </div>
-          <div
-            ref={mapRef}
-            className="w-full h-[200px] bg-gray-100"
-          />
-          <div className="p-4">
-            <div className="border border-gray-200 rounded-lg p-4">
-              <p className="text-sm font-semibold text-gray-800 mb-1">
-                {hospital.address}
-              </p>
-              <p className="text-xs text-gray-500">
-                {hospital.phone}
-              </p>
+        {/* 3. 오시는 길 (카드형) */}
+        <div className="mt-8 px-4 sm:px-6 md:px-8">
+          <h3 className="text-lg font-bold text-gray-900 mb-3 ml-1">
+            오시는 길
+          </h3>
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div
+              ref={mapRef}
+              className="w-full h-[200px] bg-gray-100"
+            />
+            <div className="p-5">
+              <div className="border border-gray-200 rounded-xl p-4 mb-3">
+                <p className="text-sm font-semibold text-gray-800 mb-1">
+                  {hospital.address}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {hospital.phone}
+                </p>
+              </div>
+              <Button
+                onClick={handleDirections}
+                className="w-full h-12 bg-gray-800 text-white font-semibold hover:bg-gray-900 rounded-xl"
+              >
+                길찾기
+              </Button>
             </div>
-            <Button
-              onClick={handleDirections}
-              className="w-full mt-3 h-12 bg-gray-800 text-white font-semibold hover:bg-gray-900"
-            >
-              길찾기
-            </Button>
           </div>
         </div>
 
-        <div className="mt-6 bg-white py-6">
-          <div className="px-4 sm:px-6 md:px-8 mb-4 flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">
+        {/* 4. 병원 후기 (카드형) */}
+        <div className="mt-8 px-4 sm:px-6 md:px-8">
+          <div className="flex justify-between items-center mb-3 ml-1">
+            <h3 className="text-lg font-bold text-gray-900">
               병원 후기
             </h3>
             <button className="text-sm font-medium text-gray-500 hover:text-gray-800">
               전체보기
             </button>
           </div>
-          <div className="px-4 sm:px-6 md:px-8">
-            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+
+          <div className="bg-white rounded-2xl p-5 shadow-sm">
+            <div className="bg-gray-50 rounded-xl p-4 mb-4">
               <div className="flex items-center gap-2 mb-2">
                 <Star
                   size={20}
@@ -373,75 +381,75 @@ export function HospitalDetailPage({
                     key={item.label}
                     className="grid grid-cols-3 items-center gap-2"
                   >
-                    <span className="text-sm text-gray-600">
+                    <span className="text-xs text-gray-600 truncate">
                       {item.label}
                     </span>
                     <div className="col-span-2">
                       <Progress
                         value={item.percent}
-                        className="h-2"
+                        className="h-1.5"
                       />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="border-t border-gray-100 pt-4">
+
+            <div className="pt-2">
               <div className="flex items-center gap-1 mb-1">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    size={16}
+                    size={14}
                     className="text-[#FFB800] fill-[#FFB800]"
                   />
                 ))}
               </div>
-              <p className="text-sm text-gray-500 mb-2">
+              <p className="text-xs text-gray-500 mb-2">
                 김*강님 | 2025.11.18
               </p>
-              <p className="text-sm text-gray-800 leading-relaxed">
+              <p className="text-sm text-gray-800 leading-relaxed line-clamp-2">
                 의사 선생님이 정말 친절하시고, 설명도 꼼꼼하게
-                잘 해주셔서 좋았습니다. 병원 내부도 깨끗하고
-                대기 시간도 짧았어요.
+                잘 해주셔서 좋았습니다. 병원 내부도 깨끗하고...
               </p>
             </div>
           </div>
         </div>
 
-        <div className="mt-6 bg-white py-6">
-          <div className="px-4 sm:px-6 md:px-8 mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
-              병원 접수 안내
-            </h3>
-          </div>
-          <div className="px-4 sm:px-6 md:px-8">
-            <ul className="list-disc list-outside space-y-2 pl-5 text-sm text-gray-600">
+        {/* 5. 병원 접수 안내 (카드형) */}
+        <div className="mt-8 px-4 sm:px-6 md:px-8">
+          <h3 className="text-lg font-bold text-gray-900 mb-3 ml-1">
+            병원 접수 안내
+          </h3>
+          <div className="bg-white rounded-2xl p-5 shadow-sm">
+            <ul className="list-disc list-outside space-y-2 pl-5 text-sm text-gray-600 leading-relaxed">
               <li>
-                [즉시 접수] 트래픽 병원 사정에 따라 상시 마감될
-                수 있습니다.
+                [즉시 접수] 후 병원 방문 시 꼭 성함과 함께
+                접수처에 말씀해 주세요.
               </li>
               <li>
-                접수 후 30분 이내 미방문 시 자동 접수
-                취소됩니다.
+                접수 후 30분 이내로 미방문 시 자동으로 접수가
+                취소됩니다. 주의 부탁드립니다.
               </li>
               <li>
-                점심시간 10분 전/진료 마감 30분 전까지 접수 및
-                방문해야 합니다.
+                현장 접수 하시는 분들로 인하여 대기 현황 및 접수
+                순서는 다를 수 있으니 양해 부탁드립니다.
               </li>
             </ul>
           </div>
         </div>
       </main>
 
+      {/* Bottom Fixed Button */}
       <div className="fixed bottom-0 left-0 right-0 z-20 p-4 bg-white border-t border-gray-100 max-w-[500px] mx-auto">
         <div className="flex space-x-3">
           <Button
             variant="outline"
-            className="flex-1 h-14 text-lg font-semibold border-2 border-[#36D2C5] text-[#36D2C5] bg-white hover:bg-gray-50"
+            className="flex-1 h-14 text-lg font-bold border-2 border-[#36D2C5] text-[#36D2C5] bg-white hover:bg-gray-50 rounded-xl"
           >
             예약하기
           </Button>
-          <Button className="flex-1 h-14 text-lg font-semibold bg-[#36D2C5] hover:bg-[#00C2B3]">
+          <Button className="flex-1 h-14 text-lg font-bold bg-[#36D2C5] hover:bg-[#00C2B3] text-white rounded-xl">
             즉시 접수
           </Button>
         </div>

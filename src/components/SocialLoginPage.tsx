@@ -7,7 +7,10 @@ interface SocialLoginPageProps {
   onEmailLogin: () => void;
 }
 
-export function SocialLoginPage({ onBack, onEmailLogin }: SocialLoginPageProps) {
+export function SocialLoginPage({
+  onBack,
+  onEmailLogin,
+}: SocialLoginPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#e0f7fa] to-white flex flex-col items-center justify-between px-5 py-5 max-w-[500px] mx-auto text-center">
       {/* 헤더 - 뒤로가기 버튼 */}
@@ -67,9 +70,6 @@ export function SocialLoginPage({ onBack, onEmailLogin }: SocialLoginPageProps) 
         <p className="text-sm text-[#7f8c8d] mb-5">
           간편하게 SNS로 로그인하세요
         </p>
-
-        {/* 하단 바 */}
-        <div className="w-[130px] h-[5px] bg-[#333] rounded-full"></div>
       </div>
     </div>
   );
