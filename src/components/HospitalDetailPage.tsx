@@ -8,6 +8,11 @@ import {
   Star,
   ChevronRight,
   ClipboardList,
+  ThumbsUp,
+  CheckCircle2,
+  Bot,
+  ChevronDown,
+  TrendingUp,
 } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { DoctorCard } from "./DoctorCard";
@@ -41,7 +46,6 @@ export function HospitalDetailPage({
 }: HospitalDetailPageProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const [mapError, setMapError] = useState(false);
 
   // 카카오맵 스크립트 동적 로딩
   useEffect(() => {
@@ -65,9 +69,6 @@ export function HospitalDetailPage({
 
         setTimeout(() => {
           clearInterval(checkKakao);
-          if (!window.kakao || !window.kakao.maps) {
-            setMapError(true);
-          }
         }, 5000);
         return;
       }
@@ -81,13 +82,7 @@ export function HospitalDetailPage({
           window.kakao.maps.load(() => {
             setIsMapLoaded(true);
           });
-        } else {
-          setMapError(true);
         }
-      };
-
-      script.onerror = () => {
-        setMapError(true);
       };
 
       document.head.appendChild(script);
@@ -136,37 +131,67 @@ export function HospitalDetailPage({
     );
   };
 
+  // 시안에 맞춘 의사 정보 데이터
   const doctors = [
     {
       id: 1,
-      name: "김건강 원장",
-      specialty: "내과 전문의",
-      experience: "경력 15년",
+      name: "박진희 의사",
+      specialty: "가정의학과 전문의",
       image:
         "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200&q=80",
     },
     {
       id: 2,
-      name: "이웰니스 원장",
-      specialty: "가정의학과 전문의",
-      experience: "경력 12년",
+      name: "김민수 의사",
+      specialty: "내과 전문의",
       image:
-        "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=200&q=80",
+        "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&q=80",
     },
     {
       id: 3,
-      name: "박진료 원장",
-      specialty: "내과 전문의",
-      experience: "경력 10년",
+      name: "이영희 의사",
+      specialty: "소아청소년과 전문의",
       image:
-        "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&q=80",
+        "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=200&q=80",
     },
   ];
 
   const reviewKeywords = [
+    { label: "과잉진료가 없어요", percent: 96 },
     { label: "친절해요", percent: 92 },
-    { label: "진료를 잘해요", percent: 85 },
-    { label: "시설이 깨끗해요", percent: 77 },
+    { label: "재진료 희망해요", percent: 77 },
+  ];
+
+  const userReviews = [
+    {
+      id: 1,
+      name: "김**님",
+      date: "2025.08.04",
+      rating: 5,
+      tags: ["진료 만족해요", "친절해요"],
+      content:
+        "목이 아프고 근육통이 심해서 방문했는데 친절하게 진료 잘 봐주셔서 좋았습니다! 목 상태 확인하시고 간단한 증상 상담 후 약 처방해 주셨어요. 처방받은 약 먹고 한숨 잤더니 한결 개운해졌습니다.\n\n갑자기 아파서 가장 가까운 데로 바로 접수 후에 대기 없이 진료받을 수 있었어요. 기운 없었는데 빨리 진료 끝나서 만족합니다. 서초동 근처에 병원 찾으시면 추천해요 ㅎㅎ",
+      likes: 10,
+    },
+    {
+      id: 2,
+      name: "이**님",
+      date: "2025.08.01",
+      rating: 5,
+      tags: ["진료 만족해요", "재진료 희망해요", "친절해요"],
+      content:
+        "고혈압 증상으로 처음 방문했는데 원장님이 제 이야기 끝까지 들어주시고 고혈압 관리 방법도 상세히 알려주셔서 불안했던 마음이 많이 괜찮아졌어요 ㅠㅠ\n\n이제 주기적으로 약 복용해야 하는데 생활습관과 식습관 등 주의 사항도 꼼꼼히 알려주셔서 큰 도움 됐습니다. 다음 재진때 뵐게요!",
+      likes: 2,
+    },
+  ];
+
+  const medicalSubjects = [
+    "가정의학과",
+    "내과",
+    "소아청소년과",
+    "피부과",
+    "정신건강의학과",
+    "노인진료과",
   ];
 
   return (
@@ -195,49 +220,39 @@ export function HospitalDetailPage({
         </div>
 
         {/* Hospital Main Info Card */}
-        <div className="relative z-10 mx-4 sm:mx-6 md:mx-8 -mt-16">
-          <div className="bg-white rounded-2xl shadow-lg p-5">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {hospital.name}
-            </h2>
-            <p className="text-base text-gray-600 mb-4">
-              {hospital.department}
-            </p>
-
-            <div className="space-y-3 border-b border-gray-100 pb-4 mb-4">
-              <div className="flex items-center gap-3">
-                <Clock
-                  size={20}
-                  className="text-[#36D2C5] flex-shrink-0"
-                />
-                <p className="text-sm text-gray-700">
-                  <span className="font-semibold">진료중</span>{" "}
-                  {hospital.hours}
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <MapPin
-                  size={20}
-                  className="text-[#36D2C5] flex-shrink-0 mt-0.5"
-                />
-                <p className="text-sm text-gray-700">
-                  {hospital.address}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Phone
-                  size={20}
-                  className="text-[#36D2C5] flex-shrink-0"
-                />
-                <p className="text-sm text-gray-700">
-                  {hospital.phone}
-                </p>
-              </div>
+        <div className="relative z-10 mx-4 sm:mx-6 md:mx-8 -mt-20">
+          <div className="bg-white rounded-3xl shadow-lg p-6">
+            {/* Title Row */}
+            <div className="flex items-end gap-2 mb-4">
+              <h2 className="text-2xl font-bold text-gray-900 leading-none">
+                {hospital.name}
+              </h2>
+              <span className="text-gray-500 text-sm mb-0.5 font-medium">
+                {hospital.department}
+              </span>
             </div>
 
-            <button className="flex justify-between items-center w-full text-sm font-medium text-gray-700">
-              <span>진료과목 상세보기</span>
-              <ChevronRight size={16} />
+            {/* Time Row */}
+            <div className="flex items-center gap-1.5 mb-3">
+              <Clock size={18} className="text-gray-400" />
+              <span className="text-[#36D2C5] font-bold text-sm">
+                오늘 진료
+              </span>
+              <span className="text-gray-700 text-sm">
+                {hospital.hours}
+              </span>
+            </div>
+
+            {/* Address Row */}
+            <div className="mb-6">
+              <p className="text-gray-500 text-[15px] leading-relaxed">
+                {hospital.address}
+              </p>
+            </div>
+
+            {/* Button */}
+            <button className="w-full py-3.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors">
+              병원정보 자세히보기
             </button>
           </div>
         </div>
@@ -255,40 +270,31 @@ export function HospitalDetailPage({
           <ClipboardList size={24} className="text-blue-500" />
         </div>
 
-        {/* 1. 진료 과목 (카드형) */}
+        {/* 1. 진료 과목 */}
         <div className="mt-8 px-4 sm:px-6 md:px-8">
           <h3 className="text-lg font-bold text-gray-900 mb-3 ml-1">
             진료 과목
           </h3>
-          <div className="bg-white rounded-2xl p-5 shadow-sm">
-            <div className="flex flex-wrap gap-2">
-              {[
-                "내과",
-                "소아청소년과",
-                "피부과",
-                "정형외과",
-                "이비인후과",
-              ].map((subject) => (
-                <span
-                  key={subject}
-                  className="bg-gray-100 text-gray-700 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap"
-                >
-                  {subject}
-                </span>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-2">
+            {medicalSubjects.map((subject) => (
+              <span
+                key={subject}
+                className="bg-[#F4F5F7] text-[#4B5563] px-3.5 py-2 rounded-lg text-[15px] font-medium"
+              >
+                {subject}
+              </span>
+            ))}
           </div>
         </div>
 
-        {/* 2. 의료진 소개 (타이틀 밖으로, 카드 유지) */}
+        {/* 2. 의사 정보 */}
         <div className="mt-8">
           <div className="px-4 sm:px-6 md:px-8 mb-3 ml-1">
             <h3 className="text-lg font-bold text-gray-900">
-              의료진 소개
+              의사 정보
             </h3>
           </div>
 
-          {/* 모바일: Swiper (배경색 제거) */}
           <div className="md:hidden">
             <Swiper
               slidesPerView="auto"
@@ -306,7 +312,6 @@ export function HospitalDetailPage({
             </Swiper>
           </div>
 
-          {/* 태블릿/데스크톱: 그리드 */}
           <div className="hidden md:grid md:grid-cols-2 gap-4 px-4 sm:px-6 md:px-8">
             {doctors.map((doctor) => (
               <DoctorCard key={doctor.id} doctor={doctor} />
@@ -314,10 +319,10 @@ export function HospitalDetailPage({
           </div>
         </div>
 
-        {/* 3. 오시는 길 (카드형) */}
+        {/* 3. 병원 위치 */}
         <div className="mt-8 px-4 sm:px-6 md:px-8">
           <h3 className="text-lg font-bold text-gray-900 mb-3 ml-1">
-            오시는 길
+            병원 위치
           </h3>
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div
@@ -325,98 +330,152 @@ export function HospitalDetailPage({
               className="w-full h-[200px] bg-gray-100"
             />
             <div className="p-5">
-              <div className="border border-gray-200 rounded-xl p-4 mb-3">
-                <p className="text-sm font-semibold text-gray-800 mb-1">
-                  {hospital.address}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {hospital.phone}
-                </p>
+              <p className="text-lg font-bold text-gray-900 leading-snug mb-3">
+                {hospital.address}
+              </p>
+              <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mb-6">
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#BDB092] text-white text-[10px] font-bold shrink-0">
+                  9
+                </span>
+                <span className="flex items-center justify-center h-5 px-1.5 rounded bg-[#D4003B] text-white text-[10px] font-bold shrink-0">
+                  신분당선
+                </span>
+                <span>신논현역 7번출구에서 214m</span>
               </div>
               <Button
                 onClick={handleDirections}
-                className="w-full h-12 bg-gray-800 text-white font-semibold hover:bg-gray-900 rounded-xl"
+                variant="outline"
+                className="w-full h-12 text-gray-600 border-gray-200 font-medium hover:bg-gray-50 rounded-xl flex items-center justify-center gap-2"
               >
+                <TrendingUp className="w-5 h-5" />
                 길찾기
               </Button>
             </div>
           </div>
         </div>
 
-        {/* 4. 병원 후기 (카드형) */}
+        {/* 4. 병원 후기 */}
         <div className="mt-8 px-4 sm:px-6 md:px-8">
-          <div className="flex justify-between items-center mb-3 ml-1">
-            <h3 className="text-lg font-bold text-gray-900">
-              병원 후기
-            </h3>
-            <button className="text-sm font-medium text-gray-500 hover:text-gray-800">
-              전체보기
-            </button>
-          </div>
+          <h3 className="text-lg font-bold text-gray-900 mb-3 ml-1">
+            병원 후기
+          </h3>
 
-          <div className="bg-white rounded-2xl p-5 shadow-sm">
-            <div className="bg-gray-50 rounded-xl p-4 mb-4">
-              <div className="flex items-center gap-2 mb-2">
+          {/* 요약 카드 */}
+          <div className="bg-white rounded-2xl p-5 shadow-sm mb-3">
+            <div className="flex gap-6 mb-6">
+              <div className="flex flex-col items-center justify-center min-w-[80px]">
                 <Star
-                  size={20}
-                  className="text-[#FFB800] fill-[#FFB800]"
+                  size={32}
+                  className="text-[#FFB800] fill-[#FFB800] mb-1"
                 />
-                <span className="text-2xl font-bold text-gray-900">
+                <span className="text-3xl font-bold text-gray-900">
                   4.8
                 </span>
                 <span className="text-sm text-gray-500">
-                  (223개)
+                  (223)
                 </span>
               </div>
-              <p className="text-sm text-gray-700 mb-4">
-                이 병원은{" "}
-                <span className="text-red-500 font-semibold">
-                  90%
-                </span>
-                가 만족했어요
-              </p>
-              <div className="space-y-2">
+
+              <div className="flex-1 space-y-3">
                 {reviewKeywords.map((item) => (
-                  <div
-                    key={item.label}
-                    className="grid grid-cols-3 items-center gap-2"
-                  >
-                    <span className="text-xs text-gray-600 truncate">
-                      {item.label}
-                    </span>
-                    <div className="col-span-2">
-                      <Progress
-                        value={item.percent}
-                        className="h-1.5"
-                      />
+                  <div key={item.label} className="space-y-1">
+                    <div className="flex justify-between text-xs text-gray-600">
+                      <span>{item.label}</span>
+                      <span>{item.percent}%</span>
                     </div>
+                    <Progress
+                      value={item.percent}
+                      className="h-2 bg-gray-100 [&>div]:bg-[#6DD3CE]"
+                    />
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="pt-2">
-              <div className="flex items-center gap-1 mb-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    size={14}
-                    className="text-[#FFB800] fill-[#FFB800]"
-                  />
-                ))}
+            <div className="bg-[#FFF8F8] rounded-xl p-4 flex flex-col items-center text-center gap-1">
+              <div className="flex items-center gap-1.5 text-[#36D2C5] text-sm font-bold mb-1">
+                <Bot size={18} />
+                <span>AI 웰리 요약</span>
               </div>
-              <p className="text-xs text-gray-500 mb-2">
-                김*강님 | 2025.11.18
-              </p>
-              <p className="text-sm text-gray-800 leading-relaxed line-clamp-2">
-                의사 선생님이 정말 친절하시고, 설명도 꼼꼼하게
-                잘 해주셔서 좋았습니다. 병원 내부도 깨끗하고...
+              <p className="text-sm font-semibold text-gray-800">
+                처방받은 약 효과가 좋다는 후기가 많아요
               </p>
             </div>
           </div>
+
+          {/* 인증 배너 */}
+          <div className="bg-[#F0F0F0] rounded-lg py-2.5 px-4 flex items-center justify-center gap-1.5 mb-3 text-gray-500 text-xs">
+            <CheckCircle2 size={14} />
+            <span>
+              웰리오는 방문이 인증된 후기만 제공하고 있습니다
+            </span>
+          </div>
+
+          {/* 리뷰 리스트 카드 */}
+          <div className="bg-white rounded-2xl p-5 shadow-sm">
+            <div className="mb-4">
+              <button className="flex items-center gap-1 border border-gray-200 rounded-full px-3 py-1.5 text-sm text-gray-700">
+                인기순 <ChevronDown size={14} />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {userReviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="border-b border-gray-100 last:border-0 pb-6 last:pb-0"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={14}
+                          className={`${
+                            i < review.rating
+                              ? "text-[#FFB800] fill-[#FFB800]"
+                              : "text-gray-200"
+                          }`}
+                        />
+                      ))}
+                      <span className="text-xs text-gray-500 ml-1">
+                        {review.name} | {review.date}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-gray-400 text-xs">
+                      <ThumbsUp size={14} />
+                      <span>{review.likes}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {review.tags.map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className="text-[11px] text-[#36D2C5] border border-[#36D2C5] px-2 py-0.5 rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                    {review.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <Button
+              variant="outline"
+              className="w-full mt-6 h-12 text-gray-600 border-gray-200 rounded-xl hover:bg-gray-50"
+            >
+              223개 리뷰 더보기
+            </Button>
+          </div>
         </div>
 
-        {/* 5. 병원 접수 안내 (카드형) */}
+        {/* 5. 병원 접수 안내 */}
         <div className="mt-8 px-4 sm:px-6 md:px-8">
           <h3 className="text-lg font-bold text-gray-900 mb-3 ml-1">
             병원 접수 안내

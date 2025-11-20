@@ -5,7 +5,6 @@ interface Doctor {
   id: number;
   name: string;
   specialty: string;
-  experience: string;
   image: string;
 }
 
@@ -15,30 +14,32 @@ interface DoctorCardProps {
 
 export function DoctorCard({ doctor }: DoctorCardProps) {
   return (
-    <button className="w-[263px] h-[93px] bg-white rounded-2xl p-3 flex items-center justify-between shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors">
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        <div className="w-[60px] h-[60px] rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+    <button className="w-[263px] h-[93px] bg-white rounded-2xl p-5 flex items-center justify-between shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-transparent hover:border-gray-100 hover:bg-gray-50 transition-all text-left">
+      <div className="flex items-center gap-4 overflow-hidden">
+        {/* 의사 사진 (원형) */}
+        <div className="w-[52px] h-[52px] rounded-full overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-50">
           <ImageWithFallback
             src={doctor.image}
             alt={doctor.name}
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="flex-1 text-left min-w-0">
-          <h4 className="font-semibold text-gray-900 truncate">
-            {doctor.name}
-          </h4>
-          <p className="text-xs text-gray-600 mt-0.5 truncate">
+        {/* 텍스트 정보 */}
+        <div className="flex flex-col justify-center overflow-hidden">
+          {/* 1. 전문과목 (위쪽, 회색) */}
+          <span className="text-[13px] text-gray-500 leading-tight mb-1 truncate font-medium">
             {doctor.specialty}
-          </p>
-          <p className="text-xs text-gray-500 mt-0.5 truncate">
-            {doctor.experience}
-          </p>
+          </span>
+          {/* 2. 이름 (아래쪽, 굵은 검정) */}
+          <span className="text-[16px] font-bold text-gray-900 leading-tight truncate">
+            {doctor.name}
+          </span>
         </div>
       </div>
 
+      {/* 화살표 아이콘 */}
       <ChevronRight
-        size={18}
+        size={20}
         className="text-gray-400 flex-shrink-0 ml-2"
       />
     </button>
