@@ -90,7 +90,7 @@ export function UploadPage({
     useState(false);
   const [permissionsGranted, setPermissionsGranted] =
     useState(false);
-  const [isFrontCamera, setIsFrontCamera] = useState(true);
+  const [isFrontCamera, setIsFrontCamera] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(
     null,
   );
