@@ -69,7 +69,7 @@ function BackgroundSvg() {
 
 export function UserGreeting({ userName }: UserGreetingProps) {
   return (
-    <div className="relative w-full h-[250px] md:h-[420px] overflow-hidden">
+    <div className="relative w-full h-[250px] md:h-[420px] min-h-[360px] overflow-hidden">
       {/* 1. SVG 배경 - 왼쪽에서 오른쪽으로 드러나는 애니메이션 */}
       <motion.div
         initial={{ clipPath: "inset(0 100% 0 0)" }}
