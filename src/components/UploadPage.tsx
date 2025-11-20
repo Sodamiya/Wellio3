@@ -16,7 +16,7 @@ import {
   Heart,
   Check,
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Button } from "./ui/button";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import {
@@ -31,6 +31,41 @@ import {
 } from "./ui/alert-dialog";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
+import { toast } from "sonner@2.0.3";
+
+// 원본 필터 목록
+const ORIGINAL_FILTERS = [
+  { name: "Normal", filter: "none" },
+  {
+    name: "Kilda",
+    filter:
+      "brightness(1.0) contrast(1.2) saturate(1.25) hue-rotate(-5deg)",
+  },
+  {
+    name: "Still",
+    filter:
+      "brightness(1.0) contrast(1.0) saturate(0.5) grayscale(0.3)",
+  },
+  {
+    name: "Fade",
+    filter:
+      "brightness(1.1) contrast(0.85) saturate(0.9) sepia(0.05)",
+  },
+  {
+    name: "Paris",
+    filter:
+      "brightness(1.15) contrast(0.95) saturate(1.0) sepia(0.08) blur(0.3px)",
+  },
+  {
+    name: "Lapis",
+    filter:
+      "brightness(1.0) contrast(1.08) saturate(1.1) hue-rotate(10deg)",
+  },
+  {
+    name: "Simple",
+    filter: "brightness(1.08) contrast(1.0) saturate(1.0)",
+  },
+];
 
 interface UploadPageProps {
   onBack: () => void;
@@ -45,7 +80,10 @@ interface UploadPageProps {
   }) => void;
 }
 
-export function UploadPage({ onBack, onUpload }: UploadPageProps) {
+export function UploadPage({
+  onBack,
+  onUpload,
+}: UploadPageProps) {
   const [showCameraPermission, setShowCameraPermission] =
     useState(false);
   const [showGalleryPermission, setShowGalleryPermission] =
@@ -63,8 +101,11 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
     string | null
   >(null);
   const [isUploadMode, setIsUploadMode] = useState(false);
-  const [hasCameraDevice, setHasCameraDevice] = useState<boolean | null>(null);
-  const [isDetailEditMode, setIsDetailEditMode] = useState(false);
+  const [hasCameraDevice, setHasCameraDevice] = useState<
+    boolean | null
+  >(null);
+  const [isDetailEditMode, setIsDetailEditMode] =
+    useState(false);
 
   // 세부 입력 state
   const [textInput, setTextInput] = useState("");
@@ -78,21 +119,20 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
 
   // 필터 모드 state
   const [isFilterMode, setIsFilterMode] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState("Normal");
-
-  // 필터 목록
-  const filters = [
-    { name: "Normal", filter: "none" },
-    { name: "Fade", filter: "brightness(1.1) contrast(0.85) saturate(0.9) sepia(0.05)" },
-    { name: "Paris", filter: "brightness(1.15) contrast(0.95) saturate(1.0) sepia(0.08) blur(0.3px)" },
-    { name: "Lapis", filter: "brightness(1.0) contrast(1.08) saturate(1.1) hue-rotate(10deg)" },
-    { name: "Kilda", filter: "brightness(1.0) contrast(1.2) saturate(1.25) hue-rotate(-5deg)" },
-    { name: "Still", filter: "brightness(1.0) contrast(1.0) saturate(0.5) grayscale(0.3)" },
-    { name: "Simple", filter: "brightness(1.08) contrast(1.0) saturate(1.0)" },
-  ];
+  const [selectedFilter, setSelectedFilter] =
+    useState("Normal");
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // [수정] 무한 루프를 안정적으로 돌리기 위해 데이터를 3배로 불림
+  const loopFilters = useMemo(() => {
+    return [
+      ...ORIGINAL_FILTERS,
+      ...ORIGINAL_FILTERS,
+      ...ORIGINAL_FILTERS,
+    ];
+  }, []);
 
   // 매번 권한 팝업 표시 (카메라 먼저)
   useEffect(() => {
@@ -204,7 +244,8 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
     if (isUploadMode) {
       // 업로드 모드일 때 - 실제 업로드 처리
       console.log("사진 업로드:", selectedImage);
-      // TODO: 실제 업로드 로직 구현
+
+      // 업로드 실행
       onUpload({
         image: selectedImage!,
         caption: textInput,
@@ -214,6 +255,10 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
         time: timeInput,
         health: healthInput,
       });
+
+      // 성공 토스트 표시
+      toast.success("업로드 되었습니다!");
+
       return;
     }
 
@@ -235,7 +280,9 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
               setIsUploadMode(true);
               // 카메라 스트림 정리
               if (stream) {
-                stream.getTracks().forEach((track) => track.stop());
+                stream
+                  .getTracks()
+                  .forEach((track) => track.stop());
                 setStream(null);
               }
             };
@@ -246,10 +293,10 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
     } else {
       // 카메라가 없는 경우: 임의의 이미지 사용
       const randomImageUrl = `https://source.unsplash.com/800x600/?medical,health,hospital&${Date.now()}`;
-      
+
       setSelectedImage(randomImageUrl);
       setIsUploadMode(true);
-      
+
       // 카메라 스트림 정리 (혹시 있다면)
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
@@ -416,40 +463,66 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                     alt="Selected Image"
                     className="w-full h-full object-cover"
                     style={{
-                      filter: filters.find(f => f.name === selectedFilter)?.filter || "none"
+                      filter:
+                        ORIGINAL_FILTERS.find(
+                          (f) => f.name === selectedFilter,
+                        )?.filter || "none",
                     }}
                   />
-                  
+
                   {/* 텍스트 입력 시 어두운 오버레이 */}
                   {showTextInput && (
                     <div className="absolute inset-0 bg-black/50" />
                   )}
 
                   {/* 왼쪽 상단 정보 오버레이 (위치/날씨/시간/건강) */}
-                  {(locationInput || weatherInput || timeInput || healthInput) && (
+                  {(locationInput ||
+                    weatherInput ||
+                    timeInput ||
+                    healthInput) && (
                     <div className="absolute top-4 left-4 flex flex-col gap-2">
                       {locationInput && (
                         <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                          <MapPin size={16} className="text-white" />
-                          <span className="text-white text-sm">{locationInput}</span>
+                          <MapPin
+                            size={16}
+                            className="text-white"
+                          />
+                          <span className="text-white text-sm">
+                            {locationInput}
+                          </span>
                         </div>
                       )}
                       {weatherInput && (
                         <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                          <Cloud size={16} className="text-white" />
-                          <span className="text-white text-sm">{weatherInput}</span>
+                          <Cloud
+                            size={16}
+                            className="text-white"
+                          />
+                          <span className="text-white text-sm">
+                            {weatherInput}
+                          </span>
                         </div>
                       )}
                       {timeInput && (
                         <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                          <Clock size={16} className="text-white" />
-                          <span className="text-white text-sm">{timeInput}</span>
+                          <Clock
+                            size={16}
+                            className="text-white"
+                          />
+                          <span className="text-white text-sm">
+                            {timeInput}
+                          </span>
                         </div>
                       )}
                       {healthInput && (
                         <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                          <Heart size={16} className="text-white" />
-                          <span className="text-white text-sm">{healthInput}</span>
+                          <Heart
+                            size={16}
+                            className="text-white"
+                          />
+                          <span className="text-white text-sm">
+                            {healthInput}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -515,7 +588,11 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
             </button>
           )}
           <h1 className="text-xl font-bold text-[#1A1A1A] text-center">
-            {isFilterMode ? "필터" : isDetailEditMode ? "세부조정" : "업로드"}
+            {isFilterMode
+              ? "필터"
+              : isDetailEditMode
+                ? "세부조정"
+                : "업로드"}
           </h1>
         </header>
 
@@ -532,44 +609,62 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
 
           {isFilterMode ? (
             /* 필터 모드: 필터 슬라이더만 표시, 버튼 숨김 */
-            <div className="w-full relative pb-4">
-              {/* 가운데 고정된 원형 테두리 */}
-              <div className="absolute left-1/2 top-8 -translate-x-1/2 z-10 pointer-events-none">
-                <div className="w-20 h-20 rounded-full border-4 border-[#36D2C5]" />
+            <div className="w-full h-28 relative flex items-center justify-center">
+              {/* 가운데 고정된 원형 테두리 (민트색) */}
+              {/* z-30으로 높여서 슬라이더 위에 표시 */}
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
+                <div className="w-[68px] h-[68px] rounded-full border-[3px] border-[#36D2C5]" />
               </div>
 
               {/* 필터 슬라이더 */}
-              <div className="px-4">
+              <div className="w-full h-full z-20">
                 <Swiper
-                  spaceBetween={16}
+                  spaceBetween={14} // 간격 조정
                   slidesPerView="auto"
-                  className="w-full"
+                  className="w-full h-full"
+                  // [수정] 정식 루프 기능 사용, 가짜 데이터 대신 루프 사용
                   loop={true}
                   centeredSlides={true}
-                  initialSlide={0}
-                  onSlideChange={(swiper) => {
-                    const realIndex = swiper.realIndex % filters.length;
-                    setSelectedFilter(filters[realIndex].name);
+                  slideToClickedSlide={true} // 클릭 시 이동 지원
+                  threshold={10}
+                  speed={400}
+                  // [수정] onRealIndexChange를 사용하여 실제 필터 인덱스 계산
+                  onRealIndexChange={(swiper) => {
+                    const realIndex =
+                      swiper.realIndex %
+                      ORIGINAL_FILTERS.length;
+                    setSelectedFilter(
+                      ORIGINAL_FILTERS[realIndex].name,
+                    );
                   }}
                 >
-                  {/* 필터를 3번 반복해서 충분한 슬라이드 확보 */}
-                  {[...filters, ...filters, ...filters].map((filter, index) => {
-                    const isSelected = selectedFilter === filter.name;
-                    return (
-                      <SwiperSlide key={`filter-${index}-${filter.name}`} style={{ width: 'auto' }}>
+                  {/* [수정] 3배 복제된 데이터 사용 (루프 버퍼 확보) */}
+                  {loopFilters.map((filter, index) => (
+                    <SwiperSlide
+                      // [중요] key는 유니크하게
+                      key={`${filter.name}-${index}`}
+                      style={{
+                        width: "auto",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      {({ isActive }) => (
                         <button
-                          onClick={() => setSelectedFilter(filter.name)}
-                          className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all ${
-                            isSelected
-                              ? "bg-[#36D2C5] text-white"
-                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          // [수정] isActive를 사용하여 스타일 적용 (깜빡임 방지)
+                          // onClick 제거 (Swiper가 처리)
+                          className={`w-16 h-16 rounded-full flex items-center justify-center text-[11px] font-bold tracking-wide select-none transition-all duration-200 ${
+                            isActive
+                              ? "bg-white text-gray-900 shadow-sm scale-100"
+                              : "bg-[#EEEEEE] text-gray-400 scale-95"
                           }`}
                         >
-                          {filter.name}
+                          {filter.name.toUpperCase()}
                         </button>
-                      </SwiperSlide>
-                    );
-                  })}
+                      )}
+                    </SwiperSlide>
+                  ))}
                 </Swiper>
               </div>
             </div>
@@ -585,7 +680,9 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                   <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#E7F3FF] text-[#2F80ED] transition-colors hover:bg-[#D0E7FF]">
                     <Type size={24} />
                   </div>
-                  <span className="text-xs text-gray-600">텍스트</span>
+                  <span className="text-xs text-gray-600">
+                    텍스트
+                  </span>
                 </button>
 
                 <button
@@ -595,7 +692,9 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                   <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#FFF4E5] text-[#FF9800] transition-colors hover:bg-[#FFE8CC]">
                     <MapPin size={24} />
                   </div>
-                  <span className="text-xs text-gray-600">위치</span>
+                  <span className="text-xs text-gray-600">
+                    위치
+                  </span>
                 </button>
 
                 <button
@@ -605,7 +704,9 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                   <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#E8F8F7] text-[#36D2C5] transition-colors hover:bg-[#D0F0ED]">
                     <Cloud size={24} />
                   </div>
-                  <span className="text-xs text-gray-600">날씨</span>
+                  <span className="text-xs text-gray-600">
+                    날씨
+                  </span>
                 </button>
 
                 <button
@@ -615,7 +716,9 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                   <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#F3E5F5] text-[#9C27B0] transition-colors hover:bg-[#E1BEE7]">
                     <Clock size={24} />
                   </div>
-                  <span className="text-xs text-gray-600">시간</span>
+                  <span className="text-xs text-gray-600">
+                    시간
+                  </span>
                 </button>
 
                 <button
@@ -625,7 +728,9 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                   <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#FFEBEE] text-[#F44336] transition-colors hover:bg-[#FFCDD2]">
                     <Heart size={24} />
                   </div>
-                  <span className="text-xs text-gray-600">건강</span>
+                  <span className="text-xs text-gray-600">
+                    건강
+                  </span>
                 </button>
               </div>
 
@@ -642,7 +747,11 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
             <div className="flex items-center justify-between max-w-md mx-auto px-6">
               {/* 왼쪽 버튼 - 촬영 모드: 갤러리, 업로드 모드: 입력하기 */}
               <button
-                onClick={isUploadMode ? handleEdit : () => fileInputRef.current?.click()}
+                onClick={
+                  isUploadMode
+                    ? handleEdit
+                    : () => fileInputRef.current?.click()
+                }
                 className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200"
               >
                 {isUploadMode ? (
@@ -666,7 +775,11 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
 
               {/* 오른쪽 버튼 - 촬영 모드: 카메라 전환, 업로드 모드: 필터 */}
               <button
-                onClick={isUploadMode ? handleFilter : handleCameraSwitch}
+                onClick={
+                  isUploadMode
+                    ? handleFilter
+                    : handleCameraSwitch
+                }
                 className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors"
               >
                 {isUploadMode ? (
@@ -684,18 +797,18 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
       {showTextInput && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
           {/* 배경 오버레이 */}
-          <div 
+          <div
             className="absolute inset-0 bg-black/30"
             onClick={() => setShowTextInput(false)}
           />
-          
+
           {/* 입력 창 */}
           <div className="relative w-full max-w-[500px] bg-white rounded-t-2xl p-6 shadow-2xl animate-slide-up">
             <div className="flex items-center gap-3 mb-4">
               <Type size={24} className="text-[#2F80ED]" />
               <h3 className="text-lg">텍스트 입력</h3>
             </div>
-            
+
             <input
               ref={textInputRef}
               type="text"
@@ -704,7 +817,7 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
               placeholder="사진에 추가할 텍스트를 입력하세요"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#36D2C5] mb-4"
             />
-            
+
             <div className="flex gap-3">
               <button
                 onClick={() => setShowTextInput(false)}
@@ -724,7 +837,10 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
       )}
 
       {/* 건강기록 선택 모달 */}
-      <AlertDialog open={showHealthModal} onOpenChange={setShowHealthModal}>
+      <AlertDialog
+        open={showHealthModal}
+        onOpenChange={setShowHealthModal}
+      >
         <AlertDialogContent className="max-w-[380px]">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
@@ -735,10 +851,12 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
               사진에 추가할 건강기록을 선택하세요
             </AlertDialogDescription>
           </AlertDialogHeader>
-          
+
           <div className="flex flex-col gap-2 py-4">
             <button
-              onClick={() => handleHealthRecordSelect("걸음수 8,542보")}
+              onClick={() =>
+                handleHealthRecordSelect("걸음수 8,542보")
+              }
               className="flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <div className="flex items-center gap-3">
@@ -747,14 +865,18 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                 </div>
                 <div className="text-left">
                   <p className="font-medium">걸음수</p>
-                  <p className="text-sm text-gray-500">8,542보</p>
+                  <p className="text-sm text-gray-500">
+                    8,542보
+                  </p>
                 </div>
               </div>
               <Check size={20} className="text-[#36D2C5]" />
             </button>
 
             <button
-              onClick={() => handleHealthRecordSelect("심박수 72 BPM")}
+              onClick={() =>
+                handleHealthRecordSelect("심박수 72 BPM")
+              }
               className="flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <div className="flex items-center gap-3">
@@ -763,14 +885,18 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                 </div>
                 <div className="text-left">
                   <p className="font-medium">심박수</p>
-                  <p className="text-sm text-gray-500">72 BPM</p>
+                  <p className="text-sm text-gray-500">
+                    72 BPM
+                  </p>
                 </div>
               </div>
               <Check size={20} className="text-[#36D2C5]" />
             </button>
 
             <button
-              onClick={() => handleHealthRecordSelect("수면 7시간 30분")}
+              onClick={() =>
+                handleHealthRecordSelect("수면 7시간 30분")
+              }
               className="flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <div className="flex items-center gap-3">
@@ -779,14 +905,18 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                 </div>
                 <div className="text-left">
                   <p className="font-medium">수면</p>
-                  <p className="text-sm text-gray-500">7시간 30분</p>
+                  <p className="text-sm text-gray-500">
+                    7시간 30분
+                  </p>
                 </div>
               </div>
               <Check size={20} className="text-[#36D2C5]" />
             </button>
 
             <button
-              onClick={() => handleHealthRecordSelect("칼로리 1,850 kcal")}
+              onClick={() =>
+                handleHealthRecordSelect("칼로리 1,850 kcal")
+              }
               className="flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <div className="flex items-center gap-3">
@@ -795,7 +925,9 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                 </div>
                 <div className="text-left">
                   <p className="font-medium">칼로리</p>
-                  <p className="text-sm text-gray-500">1,850 kcal</p>
+                  <p className="text-sm text-gray-500">
+                    1,850 kcal
+                  </p>
                 </div>
               </div>
               <Check size={20} className="text-[#36D2C5]" />
@@ -803,7 +935,9 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
           </div>
 
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowHealthModal(false)}>
+            <AlertDialogCancel
+              onClick={() => setShowHealthModal(false)}
+            >
               취소
             </AlertDialogCancel>
           </AlertDialogFooter>

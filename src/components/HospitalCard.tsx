@@ -32,6 +32,9 @@ export function HospitalCard({ hospital, onClick, isFavorite, favoriteHospitals,
     ? isFavorite 
     : favoriteHospitals?.some(h => h.id === hospital.id) || false;
 
+  // reviewCount가 제공되면 사용, 아니면 hospital.reviews 사용
+  const displayReviewCount = reviewCount !== undefined ? reviewCount : hospital.reviews;
+
   return (
     <div
       onClick={onClick}
@@ -123,7 +126,7 @@ export function HospitalCard({ hospital, onClick, isFavorite, favoriteHospitals,
               {hospital.rating}
             </span>
             <span className="text-gray-400">
-              ({reviewCount || hospital.reviews})
+              ({displayReviewCount})
             </span>
           </div>
         </div>
