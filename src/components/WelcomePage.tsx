@@ -1,3 +1,4 @@
+import image_b41bc2e4319a3db074275b4da6314c6ddf33f5db from 'figma:asset/b41bc2e4319a3db074275b4da6314c6ddf33f5db.png';
 "use client";
 
 import { ImageWithFallback } from "./figma/ImageWithFallback";
@@ -20,7 +21,7 @@ export function WelcomePage({ onGuestMode, onSignUp }: WelcomePageProps) {
       {/* 이미지 */}
       <div className="flex-1 flex items-center justify-center my-10">
         <ImageWithFallback
-          src="https://images.unsplash.com/photo-1758573467051-71613f7a3444?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600"
+          src={image_b41bc2e4319a3db074275b4da6314c6ddf33f5db}
           alt="doctor illustration"
           className="w-[230px] h-auto"
         />
