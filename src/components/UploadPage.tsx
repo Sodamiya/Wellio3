@@ -242,22 +242,63 @@ export function UploadPage({
   // 사진 촬영 또는 편집 모드 전환
   const handleCapture = () => {
     if (isUploadMode) {
-      // 업로드 모드일 때 - 실제 업로드 처리
+      // 업로드 모드일 때 - 필터가 적용된 이미지 생성 후 업로드
       console.log("사진 업로드:", selectedImage);
 
-      // 업로드 실행
-      onUpload({
-        image: selectedImage!,
-        caption: textInput,
-        textOverlay: textInput,
-        location: locationInput,
-        weather: weatherInput,
-        time: timeInput,
-        health: healthInput,
-      });
+      // 선택된 필터 가져오기
+      const filterStyle = ORIGINAL_FILTERS.find(
+        (f) => f.name === selectedFilter,
+      )?.filter || "none";
 
-      // 성공 토스트 표시
-      toast.success("업로드 되었습니다!");
+      // 필터가 "Normal"이 아니면 Canvas를 사용하여 필터 적용된 이미지 생성
+      if (filterStyle !== "none" && selectedImage) {
+        const img = new Image();
+        img.crossOrigin = "anonymous"; // CORS 문제 방지
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+
+          if (ctx) {
+            // Canvas context에 필터 적용
+            ctx.filter = filterStyle;
+            ctx.drawImage(img, 0, 0);
+
+            // 필터가 적용된 이미지를 dataURL로 변환
+            const filteredImageUrl = canvas.toDataURL("image/jpeg", 0.95);
+
+            // 업로드 실행
+            onUpload({
+              image: filteredImageUrl,
+              caption: textInput,
+              textOverlay: textInput,
+              location: locationInput,
+              weather: weatherInput,
+              time: timeInput,
+              health: healthInput,
+            });
+
+            // 성공 토스트 표시
+            toast.success("업로드 되었습니다!");
+          }
+        };
+        img.src = selectedImage;
+      } else {
+        // 필터가 "Normal"이면 원본 이미지 그대로 업로드
+        onUpload({
+          image: selectedImage!,
+          caption: textInput,
+          textOverlay: textInput,
+          location: locationInput,
+          weather: weatherInput,
+          time: timeInput,
+          health: healthInput,
+        });
+
+        // 성공 토스트 표시
+        toast.success("업로드 되었습니다!");
+      }
 
       return;
     }

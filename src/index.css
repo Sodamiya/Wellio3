@@ -961,10 +961,6 @@
     height: 100px;
   }
 
-  .h-\[110px\] {
-    height: 110px;
-  }
-
   .h-\[150px\] {
     height: 150px;
   }
@@ -999,6 +995,10 @@
 
   .max-h-\[50vh\] {
     max-height: 50vh;
+  }
+
+  .min-h-\[110px\] {
+    min-height: 110px;
   }
 
   .min-h-\[120px\] {

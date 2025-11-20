@@ -89,6 +89,9 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("home");
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
   
+  // 알림 페이지에서 돌아갈 페이지 추적
+  const [previousPage, setPreviousPage] = useState<Page>("home");
+  
   // 찜한 병원 목록 관리
   const [favoriteHospitals, setFavoriteHospitals] = useState<Hospital[]>([]);
   
@@ -584,7 +587,12 @@ export default function App() {
           <HomePage
             userName={userName}
             currentPage={currentPage}
-            onPageChange={setCurrentPage}
+            onPageChange={(page) => {
+              if (page === "notifications") {
+                setPreviousPage("home");
+              }
+              setCurrentPage(page as Page);
+            }}
             onHospitalClick={handleHospitalClick}
             getHospitalReviewCount={getHospitalReviewCount}
           />
@@ -612,7 +620,10 @@ export default function App() {
           <CommunityPage
             onBack={() => setCurrentPage("home")}
             onUploadClick={() => setCurrentPage("upload")}
-            onNotificationClick={() => setCurrentPage("notifications")}
+            onNotificationClick={() => {
+              setPreviousPage("community");
+              setCurrentPage("notifications");
+            }}
             onDeletePost={handleDeletePost}
             posts={posts}
             currentUserName={userName} // 👈 현재 로그인된 사용자 이름 전달
@@ -676,7 +687,7 @@ export default function App() {
           <NotificationPage
             onBack={() => {
               console.log("NotificationPage onBack clicked");
-              setCurrentPage("home");
+              setCurrentPage(previousPage);
             }}
           />
         )}

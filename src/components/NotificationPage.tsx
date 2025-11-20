@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "motion/react";
 // --- [타입 정의] ---
 interface Notification {
   id: number;
-  type: "hospital" | "family" | "medicine" | "challenge";
+  type: "hospital" | "family" | "medicine" | "challenge" | "community";
   category: string;
   message: string;
   time: string;
@@ -17,6 +17,7 @@ interface Notification {
 interface NotificationPageProps {
   onBack: () => void;
   onDeleteNotification?: (id: number) => void;
+  initialNotifications?: Notification[];
 }
 
 // --- [애니메이션 설정 (수정됨)] ---
@@ -47,63 +48,66 @@ const itemVariants = {
 export function NotificationPage({
   onBack,
   onDeleteNotification,
+  initialNotifications,
 }: NotificationPageProps) {
   // --- [데이터 및 상태 관리] ---
   const [notifications, setNotifications] = useState<
     Notification[]
-  >([
-    {
-      id: 1,
-      type: "hospital",
-      category: "병원 예약",
-      message:
-        "**김동석**님 매일건강의원 **14:00 진료** 접수되었습니다.\n초진이라면 신분증을 반드시 챙겨주세요.",
-      time: "지금",
-      isRead: false,
-    },
-    {
-      id: 2,
-      type: "family",
-      category: "가족",
-      message: "**박승희**님이 가족에 추가됐어요.",
-      time: "5분전",
-      isRead: false,
-    },
-    {
-      id: 3,
-      type: "family",
-      category: "가족",
-      message: "**김동석**님이 가족에 추가됐어요.",
-      time: "5분전",
-      isRead: false,
-    },
-    {
-      id: 4,
-      type: "medicine",
-      category: "복약알림",
-      message: "오늘 오후 9시 복용할 약이 있습니다.",
-      time: "3시간전",
-      isRead: true,
-    },
-    {
-      id: 5,
-      type: "challenge",
-      category: "챌린지",
-      message:
-        "**김엘리**님 새로운 추천 챌린지가 있어요.\n눌러서 알아보세요.",
-      time: "12시간전",
-      isRead: true,
-    },
-    {
-      id: 6,
-      type: "medicine",
-      category: "복약알림",
-      message:
-        "오늘 오후 6시, **박승희**님의 약 복용 시간입니다.",
-      time: "1일전",
-      isRead: true,
-    },
-  ]);
+  >(
+    initialNotifications || [
+      {
+        id: 1,
+        type: "hospital",
+        category: "병원 예약",
+        message:
+          "**김동석**님 매일건강의원 **14:00 진료** 접수되었습니다.\n초진이라면 신분증을 반드시 챙겨주세요.",
+        time: "지금",
+        isRead: false,
+      },
+      {
+        id: 2,
+        type: "family",
+        category: "가족",
+        message: "**박승희**님이 가족에 추가됐어요.",
+        time: "5분전",
+        isRead: false,
+      },
+      {
+        id: 3,
+        type: "family",
+        category: "가족",
+        message: "**김동석**님이 가족에 추가됐어요.",
+        time: "5분전",
+        isRead: false,
+      },
+      {
+        id: 4,
+        type: "medicine",
+        category: "복약알림",
+        message: "오늘 오후 9시 복용할 약이 있습니다.",
+        time: "3시간전",
+        isRead: true,
+      },
+      {
+        id: 5,
+        type: "challenge",
+        category: "챌린지",
+        message:
+          "**김엘리**님 새로운 추천 챌린지가 있어요.\n눌러서 알아보세요.",
+        time: "12시간전",
+        isRead: true,
+      },
+      {
+        id: 6,
+        type: "medicine",
+        category: "복약알림",
+        message:
+          "오늘 오후 6시, **박승희**님의 약 복용 시간입니다.",
+        time: "1일전",
+        isRead: true,
+      },
+    ],
+  );
 
   // 삭제 모달 관련 상태
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -175,6 +179,12 @@ export function NotificationPage({
           icon: "🏆",
           bgColor: "#fffde7",
           textColor: "#ffc107",
+        };
+      case "community":
+        return {
+          icon: "👥",
+          bgColor: "#e0f7fa",
+          textColor: "#009688",
         };
       default:
         return {
