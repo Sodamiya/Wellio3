@@ -22,6 +22,9 @@ import { useEffect, useRef, useState } from "react";
 import { Progress } from "./ui/progress";
 import { Button } from "./ui/button";
 
+// 👇 발급받은 카카오 JavaScript 키를 여기에 입력하세요
+const KAKAO_MAP_API_KEY = "ee7ef6c37b67c27768d7dcb2f13f0a83";
+
 interface Hospital {
   id: number;
   name: string;
@@ -51,89 +54,90 @@ export function HospitalDetailPage({
   const mapRef = useRef<HTMLDivElement>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
 
-  // 카카오맵 스크립트 동적 로딩
+  // 1. 카카오맵 스크립트 로드
   useEffect(() => {
-    const loadKakaoMap = () => {
+    // 이미 로드되어 있으면 바로 true 설정
+    if (window.kakao && window.kakao.maps) {
+      setIsMapLoaded(true);
+      return;
+    }
+
+    // 스크립트 중복 로드 방지
+    const scriptId = "kakao-map-script";
+    const existingScript = document.getElementById(scriptId);
+
+    if (existingScript) {
+      // 이미 스크립트가 로딩 중이라면 로드 완료를 기다림
       if (window.kakao && window.kakao.maps) {
         setIsMapLoaded(true);
-        return;
+      } else {
+        existingScript.addEventListener("load", () =>
+          setIsMapLoaded(true),
+        );
       }
+      return;
+    }
 
-      const existingScript = document.querySelector(
-        'script[src*="dapi.kakao.com"]',
-      );
+    // 스크립트 생성 및 추가
+    const script = document.createElement("script");
+    script.id = scriptId;
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_MAP_API_KEY}&autoload=false`;
+    script.async = true;
 
-      if (existingScript) {
-        const checkKakao = setInterval(() => {
-          if (window.kakao && window.kakao.maps) {
-            clearInterval(checkKakao);
-            setIsMapLoaded(true);
-          }
-        }, 100);
-
-        setTimeout(() => {
-          clearInterval(checkKakao);
-        }, 5000);
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=ee7ef6c37b67c27768d7dcb2f13f0a83&autoload=false`;
-      script.type = "text/javascript";
-
-      script.onload = () => {
-        if (window.kakao && window.kakao.maps) {
-          window.kakao.maps.load(() => {
-            setIsMapLoaded(true);
-          });
-        }
-      };
-
-      document.head.appendChild(script);
+    script.onload = () => {
+      // 스크립트 로드 후 maps 모듈 로드
+      window.kakao.maps.load(() => {
+        setIsMapLoaded(true);
+      });
     };
 
-    loadKakaoMap();
+    document.head.appendChild(script);
   }, []);
 
-  // 카카오맵 초기화
+  // 2. 맵 그리기 (스크립트 로드 완료 & 좌표 있을 때)
   useEffect(() => {
     if (!isMapLoaded || !mapRef.current) return;
 
-    try {
-      const container = mapRef.current;
-      const options = {
-        center: new window.kakao.maps.LatLng(
-          hospital.latitude || 37.5665,
-          hospital.longitude || 126.978,
-        ),
-        level: 3,
-      };
+    const lat = hospital.latitude || 37.5665;
+    const lng = hospital.longitude || 126.978;
 
-      const map = new window.kakao.maps.Map(container, options);
+    // 지도 중복 생성 방지 (컨테이너 비우기)
+    mapRef.current.innerHTML = "";
 
-      const markerPosition = new window.kakao.maps.LatLng(
-        hospital.latitude || 37.5665,
-        hospital.longitude || 126.978,
-      );
+    const options = {
+      center: new window.kakao.maps.LatLng(lat, lng),
+      level: 3,
+    };
 
-      const marker = new window.kakao.maps.Marker({
-        position: markerPosition,
-      });
+    // 지도 생성
+    const map = new window.kakao.maps.Map(
+      mapRef.current,
+      options,
+    );
 
-      marker.setMap(map);
-    } catch (error) {
-      console.error("카카오맵 초기화 실패:", error);
-    }
+    // 마커 생성
+    const markerPosition = new window.kakao.maps.LatLng(
+      lat,
+      lng,
+    );
+    const marker = new window.kakao.maps.Marker({
+      position: markerPosition,
+    });
+
+    marker.setMap(map);
   }, [isMapLoaded, hospital.latitude, hospital.longitude]);
 
   const handleDirections = () => {
     const lat = hospital.latitude || 37.5665;
     const lng = hospital.longitude || 126.978;
+    // 카카오맵 길찾기 URL로 이동
     window.open(
       `https://map.kakao.com/link/to/${encodeURIComponent(hospital.name)},${lat},${lng}`,
       "_blank",
     );
   };
+
+  // ... (나머지 데이터 및 컴포넌트 코드는 동일함)
 
   const doctors = [
     {
@@ -290,15 +294,13 @@ export function HospitalDetailPage({
           </div>
         </div>
 
-        {/* 2. 의사 정보 - PC/모바일 구분 없이 항상 Swiper 사용 */}
+        {/* 2. 의사 정보 */}
         <div className="mt-8">
           <div className="px-4 sm:px-6 md:px-8 mb-3 ml-1">
             <h3 className="text-lg font-bold text-gray-900">
               의사 정보
             </h3>
           </div>
-
-          {/* [수정] md:hidden 제거하여 항상 Swiper 렌더링 */}
           <div>
             <Swiper
               slidesPerView="auto"
@@ -323,6 +325,7 @@ export function HospitalDetailPage({
             병원 위치
           </h3>
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+            {/* 지도 영역 */}
             <div
               ref={mapRef}
               className="w-full h-[200px] bg-gray-100"
