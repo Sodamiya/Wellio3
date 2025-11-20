@@ -1,6 +1,4 @@
 import image_b41bc2e4319a3db074275b4da6314c6ddf33f5db from 'figma:asset/b41bc2e4319a3db074275b4da6314c6ddf33f5db.png';
-"use client";
-
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 interface WelcomePageProps {
@@ -18,12 +16,13 @@ export function WelcomePage({ onGuestMode, onSignUp }: WelcomePageProps) {
         </h1>
       </div>
 
-      {/* 이미지 */}
-      <div className="flex-1 flex items-center justify-center my-10">
+      {/* 이미지 - 수정된 부분 */}
+      <div className="flex-1 flex items-center justify-center w-full my-10">
         <ImageWithFallback
           src={image_b41bc2e4319a3db074275b4da6314c6ddf33f5db}
           alt="doctor illustration"
-          className="w-[230px] h-auto"
+          // w-full: 가로 꽉 채움, h-auto: 높이 자동 비율
+          className="w-full h-auto object-cover"
         />
       </div>
 

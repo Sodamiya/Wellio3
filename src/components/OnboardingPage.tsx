@@ -1,4 +1,3 @@
-// sodamiya/wellio3/Wellio3-c7489bae5f1d8ec30008af7c58f107c1e3f5acb2/src/components/OnboardingPage.tsx
 "use client";
 
 import { useState } from "react";
@@ -126,7 +125,6 @@ export function OnboardingPage({
       onClick={handleClick}
     >
       {/* -------------------- 1. 배경 페이지 (흐릿하게) -------------------- */}
-      {/* GNB를 포함한 전체 화면 구조를 렌더링하고 opacity를 적용하여 배경처럼 보이게 합니다. z-0 */}
       <div className="absolute inset-0 pointer-events-none z-0">
         <div className="max-w-[500px] mx-auto min-h-screen flex flex-col">
           {/* 페이지 콘텐츠: opacity-30 적용 */}
@@ -162,7 +160,7 @@ export function OnboardingPage({
               />
             )}
           </div>
-          {/* GNB (BottomNav) 배치: 투명도(opacity-30)에서 제외하여 선명하게 노출 */}
+          {/* GNB (BottomNav) 배치 */}
           <div className="opacity-100">
             <BottomNav
               currentPage={pageSlugs[currentStep]}
@@ -173,30 +171,20 @@ export function OnboardingPage({
       </div>
 
       {/* -------------------- 2. 스포트라이트 오버레이 (구멍 뚫기) -------------------- */}
-      {/* GNB 위에 위치하여 (z-50) 투명한 구멍을 만듭니다. */}
-      <div
-        // 전체 화면을 덮는 Fixed 레이어 (max-w 제한 적용)
-        className="fixed inset-0 max-w-[500px] mx-auto z-50 pointer-events-none"
-      >
-        {/* 구멍을 뚫을 원형 요소: 이 요소 자체는 투명하고, 그림자만 화면을 덮습니다. */}
+      <div className="fixed inset-0 max-w-[500px] mx-auto z-50 pointer-events-none">
+        {/* [수정] transition 클래스 추가: duration-500 ease-in-out */}
         <div
-          className="absolute size-16 rounded-full"
+          className="absolute size-16 rounded-full transition-all duration-500 ease-in-out"
           style={{
-            // 4개의 탭 중 현재 단계에 맞게 X 위치 계산
             left: `calc((100% / 4) * ${currentStep} + (100% / 8))`,
-            // Y 위치 계산: GNB 중앙(40px) - 원 반지름(32px) = 8px
             bottom: `${gnbCenterFromBottom - holeRadiusPx}px`,
             transform: "translateX(-50%)",
-
-            // **핵심:** 원형 영역을 제외한 모든 곳을 어둡게 덮는 그림자 (구멍 생성)
             boxShadow: `0 0 0 ${spreadDistance}px rgba(0, 0, 0, 0.7)`,
           }}
         >
-          {/* GNB 아이콘 주변에 빛나는 테두리 효과 추가 (선택 사항) */}
           <div
             className="w-full h-full rounded-full"
             style={{
-              // inset box-shadow를 사용하여 원 내부의 투명한 영역에 빛나는 테두리 효과를 줍니다.
               boxShadow: `0 0 10px 10px rgba(77, 194, 192, 0.5) inset`,
             }}
           />
@@ -204,18 +192,15 @@ export function OnboardingPage({
       </div>
 
       {/* -------------------- 3. 온보딩 텍스트 및 버튼 콘텐츠 -------------------- */}
-      {/* 가장 위에 위치하여 사용자 상호작용을 처리합니다. z-[60] */}
       <div className="relative z-[60] flex flex-col min-h-screen max-w-[500px] mx-auto">
         {/* 상단 바 */}
         <div className="px-5 py-4 flex items-center justify-between">
-          {/* 진행 표시줄 */}
           <div className="flex-1 h-1 bg-white/30 rounded-full mr-5 overflow-hidden">
             <div
               className="h-full bg-[#4dc2c0] rounded-full transition-all duration-300"
               style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>
-          {/* SKIP 버튼 */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -227,13 +212,9 @@ export function OnboardingPage({
           </button>
         </div>
 
-        {/* 중앙 빈 공간 */}
         <div className="flex-1"></div>
 
-        {/* 하단 설명 영역 */}
-        {/* GNB(h-20) 높이 80px를 고려하여 충분한 여백(pb-24 = 96px)을 줍니다. */}
         <div className="px-5 pt-5 pb-24">
-          {/* 설명 박스 (말풍선) */}
           <div className="relative bg-[#4dc2c0] rounded-2xl p-5 mb-5">
             <h2 className="text-xl mb-2">
               {steps[currentStep].title}
@@ -242,28 +223,20 @@ export function OnboardingPage({
               {steps[currentStep].description}
             </p>
 
-            {/* 👇 [위치 보정 완료] 말풍선 화살표 */}
+            {/* [수정] 말풍선 화살표에도 transition 추가하여 원과 함께 움직이도록 설정 */}
             <div
-              className="absolute"
+              className="absolute transition-all duration-500 ease-in-out"
               style={{
-                // [수학적 보정 로직]
-                // 말풍선 컨테이너 너비(100%)는 전체 화면 너비보다 40px(좌우 패딩) 작습니다.
-                // 따라서 (100% + 40px)를 곱해 전체 너비 기준으로 환산한 뒤,
-                // GNB 비율을 적용하고, 다시 왼쪽 패딩(-20px)만큼 빼주어 정확한 위치를 잡습니다.
                 left: `calc( (100% + 40px) * (${currentStep * 2 + 1} / 8) - 20px )`,
-
-                bottom: "-10px", // 말풍선 바로 아래에 붙음
-                transform: "translateX(-50%)", // 중앙 정렬
-
-                // CSS로 삼각형 그리기 (네모 방지)
+                bottom: "-10px",
+                transform: "translateX(-50%)",
                 width: 0,
                 height: 0,
                 borderLeft: "10px solid transparent",
                 borderRight: "10px solid transparent",
-                borderTop: "10px solid #4dc2c0", // 말풍선 색상과 동일
+                borderTop: "10px solid #4dc2c0",
               }}
             ></div>
-            {/* 👆 말풍선 화살표 */}
           </div>
         </div>
       </div>

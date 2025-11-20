@@ -487,6 +487,10 @@
     inset: calc(var(--spacing) * 0);
   }
 
+  .inset-0\.5 {
+    inset: calc(var(--spacing) * .5);
+  }
+
   .-top-1 {
     top: calc(var(--spacing) * -1);
   }
@@ -1065,10 +1069,6 @@
 
   .w-\[100px\] {
     width: 100px;
-  }
-
-  .w-\[230px\] {
-    width: 230px;
   }
 
   .w-\[260px\] {
