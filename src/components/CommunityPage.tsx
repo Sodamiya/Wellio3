@@ -58,6 +58,15 @@ interface CommunityPageProps {
   currentUserAvatar?: string;
 }
 
+// 가족 구성원 목데이터
+const familyMembers = [
+  { id: "all", name: "전체보기", avatar: "" },
+  { id: "admin", name: "관리자", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80" },
+  { id: "guest", name: "게스트", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80" },
+  { id: "mom", name: "엄마", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80" },
+  { id: "dad", name: "아빠", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80" },
+];
+
 export function CommunityPage({
   onBack,
   onUploadClick,
@@ -69,8 +78,15 @@ export function CommunityPage({
 }: CommunityPageProps) {
   const [selectedGroup, setSelectedGroup] =
     useState("우리가족");
+  const [selectedFamilyMember, setSelectedFamilyMember] = 
+    useState<string | null>(null);
+  const [showFamilyDropdown, setShowFamilyDropdown] = useState(false);
   const [isGridView, setIsGridView] = useState(false);
   const [isReactionView, setIsReactionView] = useState(false);
+  
+  // [추가] 리액션 필터 상태 (ALL 또는 이모지)
+  const [reactionFilter, setReactionFilter] = useState("ALL");
+
   const [selectedPostForReaction, setSelectedPostForReaction] =
     useState<number | null>(null);
   const [newComment, setNewComment] = useState("");
@@ -257,8 +273,10 @@ export function CommunityPage({
     }));
   };
 
-  const getMyReactionPosts = () => {
-    return posts.filter((post) => {
+  // [수정] 리액션 필터링 로직 적용
+  const getFilteredReactionPosts = () => {
+    // 1. 내가 반응(댓글 or 이모지)을 남긴 모든 포스트 가져오기
+    const myReactedPosts = posts.filter((post) => {
       const hasMyComment = addedComments[post.id]?.some(
         (comment) => comment.userName === currentUser.userName,
       );
@@ -269,6 +287,22 @@ export function CommunityPage({
           ),
       );
       return hasMyComment || hasMyReaction;
+    });
+
+    // 2. 필터가 'ALL'이면 전체 반환
+    if (reactionFilter === "ALL") {
+      return myReactedPosts;
+    }
+
+    // 3. 특정 이모지 필터링
+    return myReactedPosts.filter((post) => {
+      // 내가 해당 포스트에 남긴 리액션들 중, 현재 선택된 필터(이모지)가 있는지 확인
+      const myReactionsInPost = addedReactions[post.id] || [];
+      return myReactionsInPost.some(
+        (reaction) => 
+          reaction.emoji === reactionFilter && 
+          reaction.users.some(u => u.userName === currentUser.userName)
+      );
     });
   };
 
@@ -286,6 +320,14 @@ export function CommunityPage({
   };
 
   const filteredPosts = posts.filter((post) => {
+    // 가족 구성원 필터링
+    if (selectedFamilyMember) {
+      if (post.userName !== selectedFamilyMember) {
+        return false;
+      }
+    }
+
+    // 검색어 필터링
     if (!searchQuery.trim()) return true;
 
     const query = searchQuery.toLowerCase();
@@ -339,10 +381,11 @@ export function CommunityPage({
             </button>
           </div>
         ) : isReactionView ? (
-          <div className="flex items-center gap-4">
+          // 리액션 뷰 헤더
+          <div className="w-full flex items-center justify-center relative">
             <button
               onClick={() => setIsReactionView(false)}
-              className="w-6 h-6 flex items-center justify-center"
+              className="absolute left-0 w-6 h-6 flex items-center justify-center"
             >
               <ArrowLeft size={24} className="text-[#1A1A1A]" />
             </button>
@@ -351,24 +394,33 @@ export function CommunityPage({
             </span>
           </div>
         ) : isGridView ? (
-          <div className="w-full flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setIsGridView(false)}
-                className="w-6 h-6 flex items-center justify-center"
-              >
-                <ArrowLeft
-                  size={24}
-                  className="text-[#1A1A1A]"
-                />
-              </button>
+          <div className="w-full flex items-center justify-center relative">
+            <button
+              onClick={() => setIsGridView(false)}
+              className="absolute left-0 w-6 h-6 flex items-center justify-center"
+            >
+              <ArrowLeft
+                size={24}
+                className="text-[#1A1A1A]"
+              />
+            </button>
+            <button 
+              className="flex items-center gap-1"
+              onClick={() => setShowFamilyDropdown(!showFamilyDropdown)}
+            >
               <span className="text-lg font-bold text-[#1A1A1A]">
-                모아보기
+                {selectedFamilyMember 
+                  ? familyMembers.find(m => m.name === selectedFamilyMember)?.name || "모아보기"
+                  : "모아보기"}
               </span>
-            </div>
+              <ChevronDown
+                size={20}
+                className="text-gray-600"
+              />
+            </button>
             <button
               onClick={() => setIsReactionView(true)}
-              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+              className="absolute right-0 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
             >
               <Heart
                 size={24}
@@ -378,29 +430,32 @@ export function CommunityPage({
             </button>
           </div>
         ) : (
-          <div className="w-full flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={onBack}
-                className="w-6 h-6 flex items-center justify-center"
-              >
-                <ArrowLeft
-                  size={24}
-                  className="text-[#1A1A1A]"
-                />
-              </button>
-              <button className="flex items-center gap-1">
-                <span className="text-lg font-bold text-[#1A1A1A]">
-                  {selectedGroup}
-                </span>
-                <ChevronDown
-                  size={20}
-                  className="text-gray-600"
-                />
-              </button>
-            </div>
+          <div className="w-full flex items-center justify-center relative">
+            <button
+              onClick={onBack}
+              className="absolute left-0 w-6 h-6 flex items-center justify-center"
+            >
+              <ArrowLeft
+                size={24}
+                className="text-[#1A1A1A]"
+              />
+            </button>
+            <button 
+              className="flex items-center gap-1"
+              onClick={() => setShowFamilyDropdown(!showFamilyDropdown)}
+            >
+              <span className="text-lg font-bold text-[#1A1A1A]">
+                {selectedFamilyMember 
+                  ? familyMembers.find(m => m.name === selectedFamilyMember)?.name || "우리가족"
+                  : "우리가족"}
+              </span>
+              <ChevronDown
+                size={20}
+                className="text-gray-600"
+              />
+            </button>
 
-            <div className="flex items-center gap-4">
+            <div className="absolute right-0 flex items-center gap-4">
               <button
                 className="w-6 h-6 flex items-center justify-center"
                 onClick={() => {
@@ -421,60 +476,189 @@ export function CommunityPage({
         )}
       </header>
 
-      {/* Content Area (Swiper) */}
-      <div className="w-full">
-        {isReactionView ? (
-          <div className="px-4 py-4 pb-20">
-            {getMyReactionPosts().length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <Heart
-                  size={48}
-                  className="text-gray-300 mb-4"
-                />
-                <p className="text-gray-500">
-                  아직 리액션한 게시물이 없습니다
-                </p>
-                <p className="text-gray-400 text-sm mt-2">
-                  댓글이나 이모지를 남겨보세요!
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-1">
-                {getMyReactionPosts().map((post) => (
-                  <div
-                    key={post.id}
-                    className="aspect-square relative overflow-hidden rounded-sm cursor-pointer hover:opacity-80 transition-opacity"
+      {/* 가족 구성원 드롭다운 */}
+      <AnimatePresence>
+        {showFamilyDropdown && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/30 z-40"
+              onClick={() => setShowFamilyDropdown(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="fixed top-[120px] left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] bg-white rounded-2xl shadow-2xl z-50 overflow-hidden"
+            >
+              <div className="p-2">
+                {familyMembers.map((member) => (
+                  <button
+                    key={member.id}
+                    onClick={() => {
+                      if (member.id === "all") {
+                        setSelectedFamilyMember(null);
+                      } else {
+                        setSelectedFamilyMember(member.name);
+                      }
+                      setShowFamilyDropdown(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                      (member.id === "all" && !selectedFamilyMember) ||
+                      member.name === selectedFamilyMember
+                        ? "bg-[#36D2C5]/10"
+                        : "hover:bg-gray-50"
+                    }`}
                   >
-                    <ImageWithFallback
-                      src={post.image}
-                      alt={post.caption}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-1.5">
-                      <Heart
-                        size={12}
-                        className="text-[#36D2C5]"
-                        fill="#36D2C5"
+                    {member.avatar ? (
+                      <ImageWithFallback
+                        src={member.avatar}
+                        alt={member.name}
+                        className="w-10 h-10 rounded-full object-cover"
                       />
-                    </div>
-                  </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#36D2C5] to-[#00C2B3] flex items-center justify-center">
+                        <LayoutGrid size={20} className="text-white" />
+                      </div>
+                    )}
+                    <span className="text-[#1A1A1A] font-medium">
+                      {member.name}
+                    </span>
+                    {((member.id === "all" && !selectedFamilyMember) ||
+                      member.name === selectedFamilyMember) && (
+                      <div className="ml-auto w-5 h-5 rounded-full bg-[#36D2C5] flex items-center justify-center">
+                        <svg
+                          width="12"
+                          height="10"
+                          viewBox="0 0 12 10"
+                          fill="none"
+                        >
+                          <path
+                            d="M1 5L4.5 8.5L11 1"
+                            stroke="white"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    )}
+                  </button>
                 ))}
               </div>
-            )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Content Area */}
+      <div className="w-full">
+        {isReactionView ? (
+          <div className="pb-20">
+            {/* [추가] 리액션 필터 바 (가로 스크롤) */}
+            <div className="px-4 py-4 flex gap-3 overflow-x-auto scrollbar-hide bg-white sticky top-[110px] z-20">
+              {/* ALL 버튼 */}
+              <button
+                onClick={() => setReactionFilter("ALL")}
+                className={`flex-shrink-0 w-[50px] h-[50px] rounded-full flex items-center justify-center text-sm font-bold transition-all border-2 ${
+                  reactionFilter === "ALL"
+                    ? "bg-[#F0F0F0] text-[#1A1A1A] border-[#36D2C5]" // 선택됨
+                    : "bg-[#F0F0F0] text-[#999999] border-transparent" // 선택 안됨
+                }`}
+              >
+                ALL
+              </button>
+              
+              {/* 이모지 버튼들 */}
+              {emojis.map((emoji) => (
+                <button
+                  key={emoji}
+                  onClick={() => setReactionFilter(emoji)}
+                  className={`flex-shrink-0 w-[50px] h-[50px] rounded-full flex items-center justify-center text-2xl transition-all border-2 ${
+                    reactionFilter === emoji
+                      ? "bg-[#FFF8F8] border-[#36D2C5]" // 선택됨 (배경색 살짝 다르게)
+                      : "bg-[#F0F0F0] border-transparent" // 선택 안됨
+                  }`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+
+            <div className="px-4">
+              {getFilteredReactionPosts().length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <Heart
+                    size={48}
+                    className="text-gray-300 mb-4"
+                  />
+                  <p className="text-gray-500">
+                    {reactionFilter === "ALL" 
+                      ? "아직 리액션한 게시물이 없습니다" 
+                      : `${reactionFilter} 반응을 남긴 게시물이 없습니다`}
+                  </p>
+                  <p className="text-gray-400 text-sm mt-2">
+                    댓글이나 이모지를 남겨보세요!
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-1">
+                  {getFilteredReactionPosts().map((post) => (
+                    <div
+                      key={post.id}
+                      className="aspect-square relative overflow-hidden rounded-sm cursor-pointer hover:opacity-80 transition-opacity"
+                    >
+                      <ImageWithFallback
+                        src={post.image}
+                        alt={post.caption}
+                        className="w-full h-full object-cover"
+                      />
+                      {/* 필터링된 이모지가 있다면 우측 상단에 표시 */}
+                      {reactionFilter !== "ALL" && (
+                        <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-sm">
+                          {reactionFilter}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         ) : isGridView ? (
           <div className="px-4 py-4 pb-20">
             <div className="grid grid-cols-3 gap-1">
-              {posts.map((post) => (
+              {filteredPosts.map((post) => (
                 <div
                   key={post.id}
-                  className="aspect-square relative overflow-hidden rounded-sm cursor-pointer hover:opacity-80 transition-opacity"
+                  className="aspect-square relative overflow-hidden rounded-sm cursor-pointer hover:opacity-80 transition-opacity group"
                 >
                   <ImageWithFallback
                     src={post.image}
                     alt={post.caption}
                     className="w-full h-full object-cover"
                   />
+                  {/* 호버 시 작성자 정보 표시 */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
+                      <ImageWithFallback
+                        src={post.userAvatar}
+                        alt={post.userName}
+                        className="w-6 h-6 rounded-full border border-white"
+                      />
+                      <span className="text-white text-xs font-medium">
+                        {post.userName}
+                      </span>
+                    </div>
+                  </div>
+                  {/* 배지 표시 */}
+                  {post.badge && (
+                    <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-0.5 text-[10px] font-medium shadow-sm">
+                      {post.badge}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -531,9 +715,7 @@ export function CommunityPage({
                           }}
                           dragElastic={0.1} // 👈 약간의 탄성 추가 (자연스러운 느낌)
                           dragMomentum={false}
-                          dragSnapToOrigin // 👈 [중요] 드래그 종료 시 원점으로 복귀 (자석 효과)
-                          // [중요] animate로 위치 제어: 삭제 모드일 때(-200) vs 평소(0)
-                          // 삭제 모드일 때는 -200에 고정되어 자석 효과를 덮어씀
+                          dragSnapToOrigin={!isDeleting} // 👈 삭제 대기 중이 아닐 때만 원점으로 복귀
                           animate={{
                             x: isDeleting ? -200 : 0,
                           }}
@@ -744,7 +926,7 @@ export function CommunityPage({
                             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
                               <div className="flex items-center gap-2">
                                 <ImageWithFallback
-                                  src={post.userName === currentUserName ? currentUserAvatar : post.userAvatar}
+                                  src={post.userAvatar}
                                   alt={post.userName}
                                   className="w-8 h-8 rounded-full border-2 border-white"
                                 />

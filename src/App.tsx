@@ -737,6 +737,208 @@ export default function App() {
         }
       ]
     },
+    {
+      id: 4,
+      image:
+        "https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=800&q=80",
+      badge: "🥗 건강한 식단",
+      userAvatar:
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80",
+      caption: "오늘의 건강 샐러드",
+      userName: "엄마",
+      textOverlay: "신선한 채소로 만든 사랑의 한 끼",
+      time: "오후 12:30",
+      comments: [
+        {
+          userName: "관리자",
+          userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
+          text: "너무 맛있어 보여요! 😋",
+          timestamp: "20분 전"
+        },
+        {
+          userName: "아빠",
+          userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80",
+          text: "오늘도 최고예요 👍",
+          timestamp: "10분 전"
+        }
+      ],
+      reactions: [
+        {
+          emoji: "🥗",
+          users: [
+            {
+              userName: "관리자",
+              userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
+            },
+            {
+              userName: "아빠",
+              userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80"
+            }
+          ]
+        },
+        {
+          emoji: "❤️",
+          users: [
+            {
+              userName: "박활력",
+              userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: 5,
+      image:
+        "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&q=80",
+      badge: "🚶‍♀️ 매일 산책",
+      userAvatar:
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80",
+      caption: "동네 한 바퀴",
+      userName: "엄마",
+      location: "근린공원",
+      weather: "맑음 20°C",
+      health: "걸음수 8,432보",
+      comments: [
+        {
+          userName: "이평화",
+          userAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
+          text: "좋은 날씨네요! 🌤️",
+          timestamp: "25분 전"
+        }
+      ],
+      reactions: [
+        {
+          emoji: "👟",
+          users: [
+            {
+              userName: "관리자",
+              userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
+            },
+            {
+              userName: "이평화",
+              userAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: 6,
+      image:
+        "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80",
+      badge: "🏃‍♂️ 주 3회 러닝",
+      userAvatar:
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80",
+      caption: "아침 러닝 완료!",
+      userName: "아빠",
+      textOverlay: "5km 달리기 성공",
+      location: "올림픽공원",
+      time: "오전 6:00",
+      weather: "맑음 15°C",
+      comments: [
+        {
+          userName: "엄마",
+          userAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80",
+          text: "수고했어요! 💪",
+          timestamp: "1시간 전"
+        },
+        {
+          userName: "관리자",
+          userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
+          text: "대단하세요!",
+          timestamp: "45분 전"
+        },
+        {
+          userName: "박활력",
+          userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80",
+          text: "5km라니 멋져요! 🏃‍♂️",
+          timestamp: "30분 전"
+        }
+      ],
+      reactions: [
+        {
+          emoji: "🔥",
+          users: [
+            {
+              userName: "관리자",
+              userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
+            },
+            {
+              userName: "엄마",
+              userAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80"
+            },
+            {
+              userName: "박활력",
+              userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80"
+            }
+          ]
+        },
+        {
+          emoji: "💪",
+          users: [
+            {
+              userName: "정활동",
+              userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: 7,
+      image:
+        "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80",
+      badge: "💊 건강검진",
+      userAvatar:
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80",
+      caption: "정기 건강검진 다녀왔습니다",
+      userName: "아빠",
+      textOverlay: "건강이 최고!",
+      health: "혈압 118/75, 콜레스테롤 정상",
+      comments: [
+        {
+          userName: "엄마",
+          userAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80",
+          text: "다행이네요! 😊",
+          timestamp: "2시간 전"
+        },
+        {
+          userName: "관리자",
+          userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
+          text: "건강 관리 잘하셨네요!",
+          timestamp: "1시간 전"
+        }
+      ],
+      reactions: [
+        {
+          emoji: "👍",
+          users: [
+            {
+              userName: "엄마",
+              userAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80"
+            },
+            {
+              userName: "관리자",
+              userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
+            },
+            {
+              userName: "이평화",
+              userAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80"
+            }
+          ]
+        },
+        {
+          emoji: "❤️",
+          users: [
+            {
+              userName: "박활력",
+              userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80"
+            }
+          ]
+        }
+      ]
+    },
   ]);
 
   const handleLogin = (name: string) => {
