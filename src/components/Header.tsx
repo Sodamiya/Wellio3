@@ -26,7 +26,7 @@ export function Header({
   // --- 'title' prop이 있으면 '서브 페이지 헤더' (내 정보) ---
   if (title) {
     return (
-      <header className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 px-5 py-4 flex items-center justify-between mx-auto h-16 max-w-[500px]">
+      <header className="fixed top-0 left-0 right-0 z-40 px-5 py-4 flex items-center justify-between mx-auto h-16 max-w-[500px]">
         {/* 왼쪽: 뒤로가기 + 타이틀 */}
         <div className="flex items-center">
           {showBackButton && (

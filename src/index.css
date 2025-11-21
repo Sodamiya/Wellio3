@@ -129,6 +129,7 @@
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
+    --tracking-tight: -.025em;
     --tracking-wide: .025em;
     --leading-tight: 1.25;
     --leading-snug: 1.375;
@@ -502,6 +503,10 @@
     inset-inline: calc(var(--spacing) * 0);
   }
 
+  .inset-y-0 {
+    inset-block: calc(var(--spacing) * 0);
+  }
+
   .inset-y-2 {
     inset-block: calc(var(--spacing) * 2);
   }
@@ -716,8 +721,8 @@
     margin-top: calc(var(--spacing) * 8);
   }
 
-  .mr-1 {
-    margin-right: calc(var(--spacing) * 1);
+  .mr-1\.5 {
+    margin-right: calc(var(--spacing) * 1.5);
   }
 
   .mr-2 {
@@ -802,6 +807,10 @@
 
   .ml-4 {
     margin-left: calc(var(--spacing) * 4);
+  }
+
+  .ml-6 {
+    margin-left: calc(var(--spacing) * 6);
   }
 
   .line-clamp-1 {
@@ -958,10 +967,6 @@
     height: 68px;
   }
 
-  .h-\[72px\] {
-    height: 72px;
-  }
-
   .h-\[80px\] {
     height: 80px;
   }
@@ -1114,10 +1119,6 @@
     width: 68px;
   }
 
-  .w-\[72px\] {
-    width: 72px;
-  }
-
   .w-\[90\%\] {
     width: 90%;
   }
@@ -1265,6 +1266,10 @@
 
   .cursor-pointer {
     cursor: pointer;
+  }
+
+  .touch-none {
+    touch-action: none;
   }
 
   .resize-none {
@@ -1451,6 +1456,10 @@
 
   .overflow-hidden {
     overflow: hidden;
+  }
+
+  .overflow-visible {
+    overflow: visible;
   }
 
   .overflow-x-auto {
@@ -2412,6 +2421,11 @@
     font-weight: var(--font-weight-semibold);
   }
 
+  .tracking-tight {
+    --tw-tracking: var(--tracking-tight);
+    letter-spacing: var(--tracking-tight);
+  }
+
   .tracking-wide {
     --tw-tracking: var(--tracking-wide);
     letter-spacing: var(--tracking-wide);
@@ -2431,6 +2445,10 @@
 
   .text-\[\#1A1A1A\], .text-\[\#1a1a1a\] {
     color: #1a1a1a;
+  }
+
+  .text-\[\#2AC1BC\] {
+    color: #2ac1bc;
   }
 
   .text-\[\#2DC7B7\] {
@@ -2778,6 +2796,18 @@
     user-select: none;
   }
 
+  @media (hover: hover) {
+    .group-hover\:text-gray-600:is(:where(.group):hover *) {
+      color: var(--color-gray-600);
+    }
+  }
+
+  @media (hover: hover) {
+    .group-hover\:text-gray-800:is(:where(.group):hover *) {
+      color: var(--color-gray-800);
+    }
+  }
+
   .selection\:bg-primary ::selection, .selection\:bg-primary::selection {
     background-color: var(--primary);
   }
@@ -3035,6 +3065,12 @@
   }
 
   @media (hover: hover) {
+    .hover\:text-gray-900:hover {
+      color: var(--color-gray-900);
+    }
+  }
+
+  @media (hover: hover) {
     .hover\:text-red-500:hover {
       color: var(--color-red-500);
     }
@@ -3261,12 +3297,6 @@
   @media (width >= 48rem) {
     .md\:w-10 {
       width: calc(var(--spacing) * 10);
-    }
-  }
-
-  @media (width >= 48rem) {
-    .md\:w-20 {
-      width: calc(var(--spacing) * 20);
     }
   }
 

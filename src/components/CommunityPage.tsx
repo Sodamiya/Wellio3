@@ -16,10 +16,10 @@ import {
   Smile,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "motion/react";
 import confetti from "canvas-confetti";
 import "swiper/css";
 
@@ -99,6 +99,10 @@ export function CommunityPage({
   const [postToDelete, setPostToDelete] = useState<
     number | null
   >(null);
+
+  // 스크롤 감지 state
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const currentUser = {
     userName: currentUserName,
@@ -494,18 +498,34 @@ export function CommunityPage({
             direction={"vertical"}
             className="w-full h-[calc(100vh-190px)]"
             allowTouchMove={dragStartX === null}
+            onTouchStart={() => {
+              // 스크롤 시작
+              setIsScrolling(true);
+              if (scrollTimerRef.current) {
+                clearTimeout(scrollTimerRef.current);
+              }
+            }}
+            onTouchEnd={() => {
+              // 스크롤 종료 후 150ms 뒤에 좌우 드래그 활성화
+              if (scrollTimerRef.current) {
+                clearTimeout(scrollTimerRef.current);
+              }
+              scrollTimerRef.current = setTimeout(() => {
+                setIsScrolling(false);
+              }, 150);
+            }}
           >
             {filteredPosts.map((post) => (
               <SwiperSlide key={post.id}>
                 <div className="h-full flex flex-col items-center px-4 py-4">
                   {/* Drag Delete Container */}
-                  <div className="relative h-[85%] w-full">
+                  <div className="relative h-[85%] w-full overflow-visible">
                     {/* 휴지통 배경 */}
                     {post.userName === currentUser.userName && (
-                      <div className="absolute inset-0.5 flex items-center justify-end pr-6 rounded-2xl z-0">
+                      <div className="absolute inset-y-0 -right-2 w-32 flex items-center justify-center z-0">
                         <Trash2
                           size={32}
-                          className="text-gray-400"
+                          className="text-red-400"
                         />
                       </div>
                     )}
@@ -513,36 +533,46 @@ export function CommunityPage({
                     {/* Post Card */}
                     {post.userName === currentUser.userName ? (
                       <motion.div
-                        className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg z-10"
-                        drag="x"
+                        className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg touch-none"
+                        drag={!isScrolling ? "x" : false}
                         dragConstraints={{
-                          left: -120,
+                          left: -200,
                           right: 0,
                         }}
-                        dragElastic={0.1}
-                        onDragStart={() => {
-                          setDragStartX(1);
+                        dragElastic={0}
+                        dragMomentum={false}
+                        whileDrag={{ 
+                          scale: 0.98,
+                          boxShadow: "0 10px 40px rgba(0,0,0,0.3)"
+                        }}
+                        onDragStart={(event, info) => {
+                          setDragStartX(info.point.x);
+                        }}
+                        onDrag={(event, info) => {
+                          // 드래그 중 시각적 피드백을 위한 로그
+                          console.log("Dragging:", info.offset.x);
                         }}
                         onDragEnd={(event, info) => {
-                          if (info.offset.x < -100) {
+                          console.log("Drag ended:", info.offset.x);
+                          // 실제로 충분히 드래그했을 때만 삭제
+                          if (info.offset.x < -120) {
                             setPostToDelete(post.id);
                             setShowDeleteModal(true);
                           }
                           setDragStartX(null);
                         }}
-                      >
-                        <div
-                          onClick={() =>
-                            setSelectedPostForReaction(post.id)
+                        onClick={(e) => {
+                          // 드래그가 아닐 때만 클릭 이벤트 처리
+                          if (!dragStartX) {
+                            setSelectedPostForReaction(post.id);
                           }
-                          className="w-full h-full cursor-pointer"
-                        >
-                          <ImageWithFallback
-                            src={post.image}
-                            alt="Community post"
-                            className="w-full h-full object-cover bg-gray-100"
-                          />
-                        </div>
+                        }}
+                      >
+                        <ImageWithFallback
+                          src={post.image}
+                          alt="Community post"
+                          className="w-full h-full object-cover bg-gray-100 pointer-events-none"
+                        />
 
                         {/* 리액션 모드 오버레이 */}
                         {selectedPostForReaction ===

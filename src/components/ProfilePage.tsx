@@ -4,7 +4,7 @@ import { useRef } from "react";
 
 interface ProfilePageProps {
   userName: string;
-  userAvatar?: string; // 👈 프로필 이미지 추가
+  userAvatar?: string;
   currentPage: string;
   onPageChange: (
     page: "home" | "community" | "hospital" | "profile" | "medical-history",
@@ -12,20 +12,20 @@ interface ProfilePageProps {
   onBack: () => void;
   onMyReviewsClick: () => void;
   onFavoriteHospitalsClick: () => void;
-  myReviewsCount?: number; // 👈 리뷰 개수 추가
-  onUpdateAvatar?: (file: File) => void; // 👈 프로필 이미지 업데이트 함수 추가
+  myReviewsCount?: number;
+  onUpdateAvatar?: (file: File) => void;
 }
 
 export function ProfilePage({
   userName,
-  userAvatar, // 👈 프로필 이미지 받기
+  userAvatar,
   currentPage,
   onPageChange,
   onBack,
   onMyReviewsClick,
   onFavoriteHospitalsClick,
-  myReviewsCount = 0, // 👈 리뷰 개수 받기 (기본값 0)
-  onUpdateAvatar, // 👈 프로필 이미지 업데이트 함수 받기
+  myReviewsCount = 0,
+  onUpdateAvatar,
 }: ProfilePageProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -56,33 +56,39 @@ export function ProfilePage({
       {/* 헤더 높이(h-16)만큼 pt-16 추가 */}
       <main className="flex-grow bg-[#F7F7F7] pt-16 pb-24">
         {/* User Info Section */}
-        <div className="bg-white py-6 px-4 sm:px-6 md:px-8 relative">
-          {/* 프로필 정보 */}
+        <div className="py-6 px-4 sm:px-6 md:px-8 relative">
+          {/* 프로필 정보 컨테이너 */}
           <div className="flex items-center">
-            {/* 프로필 이미지와 수정 버튼을 함께 감싸는 컨테이너 */}
-            <div className="relative w-[72px] h-[72px] md:w-20 md:h-20">
-              <div className="w-full h-full rounded-full overflow-hidden">
+            
+            {/* 1. 프로필 이미지 영역 (100px로 수정됨) */}
+            <div className="relative w-[100px] h-[100px]">
+              <div className="w-full h-full rounded-full overflow-hidden bg-gray-100">
                 <img
-                  src={userAvatar || "https://via.placeholder.com/72x72"}
+                  src={userAvatar || "https://via.placeholder.com/100x100"}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
               </div>
-              {/* 프로필 수정 버튼 - 프로필 이미지 하단에 겹치게 배치 */}
+              {/* 수정 버튼 */}
               <button
                 onClick={triggerFileInput}
-                className="absolute bottom-0 right-0 bg-white rounded-full p-1.5 border-2 border-white shadow-md hover:bg-gray-50 transition-colors"
+                className="absolute bottom-0 right-0 bg-white rounded-full p-2 border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 text-gray-700"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
+                  className="h-4 w-4 text-gray-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.75 2.112l-6.819 6.819a2 2 0 00-.546.732l-1.63 4.891a1 1 0 001.242 1.242l4.89-1.63a2 2 0 00.732-.546l6.818-6.819-2.828-2.828z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                  />
                 </svg>
               </button>
-              {/* 숨겨진 파일 input */}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -91,17 +97,37 @@ export function ProfilePage({
                 className="hidden"
               />
             </div>
-            <div className="ml-4">
-              <h2 className="text-xl font-bold text-gray-900">
-                {userName} 님
-              </h2>
-              <div className="flex items-center text-sm text-gray-600 mt-1">
-                <span className="bg-[#E7F3FF] text-[#2F80ED] text-xs font-semibold px-2 py-0.5 rounded-full mr-1">
-                  가족관리
+
+            {/* 2. 텍스트 영역 (디자인 수정됨) */}
+            <div className="ml-6 flex flex-col justify-center">
+              {/* 이름 + 님 */}
+              <h2 className="text-gray-900 flex items-end leading-none mb-2">
+                <span className="text-3xl font-bold tracking-tight">
+                  {userName}
                 </span>
+                <span className="text-xl text-gray-400 ml-1 mb-0.5 font-medium">
+                  님
+                </span>
+              </h2>
+
+              {/* 가족관리 링크 (민트색 하트 아이콘) */}
+              <button className="group flex items-center text-gray-600 hover:text-gray-900 transition-colors">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5 text-[#2AC1BC] mr-1.5"
+                >
+                  <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+                </svg>
+
+                <span className="text-lg font-medium text-gray-600 group-hover:text-gray-800">
+                  가족관리
+                </span>
+
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 ml-1 text-gray-400 group-hover:text-gray-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -113,20 +139,16 @@ export function ProfilePage({
                     d="M9 5l7 7-7 7"
                   />
                 </svg>
-              </div>
+              </button>
             </div>
           </div>
         </div>
 
         {/* Point Section */}
         <div className="bg-white mx-4 sm:mx-6 md:mx-8 p-4 rounded-lg shadow-sm mt-3 flex items-center justify-between">
-          <span className="text-gray-700 font-medium">
-            보유포인트
-          </span>
+          <span className="text-gray-700 font-medium">보유포인트</span>
           <div className="flex items-center">
-            <span className="text-lg font-bold text-[#4CAF50]">
-              2,025P
-            </span>
+            <span className="text-lg font-bold text-[#4CAF50]">2,025P</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 text-gray-400 ml-2"
@@ -215,7 +237,7 @@ export function ProfilePage({
             ].map((feature, index) => (
               <li
                 key={index}
-                className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between border-b border-gray-100 last:border-b-0"
+                className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between last:border-b-0"
               >
                 <span className="text-gray-700">{feature}</span>
                 <svg
@@ -254,12 +276,10 @@ export function ProfilePage({
                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
               />
             </svg>
-            <h3 className="text-lg font-bold text-gray-900">
-              건강 내역
-            </h3>
+            <h3 className="text-lg font-bold text-gray-900">건강 내역</h3>
           </div>
           <ul className="mt-4">
-            <li className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between border-b border-gray-100 last:border-b-0">
+            <li className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between last:border-b-0">
               <span className="text-gray-700">진료 이력</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -277,9 +297,7 @@ export function ProfilePage({
               </svg>
             </li>
             <li className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between border-b border-gray-100 last:border-b-0">
-              <span className="text-gray-700">
-                건강검진 내역
-              </span>
+              <span className="text-gray-700">건강검진 내역</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5 text-gray-400"
@@ -315,12 +333,10 @@ export function ProfilePage({
                 d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.128a1 1 0 00-.5 1.21l3.603 6.305a1 1 0 001.21.5l1.128-2.257a1 1 0 011.21-.502l4.493 1.498A1 1 0 0121 15.72V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
               />
             </svg>
-            <h3 className="text-lg font-bold text-gray-900">
-              고객센터
-            </h3>
+            <h3 className="text-lg font-bold text-gray-900">고객센터</h3>
           </div>
           <ul className="mt-4">
-            <li className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between border-b border-gray-100 last:border-b-0">
+            <li className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between last:border-b-0">
               <span className="text-gray-700">공지사항</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -338,9 +354,7 @@ export function ProfilePage({
               </svg>
             </li>
             <li className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between border-b border-gray-100 last:border-b-0">
-              <span className="text-gray-700">
-                고객센터 문의하기
-              </span>
+              <span className="text-gray-700">고객센터 문의하기</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5 text-gray-400"
@@ -360,13 +374,7 @@ export function ProfilePage({
         </div>
       </main>
 
-      {/* 👇 [수정] BottomNav를 감싸던 fixed div를 제거했습니다.
-        BottomNav 컴포넌트가 스스로 fixed 위치를 잡습니다.
-      */}
-      <BottomNav
-        currentPage={currentPage}
-        onPageChange={onPageChange}
-      />
+      <BottomNav currentPage={currentPage} onPageChange={onPageChange} />
     </div>
   );
 }
