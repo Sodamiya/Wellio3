@@ -38,46 +38,51 @@ export function ProfilePage({
       {/* 헤더 높이(h-16)만큼 pt-16 추가 */}
       <main className="flex-grow bg-[#F7F7F7] pt-16 pb-24">
         {/* User Info Section */}
-        <div className="bg-white py-6 px-4 sm:px-6 md:px-8 flex items-center">
-          <div className="w-[72px] h-[72px] md:w-20 md:h-20 rounded-full overflow-hidden relative">
-            <img
-              src={userAvatar || "https://via.placeholder.com/72x72"}
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
-            <button className="absolute bottom-0 right-0 bg-gray-200 rounded-full p-1 border border-white">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 text-gray-700"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.75 2.112l-6.819 6.819a2 2 0 00-.546.732l-1.63 4.891a1 1 0 001.242 1.242l4.89-1.63a2 2 0 00.732-.546l6.818-6.819-2.828-2.828z" />
-              </svg>
-            </button>
-          </div>
-          <div className="ml-4">
-            <h2 className="text-xl font-bold text-gray-900">
-              {userName} 님
-            </h2>
-            <div className="flex items-center text-sm text-gray-600 mt-1">
-              <span className="bg-[#E7F3FF] text-[#2F80ED] text-xs font-semibold px-2 py-0.5 rounded-full mr-1">
-                가족관리
-              </span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
+        <div className="bg-white py-6 px-4 sm:px-6 md:px-8 relative">
+          {/* 프로필 수정 버튼 - 우측 상단에 배치 */}
+          <button className="absolute top-6 right-4 sm:right-6 md:right-8 bg-white rounded-full p-2 border border-gray-300 shadow-sm hover:bg-gray-50 transition-colors">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-gray-700"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.75 2.112l-6.819 6.819a2 2 0 00-.546.732l-1.63 4.891a1 1 0 001.242 1.242l4.89-1.63a2 2 0 00.732-.546l6.818-6.819-2.828-2.828z" />
+            </svg>
+          </button>
+          
+          {/* 프로필 정보 */}
+          <div className="flex items-center">
+            <div className="w-[72px] h-[72px] md:w-20 md:h-20 rounded-full overflow-hidden">
+              <img
+                src={userAvatar || "https://via.placeholder.com/72x72"}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="ml-4">
+              <h2 className="text-xl font-bold text-gray-900">
+                {userName} 님
+              </h2>
+              <div className="flex items-center text-sm text-gray-600 mt-1">
+                <span className="bg-[#E7F3FF] text-[#2F80ED] text-xs font-semibold px-2 py-0.5 rounded-full mr-1">
+                  가족관리
+                </span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
         </div>

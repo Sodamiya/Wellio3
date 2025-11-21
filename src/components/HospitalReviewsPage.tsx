@@ -2,6 +2,7 @@
 
 import { ArrowLeft, Star, ThumbsUp, Bot, ChevronDown } from "lucide-react";
 import { Progress } from "./ui/progress";
+import { useEffect } from "react";
 
 interface Review {
   id: number;
@@ -14,23 +15,41 @@ interface Review {
   content: string;
 }
 
+interface KeywordStat {
+  keyword: string;
+  count: number;
+  percentage: number;
+}
+
 interface HospitalReviewsPageProps {
   onBack: () => void;
   hospitalName?: string;
   reviews?: Review[];
+  keywordStats?: KeywordStat[];
 }
 
 export function HospitalReviewsPage({
   onBack,
   hospitalName = "매일건강의원",
   reviews = [],
+  keywordStats = [],
 }: HospitalReviewsPageProps) {
-  // 리뷰 키워드 통계 데이터
-  const reviewStats = [
-    { label: "과잉진료가 없어요", percent: 96 },
-    { label: "친절해요", percent: 92 },
-    { label: "재진료 희망해요", percent: 77 },
-  ];
+  // 페이지 진입 시 최상단으로 스크롤
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // 리뷰 키워드 통계 데이터 (keywordStats가 비어있으면 기본값 사용)
+  const reviewStats = keywordStats.length > 0
+    ? keywordStats.slice(0, 3).map(stat => ({
+        label: stat.keyword,
+        percent: stat.percentage
+      }))
+    : [
+        { label: "과잉진료가 없어요", percent: 96 },
+        { label: "친절해요", percent: 92 },
+        { label: "재진료 희망해요", percent: 77 },
+      ];
 
   // 평균 별점 계산
   const averageRating = reviews.length > 0

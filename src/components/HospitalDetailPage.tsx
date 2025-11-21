@@ -45,6 +45,15 @@ interface HospitalDetailPageProps {
   reviewCount?: number;
   averageRating?: number;
   keywordStats?: Array<{ keyword: string; count: number; percentage: number }>;
+  previewReviews?: Array<{
+    id: number;
+    author: string;
+    date: string;
+    rating: number;
+    tags: string[];
+    content: string;
+    likes: number;
+  }>;
 }
 
 export function HospitalDetailPage({
@@ -54,15 +63,16 @@ export function HospitalDetailPage({
   reviewCount = 0,
   averageRating = 0,
   keywordStats = [],
+  previewReviews = [],
 }: HospitalDetailPageProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
 
-  // 샘플 리뷰 데이터 (미리보기용 - 3개만 표시)
-  const userReviews = [
+  // 미리보기용 리뷰 데이터 (3개만 표시)
+  const userReviews = previewReviews.length > 0 ? previewReviews.slice(0, 3) : [
     {
       id: 1,
-      name: "김**님",
+      author: "김**님",
       date: "2025.05.22",
       rating: 5,
       tags: ["진료 만족해요", "친절해요"],
@@ -71,7 +81,7 @@ export function HospitalDetailPage({
     },
     {
       id: 2,
-      name: "박**님",
+      author: "박**님",
       date: "2025.01.29",
       rating: 5,
       tags: ["진료 만족해요", "재진료 희망해요", "친절해요"],
@@ -80,7 +90,7 @@ export function HospitalDetailPage({
     },
     {
       id: 3,
-      name: "이**님",
+      author: "이**님",
       date: "2024.12.10",
       rating: 4,
       tags: ["대기시간이 짧아요", "친절해요"],
@@ -482,7 +492,7 @@ export function HospitalDetailPage({
                         />
                       ))}
                       <span className="text-xs text-gray-500 ml-1">
-                        {review.name} | {review.date}
+                        {review.author} | {review.date}
                       </span>
                     </div>
                     <div className="flex items-center gap-1 text-gray-400 text-xs">
@@ -514,7 +524,7 @@ export function HospitalDetailPage({
               className="w-full mt-6 h-12 text-gray-600 border-gray-200 rounded-xl hover:bg-gray-50"
               onClick={onReviewsClick}
             >
-              {reviewCount}개 리뷰 더보기
+              {reviewCount - 3}개 리뷰 더보기
             </Button>
           </div>
         </div>
