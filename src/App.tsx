@@ -1127,8 +1127,11 @@ export default function App() {
             }}
             onDeletePost={handleDeletePost}
             posts={posts}
-            currentUserName={userName} // 👈 현재 로그인된 사용자 이름 전달
-            currentUserAvatar={userAvatar} // 👈 현재 로그인된 사용자 프로필 이미지 전달
+            currentUserName={userName}
+            currentUserAvatar={userAvatar}
+            // 👇 아래 두 줄 추가
+            currentPage="community"
+            onPageChange={(page) => setCurrentPage(page as Page)}
           />
         )}
         {/* 👇 3. '준비중' 텍스트 대신 ProfilePage 컴포넌트로 교체 */}
