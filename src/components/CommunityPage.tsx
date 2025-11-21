@@ -55,7 +55,7 @@ interface CommunityPageProps {
     }>;
   }>;
   currentUserName: string;
-  currentUserAvatar?: string; // 👈 현재 사용자 프로필 이미지 추가
+  currentUserAvatar?: string;
 }
 
 export function CommunityPage({
@@ -111,13 +111,6 @@ export function CommunityPage({
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
   };
 
-  // 디버깅: 현재 사용자 정보 확인
-  console.log("Current User:", currentUser.userName);
-  console.log(
-    "Posts:",
-    posts.map((p) => ({ id: p.id, userName: p.userName })),
-  );
-
   const [addedComments, setAddedComments] = useState<{
     [postId: number]: Array<{
       userName: string;
@@ -168,8 +161,6 @@ export function CommunityPage({
     postId: number,
   ) => {
     setEmojiAnimation({ emoji, active: true });
-    // 이모지 선택 후 닫고 싶다면 아래 주석 해제
-    // setShowEmojiPicker(false);
 
     setAddedReactions((prev) => {
       const existingReactions = prev[postId] || [];
@@ -294,9 +285,8 @@ export function CommunityPage({
     setPostToDelete(null);
   };
 
-  // 게시글 필터링 로직
   const filteredPosts = posts.filter((post) => {
-    if (!searchQuery.trim()) return true; // 검색어가 없으면 모두 표시
+    if (!searchQuery.trim()) return true;
 
     const query = searchQuery.toLowerCase();
     const caption = post.caption?.toLowerCase() || "";
@@ -317,7 +307,6 @@ export function CommunityPage({
       {/* Header */}
       <header className="sticky top-0 z-30 px-4 flex flex-col justify-center border-b border-gray-100 w-full bg-white min-h-[110px]">
         {isSearchActive ? (
-          // 검색 모드
           <div className="flex items-center gap-3">
             <div
               className={`flex-1 bg-gray-100 rounded-lg px-4 py-3 flex items-center gap-2 transition-all border-2 ${
@@ -350,7 +339,6 @@ export function CommunityPage({
             </button>
           </div>
         ) : isReactionView ? (
-          // 리액션 뷰
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsReactionView(false)}
@@ -363,7 +351,6 @@ export function CommunityPage({
             </span>
           </div>
         ) : isGridView ? (
-          // 그리드 뷰
           <div className="w-full flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
@@ -391,7 +378,6 @@ export function CommunityPage({
             </button>
           </div>
         ) : (
-          // 기본 뷰
           <div className="w-full flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
@@ -498,15 +484,17 @@ export function CommunityPage({
             direction={"vertical"}
             className="w-full h-[calc(100vh-190px)]"
             allowTouchMove={dragStartX === null}
-            onTouchStart={() => {
-              // 스크롤 시작
+            onSliderMove={() => {
+              // 화면이 실제로 움직일 때만 스크롤 상태로 변경
               setIsScrolling(true);
               if (scrollTimerRef.current) {
                 clearTimeout(scrollTimerRef.current);
               }
             }}
+            onSlideChangeTransitionStart={() => setIsScrolling(true)}
+            onSlideChangeTransitionEnd={() => setIsScrolling(false)}
             onTouchEnd={() => {
-              // 스크롤 종료 후 150ms 뒤에 좌우 드래그 활성화
+              // 터치가 끝났을 때 스크롤 상태 해제 (약간의 지연 시간 둠)
               if (scrollTimerRef.current) {
                 clearTimeout(scrollTimerRef.current);
               }
@@ -515,686 +503,701 @@ export function CommunityPage({
               }, 150);
             }}
           >
-            {filteredPosts.map((post) => (
-              <SwiperSlide key={post.id}>
-                <div className="h-full flex flex-col items-center px-4 py-4">
-                  {/* Drag Delete Container */}
-                  <div className="relative h-[85%] w-full overflow-visible">
-                    {/* 휴지통 배경 */}
-                    {post.userName === currentUser.userName && (
-                      <div className="absolute inset-y-0 -right-2 w-32 flex items-center justify-center z-0">
-                        <Trash2
-                          size={32}
-                          className="text-red-400"
-                        />
-                      </div>
-                    )}
+            {filteredPosts.map((post) => {
+              const isDeleting = postToDelete === post.id;
+              return (
+                <SwiperSlide key={post.id}>
+                  <div className="h-full flex flex-col items-center px-4 py-4">
+                    {/* Drag Delete Container */}
+                    <div className="relative h-[85%] w-full overflow-visible">
+                      {/* 휴지통 배경 */}
+                      {post.userName === currentUser.userName && (
+                        <div className="absolute inset-y-0 -right-2 w-32 flex items-center justify-center z-0">
+                          <Trash2
+                            size={32}
+                            className="text-red-400"
+                          />
+                        </div>
+                      )}
 
-                    {/* Post Card */}
-                    {post.userName === currentUser.userName ? (
-                      <motion.div
-                        className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg touch-none"
-                        drag={!isScrolling ? "x" : false}
-                        dragConstraints={{
-                          left: -200,
-                          right: 0,
-                        }}
-                        dragElastic={0}
-                        dragMomentum={false}
-                        whileDrag={{ 
-                          scale: 0.98,
-                          boxShadow: "0 10px 40px rgba(0,0,0,0.3)"
-                        }}
-                        onDragStart={(event, info) => {
-                          setDragStartX(info.point.x);
-                        }}
-                        onDrag={(event, info) => {
-                          // 드래그 중 시각적 피드백을 위한 로그
-                          console.log("Dragging:", info.offset.x);
-                        }}
-                        onDragEnd={(event, info) => {
-                          console.log("Drag ended:", info.offset.x);
-                          // 실제로 충분히 드래그했을 때만 삭제
-                          if (info.offset.x < -120) {
-                            setPostToDelete(post.id);
-                            setShowDeleteModal(true);
-                          }
-                          setDragStartX(null);
-                        }}
-                        onClick={(e) => {
-                          // 드래그가 아닐 때만 클릭 이벤트 처리
-                          if (!dragStartX) {
-                            setSelectedPostForReaction(post.id);
-                          }
-                        }}
-                      >
-                        <ImageWithFallback
-                          src={post.image}
-                          alt="Community post"
-                          className="w-full h-full object-cover bg-gray-100 pointer-events-none"
-                        />
-
-                        {/* 리액션 모드 오버레이 */}
-                        {selectedPostForReaction ===
-                          post.id && (
-                          <div
-                            className="absolute inset-0 bg-black/70 z-10 flex flex-col cursor-pointer"
-                            onClick={() =>
-                              setSelectedPostForReaction(null)
+                      {/* Post Card */}
+                      {post.userName === currentUser.userName ? (
+                        <motion.div
+                          className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg touch-none"
+                          drag={!isScrolling ? "x" : false}
+                          dragConstraints={{
+                            left: -200,
+                            right: 0,
+                          }}
+                          dragElastic={0.1} // 👈 약간의 탄성 추가 (자연스러운 느낌)
+                          dragMomentum={false}
+                          dragSnapToOrigin // 👈 [중요] 드래그 종료 시 원점으로 복귀 (자석 효과)
+                          // [중요] animate로 위치 제어: 삭제 모드일 때(-200) vs 평소(0)
+                          // 삭제 모드일 때는 -200에 고정되어 자석 효과를 덮어씀
+                          animate={{
+                            x: isDeleting ? -200 : 0,
+                          }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 30,
+                          }}
+                          whileDrag={{ 
+                            scale: 0.98
+                          }}
+                          onDragStart={(event, info) => {
+                            setDragStartX(info.point.x);
+                          }}
+                          onDrag={(event, info) => {
+                            // 드래그 중 시각적 피드백을 위한 로그
+                            console.log("Dragging:", info.offset.x);
+                          }}
+                          onDragEnd={(event, info) => {
+                            console.log("Drag ended:", info.offset.x);
+                            // 실제로 충분히 드래그했을 때만 삭제 모드로 전환
+                            if (info.offset.x < -120) {
+                              setPostToDelete(post.id);
+                              setShowDeleteModal(true);
                             }
-                          >
-                            {/* 리액션 정보들... */}
-                            {getAllReactions(
-                              post.id,
-                              post.reactions,
-                            ).length > 0 && (
-                              <div
-                                className="absolute top-4 right-4 flex flex-wrap gap-2 justify-end max-w-[60%] z-20"
-                                onClick={(e) =>
-                                  e.stopPropagation()
-                                }
-                              >
-                                {getAllReactions(
-                                  post.id,
-                                  post.reactions,
-                                ).flatMap((reaction) =>
-                                  reaction.users.map(
-                                    (user, userIdx) => (
-                                      <div
-                                        key={`${reaction.emoji}-${user.userName}-${userIdx}`}
-                                        className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1.5 flex items-center gap-1.5"
-                                      >
-                                        <span className="text-base">
-                                          {reaction.emoji}
-                                        </span>
-                                        <ImageWithFallback
-                                          src={user.userAvatar}
-                                          alt={user.userName}
-                                          className="w-6 h-6 rounded-full border border-white"
-                                        />
-                                      </div>
-                                    ),
-                                  ),
-                                )}
-                              </div>
-                            )}
-
-                            {post.textOverlay && (
-                              <div
-                                className="absolute bottom-4 left-4 max-w-[70%] z-20"
-                                onClick={(e) =>
-                                  e.stopPropagation()
-                                }
-                              >
-                                <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm">
-                                  <ImageWithFallback
-                                    src={post.userAvatar}
-                                    alt={post.userName}
-                                    className="w-7 h-7 rounded-full object-cover"
-                                  />
-                                  <p className="text-sm text-gray-900 whitespace-nowrap">
-                                    {post.textOverlay}
-                                  </p>
-                                </div>
-                              </div>
-                            )}
-
-                            {getAllComments(
-                              post.id,
-                              post.comments,
-                            ).length > 0 && (
-                              <div
-                                className="absolute bottom-20 right-4 flex flex-col gap-2 items-end max-w-[70%] max-h-[50vh] overflow-y-auto z-20"
-                                onClick={(e) =>
-                                  e.stopPropagation()
-                                }
-                              >
-                                {getAllComments(
-                                  post.id,
-                                  post.comments,
-                                ).map((comment, idx) => (
-                                  <div
-                                    key={`comment-${post.id}-${idx}-${comment.userName}-${comment.timestamp}`}
-                                    className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm"
-                                  >
-                                    <p className="text-sm text-gray-900 whitespace-nowrap">
-                                      {comment.text}
-                                    </p>
-                                    <ImageWithFallback
-                                      src={comment.userAvatar}
-                                      alt={comment.userName}
-                                      className="w-7 h-7 rounded-full object-cover"
-                                    />
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* 오버레이 정보들 (위치/날씨 등) */}
-                        {selectedPostForReaction !== post.id &&
-                          (post.location ||
-                            post.weather ||
-                            post.time ||
-                            post.health) && (
-                            <div className="absolute top-4 left-4 flex flex-col gap-2">
-                              {post.location && (
-                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                                  <MapPin
-                                    size={16}
-                                    className="text-white"
-                                  />
-                                  <span className="text-white text-sm">
-                                    {post.location}
-                                  </span>
-                                </div>
-                              )}
-                              {post.weather && (
-                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                                  <Cloud
-                                    size={16}
-                                    className="text-white"
-                                  />
-                                  <span className="text-white text-sm">
-                                    {post.weather}
-                                  </span>
-                                </div>
-                              )}
-                              {post.time && (
-                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                                  <Clock
-                                    size={16}
-                                    className="text-white"
-                                  />
-                                  <span className="text-white text-sm">
-                                    {post.time}
-                                  </span>
-                                </div>
-                              )}
-                              {post.health && (
-                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                                  <Heart
-                                    size={16}
-                                    className="text-white"
-                                  />
-                                  <span className="text-white text-sm">
-                                    {post.health}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                        {selectedPostForReaction !== post.id &&
-                          post.badge &&
-                          !post.location &&
-                          !post.weather &&
-                          !post.time &&
-                          !post.health && (
-                            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1 text-sm font-medium">
-                              <span>{post.badge}</span>
-                            </div>
-                          )}
-
-                        {selectedPostForReaction !==
-                          post.id && (
-                          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <ImageWithFallback
-                                src={post.userName === currentUserName ? currentUserAvatar : post.userAvatar}
-                                alt={post.userName}
-                                className="w-8 h-8 rounded-full border-2 border-white"
-                              />
-                              {post.textOverlay && (
-                                <span className="text-white font-semibold text-sm line-clamp-1">
-                                  {post.textOverlay}
-                                </span>
-                              )}
-                            </div>
-                            <div className="bg-gray-100 rounded-full px-2.5 py-1 text-xs font-bold text-gray-800 flex items-center justify-center relative">
-                              +
-                              {
-                                getAllComments(
-                                  post.id,
-                                  post.comments,
-                                ).length
-                              }
-                              {getAllComments(
-                                post.id,
-                                post.comments,
-                              ).length > 0 && (
-                                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </motion.div>
-                    ) : (
-                      // 남의 글
-                      <div className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg">
-                        <button
-                          onClick={() =>
-                            setSelectedPostForReaction(post.id)
-                          }
-                          className="w-full h-full"
+                            setDragStartX(null);
+                          }}
+                          onClick={(e) => {
+                            // 드래그가 아닐 때만 클릭 이벤트 처리
+                            if (!dragStartX) {
+                              setSelectedPostForReaction(post.id);
+                            }
+                          }}
                         >
                           <ImageWithFallback
                             src={post.image}
                             alt="Community post"
-                            className="w-full h-full object-cover bg-gray-100"
+                            className="w-full h-full object-cover bg-gray-100 pointer-events-none"
                           />
-                        </button>
-                        {/* ... (남의 글 오버레이 동일) ... */}
-                        {selectedPostForReaction ===
-                          post.id && (
-                          <div
-                            className="absolute inset-0 bg-black/70 z-10 flex flex-col cursor-pointer"
-                            onClick={() =>
-                              setSelectedPostForReaction(null)
-                            }
-                          >
-                            {/* ... 리액션 모드 오버레이 내용 동일 ... */}
-                            {getAllReactions(
-                              post.id,
-                              post.reactions,
-                            ).length > 0 && (
-                              <div
-                                className="absolute top-4 right-4 flex flex-wrap gap-2 justify-end max-w-[60%] z-20"
-                                onClick={(e) =>
-                                  e.stopPropagation()
-                                }
-                              >
-                                {getAllReactions(
-                                  post.id,
-                                  post.reactions,
-                                ).flatMap((reaction) =>
-                                  reaction.users.map(
-                                    (user, userIdx) => (
-                                      <div
-                                        key={`${reaction.emoji}-${user.userName}-${userIdx}`}
-                                        className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1.5 flex items-center gap-1.5"
-                                      >
-                                        <span className="text-base">
-                                          {reaction.emoji}
-                                        </span>
-                                        <ImageWithFallback
-                                          src={user.userAvatar}
-                                          alt={user.userName}
-                                          className="w-6 h-6 rounded-full border border-white"
-                                        />
-                                      </div>
+
+                          {/* 리액션 모드 오버레이 */}
+                          {selectedPostForReaction ===
+                            post.id && (
+                            <div
+                              className="absolute inset-0 bg-black/70 z-10 flex flex-col cursor-pointer"
+                              // [수정] 오버레이 클릭 시 닫기 (이벤트 버블링 방지)
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedPostForReaction(null);
+                              }}
+                            >
+                              {/* 리액션 정보들... */}
+                              {getAllReactions(
+                                post.id,
+                                post.reactions,
+                              ).length > 0 && (
+                                <div
+                                  className="absolute top-4 right-4 flex flex-wrap gap-2 justify-end max-w-[60%] z-20"
+                                  onClick={(e) =>
+                                    e.stopPropagation()
+                                  }
+                                >
+                                  {getAllReactions(
+                                    post.id,
+                                    post.reactions,
+                                  ).flatMap((reaction) =>
+                                    reaction.users.map(
+                                      (user, userIdx) => (
+                                        <div
+                                          key={`${reaction.emoji}-${user.userName}-${userIdx}`}
+                                          className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1.5 flex items-center gap-1.5"
+                                        >
+                                          <span className="text-base">
+                                            {reaction.emoji}
+                                          </span>
+                                          <ImageWithFallback
+                                            src={user.userAvatar}
+                                            alt={user.userName}
+                                            className="w-6 h-6 rounded-full border border-white"
+                                          />
+                                        </div>
+                                      ),
                                     ),
-                                  ),
-                                )}
-                              </div>
-                            )}
-
-                            {post.textOverlay && (
-                              <div
-                                className="absolute bottom-4 left-4 max-w-[70%] z-20"
-                                onClick={(e) =>
-                                  e.stopPropagation()
-                                }
-                              >
-                                <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm">
-                                  <ImageWithFallback
-                                    src={post.userAvatar}
-                                    alt={post.userName}
-                                    className="w-7 h-7 rounded-full object-cover"
-                                  />
-                                  <p className="text-sm text-gray-900 whitespace-nowrap">
-                                    {post.textOverlay}
-                                  </p>
+                                  )}
                                 </div>
-                              </div>
-                            )}
+                              )}
 
-                            {getAllComments(
-                              post.id,
-                              post.comments,
-                            ).length > 0 && (
-                              <div
-                                className="absolute bottom-20 right-4 flex flex-col gap-2 items-end max-w-[70%] max-h-[50vh] overflow-y-auto z-20"
-                                onClick={(e) =>
-                                  e.stopPropagation()
-                                }
-                              >
-                                {getAllComments(
-                                  post.id,
-                                  post.comments,
-                                ).map((comment, idx) => (
-                                  <div
-                                    key={`comment-${post.id}-${idx}-${comment.userName}-${comment.timestamp}`}
-                                    className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm"
-                                  >
-                                    <p className="text-sm text-gray-900 whitespace-nowrap">
-                                      {comment.text}
-                                    </p>
+                              {post.textOverlay && (
+                                <div
+                                  className="absolute bottom-4 left-4 max-w-[70%] z-20"
+                                  onClick={(e) =>
+                                    e.stopPropagation()
+                                  }
+                                >
+                                  <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm">
                                     <ImageWithFallback
-                                      src={comment.userAvatar}
-                                      alt={comment.userName}
+                                      src={post.userAvatar}
+                                      alt={post.userName}
                                       className="w-7 h-7 rounded-full object-cover"
                                     />
+                                    <p className="text-sm text-gray-900 whitespace-nowrap">
+                                      {post.textOverlay}
+                                    </p>
                                   </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )}
+                                </div>
+                              )}
 
-                        {selectedPostForReaction !== post.id &&
-                          (post.location ||
-                            post.weather ||
-                            post.time ||
-                            post.health) && (
-                            <div className="absolute top-4 left-4 flex flex-col gap-2">
-                              {post.location && (
-                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                                  <MapPin
-                                    size={16}
-                                    className="text-white"
-                                  />
-                                  <span className="text-white text-sm">
-                                    {post.location}
-                                  </span>
-                                </div>
-                              )}
-                              {post.weather && (
-                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                                  <Cloud
-                                    size={16}
-                                    className="text-white"
-                                  />
-                                  <span className="text-white text-sm">
-                                    {post.weather}
-                                  </span>
-                                </div>
-                              )}
-                              {post.time && (
-                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                                  <Clock
-                                    size={16}
-                                    className="text-white"
-                                  />
-                                  <span className="text-white text-sm">
-                                    {post.time}
-                                  </span>
-                                </div>
-                              )}
-                              {post.health && (
-                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                                  <Heart
-                                    size={16}
-                                    className="text-white"
-                                  />
-                                  <span className="text-white text-sm">
-                                    {post.health}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                        {selectedPostForReaction !== post.id &&
-                          post.badge &&
-                          !post.location &&
-                          !post.weather &&
-                          !post.time &&
-                          !post.health && (
-                            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1 text-sm font-medium">
-                              <span>{post.badge}</span>
-                            </div>
-                          )}
-
-                        {selectedPostForReaction !==
-                          post.id && (
-                          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <ImageWithFallback
-                                src={post.userAvatar}
-                                alt={post.userName}
-                                className="w-8 h-8 rounded-full border-2 border-white"
-                              />
-                              {post.textOverlay && (
-                                <span className="text-white font-semibold text-sm line-clamp-1">
-                                  {post.textOverlay}
-                                </span>
-                              )}
-                            </div>
-                            <div className="bg-gray-100 rounded-full px-2.5 py-1 text-xs font-bold text-gray-800 flex items-center justify-center relative">
-                              +
-                              {
-                                getAllComments(
-                                  post.id,
-                                  post.comments,
-                                ).length
-                              }
                               {getAllComments(
                                 post.id,
                                 post.comments,
                               ).length > 0 && (
-                                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                                <div
+                                  className="absolute bottom-20 right-4 flex flex-col gap-2 items-end max-w-[70%] max-h-[50vh] overflow-y-auto z-20"
+                                  onClick={(e) =>
+                                    e.stopPropagation()
+                                  }
+                                >
+                                  {getAllComments(
+                                    post.id,
+                                    post.comments,
+                                  ).map((comment, idx) => (
+                                    <div
+                                      key={`comment-${post.id}-${idx}-${comment.userName}-${comment.timestamp}`}
+                                      className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm"
+                                    >
+                                      <p className="text-sm text-gray-900 whitespace-nowrap">
+                                        {comment.text}
+                                      </p>
+                                      <ImageWithFallback
+                                        src={comment.userAvatar}
+                                        alt={comment.userName}
+                                        className="w-7 h-7 rounded-full object-cover"
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
                               )}
                             </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                          )}
 
-                  {/* 댓글 및 이모지 입력 영역 */}
-                  <div className="relative flex items-center gap-2 w-full mt-4 h-[56px]">
-                    <AnimatePresence>
-                      {emojiAnimation &&
-                        emojiAnimation.active &&
-                        currentPostId === post.id && (
-                          <div className="fixed inset-0 pointer-events-none z-50">
-                            {emojiAnimation.emoji === "❤️" ? (
-                              <>
-                                {Array.from({ length: 30 }).map(
-                                  (_, i) => {
-                                    const pos =
-                                      generateRandomPosition();
-                                    return (
-                                      <motion.div
-                                        key={`heart-${post.id}-${i}`}
-                                        initial={{
-                                          opacity: 0,
-                                          scale: 0,
-                                          x: `${pos.x}vw`,
-                                          y: `${pos.y}vh`,
-                                        }}
-                                        animate={{
-                                          opacity: [0, 1, 1, 0],
-                                          scale: [
-                                            0, 1.5, 1.5, 0,
-                                          ],
-                                        }}
-                                        exit={{
-                                          opacity: 0,
-                                          scale: 0,
-                                        }}
-                                        transition={{
-                                          duration: 1.5,
-                                          delay:
-                                            Math.random() * 0.3,
-                                          ease: "easeOut",
-                                        }}
-                                        className="absolute text-6xl"
-                                      >
-                                        ❤️
-                                      </motion.div>
-                                    );
-                                  },
+                          {/* 오버레이 정보들 (위치/날씨 등) */}
+                          {selectedPostForReaction !== post.id &&
+                            (post.location ||
+                              post.weather ||
+                              post.time ||
+                              post.health) && (
+                              <div className="absolute top-4 left-4 flex flex-col gap-2">
+                                {post.location && (
+                                  <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                    <MapPin
+                                      size={16}
+                                      className="text-white"
+                                    />
+                                    <span className="text-white text-sm">
+                                      {post.location}
+                                    </span>
+                                  </div>
                                 )}
-                              </>
-                            ) : emojiAnimation.emoji ===
-                              "👍" ? (
-                              <>
-                                {Array.from({ length: 20 }).map(
-                                  (_, i) => {
-                                    const angle =
-                                      (i / 20) * Math.PI * 2;
-                                    const distance =
-                                      200 + Math.random() * 200;
-                                    return (
-                                      <motion.div
-                                        key={`thumbs-${post.id}-${i}`}
-                                        initial={{
-                                          opacity: 0,
-                                          scale: 0,
-                                          x: "50vw",
-                                          y: "50vh",
-                                        }}
-                                        animate={{
-                                          opacity: [0, 1, 1, 0],
-                                          scale: [0, 1.5, 1, 0],
-                                          x: `calc(50vw + ${
-                                            Math.cos(angle) *
-                                            distance
-                                          }px)`,
-                                          y: `calc(50vh + ${
-                                            Math.sin(angle) *
-                                            distance
-                                          }px)`,
-                                          rotate: [0, 360],
-                                        }}
-                                        exit={{
-                                          opacity: 0,
-                                          scale: 0,
-                                        }}
-                                        transition={{
-                                          duration: 1.5,
-                                          delay: i * 0.05,
-                                          ease: "easeOut",
-                                        }}
-                                        className="absolute text-5xl"
-                                      >
-                                        👍
-                                      </motion.div>
-                                    );
-                                  },
+                                {post.weather && (
+                                  <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                    <Cloud
+                                      size={16}
+                                      className="text-white"
+                                    />
+                                    <span className="text-white text-sm">
+                                      {post.weather}
+                                    </span>
+                                  </div>
                                 )}
-                              </>
-                            ) : null}
-                          </div>
-                        )}
-                    </AnimatePresence>
+                                {post.time && (
+                                  <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                    <Clock
+                                      size={16}
+                                      className="text-white"
+                                    />
+                                    <span className="text-white text-sm">
+                                      {post.time}
+                                    </span>
+                                  </div>
+                                )}
+                                {post.health && (
+                                  <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                    <Heart
+                                      size={16}
+                                      className="text-white"
+                                    />
+                                    <span className="text-white text-sm">
+                                      {post.health}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
 
-                    {/* 이모지 토글 버튼 */}
-                    <button
-                      className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors overflow-hidden relative"
-                      onClick={() => {
-                        setCurrentPostId(post.id);
-                        setShowEmojiPicker(!showEmojiPicker);
-                      }}
-                    >
-                      <AnimatePresence
-                        mode="wait"
-                        initial={false}
-                      >
-                        {showEmojiPicker &&
-                        currentPostId === post.id ? (
-                          <motion.div
-                            key="close-icon"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5] text-gray-800 rounded-full"
-                          >
-                            <X size={20} />
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            key="smile-icon"
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 10 }}
-                            transition={{ duration: 0.2 }}
-                            className="absolute inset-0 flex items-center justify-center text-gray-500 hover:text-gray-800"
-                          >
-                            <Smile size={24} />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </button>
+                          {selectedPostForReaction !== post.id &&
+                            post.badge &&
+                            !post.location &&
+                            !post.weather &&
+                            !post.time &&
+                            !post.health && (
+                              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1 text-sm font-medium">
+                                <span>{post.badge}</span>
+                              </div>
+                            )}
 
-                    {/* 입력창과 이모지 리스트 컨테이너 */}
-                    <div className="flex-1 h-full relative flex items-center">
-                      <AnimatePresence
-                        mode="wait"
-                        initial={false}
-                      >
-                        {showEmojiPicker &&
-                        currentPostId === post.id ? (
-                          // 이모지 리스트 (배경 제거, 각 버튼에 배경 적용)
-                          <motion.div
-                            key="emoji-list"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="absolute inset-0 flex items-center gap-2 overflow-x-auto no-scrollbar" // px-2 제거, 배경 제거
-                          >
-                            {emojis.map((emoji) => (
-                              <button
-                                key={emoji}
-                                onClick={() => {
-                                  setCurrentPostId(post.id);
-                                  handleEmojiReaction(
-                                    emoji,
+                          {selectedPostForReaction !==
+                            post.id && (
+                            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <ImageWithFallback
+                                  src={post.userName === currentUserName ? currentUserAvatar : post.userAvatar}
+                                  alt={post.userName}
+                                  className="w-8 h-8 rounded-full border-2 border-white"
+                                />
+                                {post.textOverlay && (
+                                  <span className="text-white font-semibold text-sm line-clamp-1">
+                                    {post.textOverlay}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="bg-gray-100 rounded-full px-2.5 py-1 text-xs font-bold text-gray-800 flex items-center justify-center relative">
+                                +
+                                {
+                                  getAllComments(
                                     post.id,
-                                  );
-                                  confetti({
-                                    particleCount: 100,
-                                    spread: 70,
-                                    origin: { y: 0.6 },
-                                  });
-                                }}
-                                className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-2xl bg-[#F5F5F5] rounded-full transition-colors" // 배경색 추가
-                              >
-                                {emoji}
-                              </button>
-                            ))}
-                          </motion.div>
-                        ) : (
-                          // 댓글 입력창
-                          <motion.div
-                            key="comment-input"
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 10 }}
-                            transition={{ duration: 0.2 }}
-                            className="absolute inset-y-2 inset-x-0 flex items-center bg-[#F5F5F5] rounded-full px-4"
-                          >
-                            <input
-                              type="text"
-                              placeholder="댓글을 작성해주세요"
-                              className="w-full bg-transparent outline-none text-[#1A1A1A] placeholder:text-gray-400"
-                              value={newComment}
-                              onChange={(e) =>
-                                setNewComment(e.target.value)
-                              }
-                              onKeyDown={(e) => {
-                                if (
-                                  e.key === "Enter" &&
-                                  !e.shiftKey
-                                ) {
-                                  e.preventDefault();
-                                  handleAddComment(post.id);
+                                    post.comments,
+                                  ).length
                                 }
-                              }}
+                                {getAllComments(
+                                  post.id,
+                                  post.comments,
+                                ).length > 0 && (
+                                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </motion.div>
+                      ) : (
+                        // 남의 글
+                        <div className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg">
+                          <button
+                            onClick={() =>
+                              setSelectedPostForReaction(post.id)
+                            }
+                            className="w-full h-full"
+                          >
+                            <ImageWithFallback
+                              src={post.image}
+                              alt="Community post"
+                              className="w-full h-full object-cover bg-gray-100"
                             />
-                          </motion.div>
-                        )}
+                          </button>
+                          {/* ... (남의 글 오버레이 동일) ... */}
+                          {selectedPostForReaction ===
+                            post.id && (
+                            <div
+                              className="absolute inset-0 bg-black/70 z-10 flex flex-col cursor-pointer"
+                              onClick={() =>
+                                setSelectedPostForReaction(null)
+                              }
+                            >
+                              {/* ... 리액션 모드 오버레이 내용 동일 ... */}
+                              {getAllReactions(
+                                post.id,
+                                post.reactions,
+                              ).length > 0 && (
+                                <div
+                                  className="absolute top-4 right-4 flex flex-wrap gap-2 justify-end max-w-[60%] z-20"
+                                  onClick={(e) =>
+                                    e.stopPropagation()
+                                  }
+                                >
+                                  {getAllReactions(
+                                    post.id,
+                                    post.reactions,
+                                  ).flatMap((reaction) =>
+                                    reaction.users.map(
+                                      (user, userIdx) => (
+                                        <div
+                                          key={`${reaction.emoji}-${user.userName}-${userIdx}`}
+                                          className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1.5 flex items-center gap-1.5"
+                                        >
+                                          <span className="text-base">
+                                            {reaction.emoji}
+                                          </span>
+                                          <ImageWithFallback
+                                            src={user.userAvatar}
+                                            alt={user.userName}
+                                            className="w-6 h-6 rounded-full border border-white"
+                                          />
+                                        </div>
+                                      ),
+                                    ),
+                                  )}
+                                </div>
+                              )}
+
+                              {post.textOverlay && (
+                                <div
+                                  className="absolute bottom-4 left-4 max-w-[70%] z-20"
+                                  onClick={(e) =>
+                                    e.stopPropagation()
+                                  }
+                                >
+                                  <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm">
+                                    <ImageWithFallback
+                                      src={post.userAvatar}
+                                      alt={post.userName}
+                                      className="w-7 h-7 rounded-full object-cover"
+                                    />
+                                    <p className="text-sm text-gray-900 whitespace-nowrap">
+                                      {post.textOverlay}
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+
+                              {getAllComments(
+                                post.id,
+                                post.comments,
+                              ).length > 0 && (
+                                <div
+                                  className="absolute bottom-20 right-4 flex flex-col gap-2 items-end max-w-[70%] max-h-[50vh] overflow-y-auto z-20"
+                                  onClick={(e) =>
+                                    e.stopPropagation()
+                                  }
+                                >
+                                  {getAllComments(
+                                    post.id,
+                                    post.comments,
+                                  ).map((comment, idx) => (
+                                    <div
+                                      key={`comment-${post.id}-${idx}-${comment.userName}-${comment.timestamp}`}
+                                      className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm"
+                                    >
+                                      <p className="text-sm text-gray-900 whitespace-nowrap">
+                                        {comment.text}
+                                      </p>
+                                      <ImageWithFallback
+                                        src={comment.userAvatar}
+                                        alt={comment.userName}
+                                        className="w-7 h-7 rounded-full object-cover"
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {selectedPostForReaction !== post.id &&
+                            (post.location ||
+                              post.weather ||
+                              post.time ||
+                              post.health) && (
+                              <div className="absolute top-4 left-4 flex flex-col gap-2">
+                                {post.location && (
+                                  <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                    <MapPin
+                                      size={16}
+                                      className="text-white"
+                                    />
+                                    <span className="text-white text-sm">
+                                      {post.location}
+                                    </span>
+                                  </div>
+                                )}
+                                {post.weather && (
+                                  <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                    <Cloud
+                                      size={16}
+                                      className="text-white"
+                                    />
+                                    <span className="text-white text-sm">
+                                      {post.weather}
+                                    </span>
+                                  </div>
+                                )}
+                                {post.time && (
+                                  <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                    <Clock
+                                      size={16}
+                                      className="text-white"
+                                    />
+                                    <span className="text-white text-sm">
+                                      {post.time}
+                                    </span>
+                                  </div>
+                                )}
+                                {post.health && (
+                                  <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                    <Heart
+                                      size={16}
+                                      className="text-white"
+                                    />
+                                    <span className="text-white text-sm">
+                                      {post.health}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                          {selectedPostForReaction !== post.id &&
+                            post.badge &&
+                            !post.location &&
+                            !post.weather &&
+                            !post.time &&
+                            !post.health && (
+                              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1 text-sm font-medium">
+                                <span>{post.badge}</span>
+                              </div>
+                            )}
+
+                          {selectedPostForReaction !==
+                            post.id && (
+                            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <ImageWithFallback
+                                  src={post.userAvatar}
+                                  alt={post.userName}
+                                  className="w-8 h-8 rounded-full border-2 border-white"
+                                />
+                                {post.textOverlay && (
+                                  <span className="text-white font-semibold text-sm line-clamp-1">
+                                    {post.textOverlay}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="bg-gray-100 rounded-full px-2.5 py-1 text-xs font-bold text-gray-800 flex items-center justify-center relative">
+                                +
+                                {
+                                  getAllComments(
+                                    post.id,
+                                    post.comments,
+                                  ).length
+                                }
+                                {getAllComments(
+                                  post.id,
+                                  post.comments,
+                                ).length > 0 && (
+                                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 댓글 및 이모지 입력 영역 */}
+                    <div className="relative flex items-center gap-2 w-full mt-4 h-[56px]">
+                      <AnimatePresence>
+                        {emojiAnimation &&
+                          emojiAnimation.active &&
+                          currentPostId === post.id && (
+                            <div className="fixed inset-0 pointer-events-none z-50">
+                              {emojiAnimation.emoji === "❤️" ? (
+                                <>
+                                  {Array.from({ length: 30 }).map(
+                                    (_, i) => {
+                                      const pos =
+                                        generateRandomPosition();
+                                      return (
+                                        <motion.div
+                                          key={`heart-${post.id}-${i}`}
+                                          initial={{
+                                            opacity: 0,
+                                            scale: 0,
+                                            x: `${pos.x}vw`,
+                                            y: `${pos.y}vh`,
+                                          }}
+                                          animate={{
+                                            opacity: [0, 1, 1, 0],
+                                            scale: [
+                                              0, 1.5, 1.5, 0,
+                                            ],
+                                          }}
+                                          exit={{
+                                            opacity: 0,
+                                            scale: 0,
+                                          }}
+                                          transition={{
+                                            duration: 1.5,
+                                            delay:
+                                              Math.random() * 0.3,
+                                            ease: "easeOut",
+                                          }}
+                                          className="absolute text-6xl"
+                                        >
+                                          ❤️
+                                        </motion.div>
+                                      );
+                                    },
+                                  )}
+                                </>
+                              ) : emojiAnimation.emoji ===
+                                "👍" ? (
+                                <>
+                                  {Array.from({ length: 20 }).map(
+                                    (_, i) => {
+                                      const angle =
+                                        (i / 20) * Math.PI * 2;
+                                      const distance =
+                                        200 + Math.random() * 200;
+                                      return (
+                                        <motion.div
+                                          key={`thumbs-${post.id}-${i}`}
+                                          initial={{
+                                            opacity: 0,
+                                            scale: 0,
+                                            x: "50vw",
+                                            y: "50vh",
+                                          }}
+                                          animate={{
+                                            opacity: [0, 1, 1, 0],
+                                            scale: [0, 1.5, 1, 0],
+                                            x: `calc(50vw + ${
+                                              Math.cos(angle) *
+                                              distance
+                                            }px)`,
+                                            y: `calc(50vh + ${
+                                              Math.sin(angle) *
+                                              distance
+                                            }px)`,
+                                            rotate: [0, 360],
+                                          }}
+                                          exit={{
+                                            opacity: 0,
+                                            scale: 0,
+                                          }}
+                                          transition={{
+                                            duration: 1.5,
+                                            delay: i * 0.05,
+                                            ease: "easeOut",
+                                          }}
+                                          className="absolute text-5xl"
+                                        >
+                                          👍
+                                        </motion.div>
+                                      );
+                                    },
+                                  )}
+                                </>
+                              ) : null}
+                            </div>
+                          )}
                       </AnimatePresence>
+
+                      {/* 이모지 토글 버튼 */}
+                      <button
+                        className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors overflow-hidden relative"
+                        onClick={() => {
+                          setCurrentPostId(post.id);
+                          setShowEmojiPicker(!showEmojiPicker);
+                        }}
+                      >
+                        <AnimatePresence
+                          mode="wait"
+                          initial={false}
+                        >
+                          {showEmojiPicker &&
+                          currentPostId === post.id ? (
+                            <motion.div
+                              key="close-icon"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5] text-gray-800 rounded-full"
+                            >
+                              <X size={20} />
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="smile-icon"
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 10 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute inset-0 flex items-center justify-center text-gray-500 hover:text-gray-800"
+                            >
+                              <Smile size={24} />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </button>
+
+                      {/* 입력창과 이모지 리스트 컨테이너 */}
+                      <div className="flex-1 h-full relative flex items-center">
+                        <AnimatePresence
+                          mode="wait"
+                          initial={false}
+                        >
+                          {showEmojiPicker &&
+                          currentPostId === post.id ? (
+                            // 이모지 리스트 (배경 제거, 각 버튼에 배경 적용)
+                            <motion.div
+                              key="emoji-list"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute inset-0 flex items-center gap-2 overflow-x-auto no-scrollbar" // px-2 제거, 배경 제거
+                            >
+                              {emojis.map((emoji) => (
+                                <button
+                                  key={emoji}
+                                  onClick={() => {
+                                    setCurrentPostId(post.id);
+                                    handleEmojiReaction(
+                                      emoji,
+                                      post.id,
+                                    );
+                                    confetti({
+                                      particleCount: 100,
+                                      spread: 70,
+                                      origin: { y: 0.6 },
+                                    });
+                                  }}
+                                  className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-2xl bg-[#F5F5F5] rounded-full transition-colors" // 배경색 추가
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                            </motion.div>
+                          ) : (
+                            // 댓글 입력창
+                            <motion.div
+                              key="comment-input"
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 10 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute inset-y-2 inset-x-0 flex items-center bg-[#F5F5F5] rounded-full px-4"
+                            >
+                              <input
+                                type="text"
+                                placeholder="댓글을 작성해주세요"
+                                className="w-full bg-transparent outline-none text-[#1A1A1A] placeholder:text-gray-400"
+                                value={newComment}
+                                onChange={(e) =>
+                                  setNewComment(e.target.value)
+                                }
+                                onKeyDown={(e) => {
+                                  if (
+                                    e.key === "Enter" &&
+                                    !e.shiftKey
+                                  ) {
+                                    e.preventDefault();
+                                    handleAddComment(post.id);
+                                  }
+                                }}
+                              />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </SwiperSlide>
-            ))}
+                </SwiperSlide>
+              );
+            })}
           </Swiper>
         )}
       </div>
