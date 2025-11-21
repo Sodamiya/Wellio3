@@ -7,7 +7,12 @@ import { motion, AnimatePresence } from "motion/react";
 // --- [타입 정의] ---
 interface Notification {
   id: number;
-  type: "hospital" | "family" | "medicine" | "challenge" | "community";
+  type:
+    | "hospital"
+    | "family"
+    | "medicine"
+    | "challenge"
+    | "community";
   category: string;
   message: string;
   time: string;
@@ -251,8 +256,8 @@ export function NotificationPage({
                 className="relative"
               >
                 {/* 1. 뒤에 숨겨진 빨간 휴지통 배경 */}
-                <div className="absolute inset-0.5 flex items-center justify-end pr-6 bg-red-500 rounded-xl z-0">
-                  <Trash2 size={24} className="text-white" />
+                <div className="absolute inset-0.5 flex items-center justify-end pr-6 rounded-xl z-0">
+                  <Trash2 size={24} className="text-gray-400" />
                 </div>
 
                 {/* 2. 드래그 가능한 실제 알림 카드 */}

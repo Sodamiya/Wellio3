@@ -33,66 +33,12 @@ interface Review {
   visitType?: string;
 }
 
-const mockReviews: Review[] = [
-  {
-    id: 1,
-    hospitalId: 1,
-    hospitalName: "바른정형외과의원",
-    hospitalImage: "https://example.com/hospital1.jpg",
-    visitDate: "2025.08.05",
-    rating: 5,
-    keywords: [
-      "회복이 빨라요",
-      "친절해요",
-      "과잉진료가 없어요",
-    ],
-    reviewText:
-      "대기 많아서 대리접수 해드렸어요. 꾸준히 물리 받고 많이 좋아지셨습니다 첨엔 가만히 있어도 통증이 심했는데 3개월 정도 다녔는데 이제 통증도 없으시다고 하네요. 앞으로도 잘부탁드립니다",
-    userName: "김철수",
-    userAvatar: "https://example.com/avatar1.jpg",
-    createdAt: "2024-11-15T10:00:00Z",
-    visitType: "첫방문",
-  },
-  {
-    id: 2,
-    hospitalId: 2,
-    hospitalName: "고운피부과",
-    hospitalImage: "https://example.com/hospital2.jpg",
-    visitDate: "2025.07.14",
-    rating: 5,
-    keywords: ["쾌적해요", "꼼꼼해요"],
-    reviewText:
-      "토닝이랑 재생관리 받으려고 방문했어요. 장비도 최신 모델링이고, 시술 과정도 꼼꼼해서 믿음이 갑니다.",
-    userName: "이영희",
-    userAvatar: "https://example.com/avatar2.jpg",
-    createdAt: "2024-11-10T14:00:00Z",
-    visitType: "첫방문",
-  },
-  {
-    id: 3,
-    hospitalId: 3,
-    hospitalName: "오늘도강한내과의원",
-    hospitalImage: "https://example.com/hospital3.jpg",
-    visitDate: "2025.07.02",
-    rating: 5,
-    keywords: ["꼼꼼해요", "과잉진료가 없어요"],
-    reviewText:
-      "아빠 혈압약 받아왔습니다. 원장님 언제나 친절하고 좋으세요!",
-    userName: "박민수",
-    userAvatar: "https://example.com/avatar3.jpg",
-    createdAt: "2024-10-25T12:00:00Z",
-    visitType: "재방문",
-  },
-];
-
 export function MyReviewsPage({
   onBack,
-  reviews = mockReviews,
+  reviews = [],
   onDeleteReview,
 }: MyReviewsPageProps) {
-  const [displayReviews, setDisplayReviews] = useState(
-    reviews.length > 0 ? reviews : mockReviews,
-  );
+  const [displayReviews, setDisplayReviews] = useState(reviews);
 
   const [expandedReviewId, setExpandedReviewId] = useState<
     number | null
@@ -109,6 +55,14 @@ export function MyReviewsPage({
   const [reviewToDelete, setReviewToDelete] = useState<
     number | null
   >(null);
+
+  // 드래그 삭제 관련 state
+  const [dragStartX, setDragStartX] = useState<number | null>(null);
+
+  // reviews prop이 변경되면 displayReviews 업데이트
+  useEffect(() => {
+    setDisplayReviews(reviews);
+  }, [reviews]);
 
   useEffect(() => {
     if (editingReviewId !== null && textareaRef.current) {
@@ -217,174 +171,194 @@ export function MyReviewsPage({
             const isEditing = editingReviewId === review.id;
 
             return (
-              <motion.div
-                key={review.id}
-                className={`bg-white rounded-xl p-5 shadow-sm transition-colors relative flex flex-col overflow-hidden mb-3 ${isEditing ? "cursor-default" : "cursor-pointer hover:shadow-md"}`}
-                onClick={() => handleCardClick(review.id)}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1">
-                    <span className="font-bold text-gray-900 text-lg">
-                      {review.hospitalName}
-                    </span>
-                    <ChevronRight
-                      size={18}
-                      className="text-gray-400"
-                    />
-                  </div>
+              <div key={review.id} className="relative mb-3">
+                {/* 휴지통 배경 */}
+                <div className="absolute inset-0 flex items-center justify-end pr-6 rounded-xl z-0">
+                  <Trash2 size={32} className="text-gray-400" />
                 </div>
 
-                <div className="flex items-center gap-2 text-sm mb-3">
-                  <div className="flex items-center gap-0.5">
-                    {[...Array(5)].map((_, index) => (
-                      <Star
-                        key={index}
-                        size={16}
-                        className={
-                          index < review.rating
-                            ? "fill-[#FFB800] text-[#FFB800]"
-                            : "text-gray-200"
-                        }
-                      />
-                    ))}
-                  </div>
-
-                  <div className="flex items-center gap-2 text-[#999999] text-[13px]">
-                    <span className="ml-1">
-                      {review.visitDate}
-                    </span>
-                    <span className="text-gray-300">|</span>
-                    <span>{review.visitType || "첫방문"}</span>
-                  </div>
-                </div>
-
-                {review.keywords.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mb-3">
-                    {review.keywords.map((keyword, index) => (
-                      <span
-                        key={index}
-                        className="px-2.5 py-1 bg-white border border-[#36D2C5] text-[#36D2C5] rounded-[14px] text-[12px]"
-                        style={{ borderRadius: "999px" }}
-                      >
-                        {keyword}
+                {/* 리뷰 카드 */}
+                <motion.div
+                  className={`bg-white rounded-xl p-5 shadow-sm transition-colors relative flex flex-col overflow-hidden ${isEditing ? "cursor-default" : "cursor-pointer hover:shadow-md"} z-10`}
+                  onClick={() => handleCardClick(review.id)}
+                  drag="x"
+                  dragConstraints={{ left: -120, right: 0 }}
+                  dragElastic={0.1}
+                  onDragStart={() => {
+                    setDragStartX(1);
+                  }}
+                  onDragEnd={(event, info) => {
+                    if (info.offset.x < -100) {
+                      setReviewToDelete(review.id);
+                      setShowDeleteModal(true);
+                    }
+                    setDragStartX(null);
+                  }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0, x: 0 }}
+                  exit={{ opacity: 0, x: -50 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1">
+                      <span className="font-bold text-gray-900 text-lg">
+                        {review.hospitalName}
                       </span>
-                    ))}
+                      <ChevronRight
+                        size={18}
+                        className="text-gray-400"
+                      />
+                    </div>
                   </div>
-                )}
 
-                {/* 리뷰 텍스트 및 입력창 영역 */}
-                {isEditing ? (
-                  <div
-                    className="w-full mt-1"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <textarea
-                      ref={textareaRef}
-                      value={editText}
-                      onChange={(e) =>
-                        setEditText(e.target.value)
-                      }
-                      className="w-full p-3 border border-gray-200 rounded-lg text-[15px] text-[#333333] leading-normal resize-none focus:outline-none focus:border-[#36D2C5] bg-gray-50 font-sans overflow-hidden"
-                      style={{ minHeight: "48px" }}
-                    />
+                  <div className="flex items-center gap-2 text-sm mb-3">
+                    <div className="flex items-center gap-0.5">
+                      {[...Array(5)].map((_, index) => (
+                        <Star
+                          key={index}
+                          size={16}
+                          className={
+                            index < review.rating
+                              ? "fill-[#FFB800] text-[#FFB800]"
+                              : "text-gray-200"
+                          }
+                        />
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-2 text-[#999999] text-[13px]">
+                      <span className="ml-1">
+                        {review.visitDate}
+                      </span>
+                      <span className="text-gray-300">|</span>
+                      <span>{review.visitType || "첫방문"}</span>
+                    </div>
                   </div>
-                ) : (
-                  review.reviewText && (
-                    <motion.div
-                      initial={false}
-                      animate={{
-                        height: isExpanded ? "auto" : 48,
-                      }}
-                      transition={{
-                        duration: 0.3,
-                        ease: "easeInOut",
-                      }}
-                      className="text-[15px] text-[#333333] leading-normal overflow-hidden"
-                    >
-                      <p>{review.reviewText}</p>
-                    </motion.div>
-                  )
-                )}
 
-                {/* 버튼 영역 */}
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div
-                      initial={{
-                        height: 0,
-                        opacity: 0,
-                        marginTop: 0,
-                      }}
-                      animate={{
-                        height: "auto",
-                        opacity: 1,
-                        marginTop: 12,
-                      }}
-                      exit={{
-                        height: 0,
-                        opacity: 0,
-                        marginTop: 0,
-                      }}
-                      transition={{
-                        duration: 0.3,
-                        ease: "easeInOut",
-                      }}
-                      className="overflow-hidden"
-                    >
-                      <div
-                        className={`flex justify-end gap-3 ${isEditing ? "mt-2" : "pt-1"}`}
-                      >
-                        {isEditing ? (
-                          // [수정] 수정/삭제 버튼과 동일한 스타일(배경X, 아이콘+텍스트)로 변경
-                          <>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="flex items-center gap-1 text-gray-500 hover:text-gray-800 text-sm py-1 px-1 transition-colors"
-                            >
-                              <X size={14} />
-                              <span>취소</span>
-                            </button>
-                            <button
-                              onClick={(e) =>
-                                handleSaveEdit(e, review.id)
-                              }
-                              className="flex items-center gap-1 text-[#36D2C5] hover:text-[#2bb5aa] text-sm py-1 px-1 transition-colors font-medium"
-                            >
-                              <Check size={14} />
-                              <span>완료</span>
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={(e) =>
-                                handleEditClick(e, review)
-                              }
-                              className="flex items-center gap-1 text-gray-500 hover:text-gray-800 text-sm py-1 px-1 transition-colors"
-                            >
-                              <Pencil size={14} />
-                              <span>수정</span>
-                            </button>
-                            <button
-                              onClick={(e) =>
-                                handleDeleteClick(e, review.id)
-                              }
-                              className="flex items-center gap-1 text-gray-500 hover:text-red-500 text-sm py-1 px-1 transition-colors"
-                            >
-                              <Trash2 size={14} />
-                              <span>삭제</span>
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </motion.div>
+                  {review.keywords.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {review.keywords.map((keyword, index) => (
+                        <span
+                          key={index}
+                          className="px-2.5 py-1 bg-white border border-[#36D2C5] text-[#36D2C5] rounded-[14px] text-[12px]"
+                          style={{ borderRadius: "999px" }}
+                        >
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
                   )}
-                </AnimatePresence>
-              </motion.div>
+
+                  {/* 리뷰 텍스트 및 입력창 영역 */}
+                  {isEditing ? (
+                    <div
+                      className="w-full mt-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <textarea
+                        ref={textareaRef}
+                        value={editText}
+                        onChange={(e) =>
+                          setEditText(e.target.value)
+                        }
+                        className="w-full p-3 border border-gray-200 rounded-lg text-[15px] text-[#333333] leading-normal resize-none focus:outline-none focus:border-[#36D2C5] bg-gray-50 font-sans overflow-hidden"
+                        style={{ minHeight: "48px" }}
+                      />
+                    </div>
+                  ) : (
+                    review.reviewText && (
+                      <motion.div
+                        initial={false}
+                        animate={{
+                          height: isExpanded ? "auto" : 48,
+                        }}
+                        transition={{
+                          duration: 0.3,
+                          ease: "easeInOut",
+                        }}
+                        className="text-[15px] text-[#333333] leading-normal overflow-hidden"
+                      >
+                        <p>{review.reviewText}</p>
+                      </motion.div>
+                    )
+                  )}
+
+                  {/* 버튼 영역 */}
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{
+                          height: 0,
+                          opacity: 0,
+                          marginTop: 0,
+                        }}
+                        animate={{
+                          height: "auto",
+                          opacity: 1,
+                          marginTop: 12,
+                        }}
+                        exit={{
+                          height: 0,
+                          opacity: 0,
+                          marginTop: 0,
+                        }}
+                        transition={{
+                          duration: 0.3,
+                          ease: "easeInOut",
+                        }}
+                        className="overflow-hidden"
+                      >
+                        <div
+                          className={`flex justify-end gap-3 ${isEditing ? "mt-2" : "pt-1"}`}
+                        >
+                          {isEditing ? (
+                            // [수정] 수정/삭제 버튼과 동일한 스타일(배경X, 아이콘+텍스트)로 변경
+                            <>
+                              <button
+                                onClick={handleCancelEdit}
+                                className="flex items-center gap-1 text-gray-500 hover:text-gray-800 text-sm py-1 px-1 transition-colors"
+                              >
+                                <X size={14} />
+                                <span>취소</span>
+                              </button>
+                              <button
+                                onClick={(e) =>
+                                  handleSaveEdit(e, review.id)
+                                }
+                                className="flex items-center gap-1 text-[#36D2C5] hover:text-[#2bb5aa] text-sm py-1 px-1 transition-colors font-medium"
+                              >
+                                <Check size={14} />
+                                <span>완료</span>
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={(e) =>
+                                  handleEditClick(e, review)
+                                }
+                                className="flex items-center gap-1 text-gray-500 hover:text-gray-800 text-sm py-1 px-1 transition-colors"
+                              >
+                                <Pencil size={14} />
+                                <span>수정</span>
+                              </button>
+                              <button
+                                onClick={(e) =>
+                                  handleDeleteClick(e, review.id)
+                                }
+                                className="flex items-center gap-1 text-gray-500 hover:text-red-500 text-sm py-1 px-1 transition-colors"
+                              >
+                                <Trash2 size={14} />
+                                <span>삭제</span>
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              </div>
             );
           })}
         </AnimatePresence>

@@ -15,6 +15,9 @@ import {
   Clock,
   Heart,
   Check,
+  Footprints, // 추가
+  Flame, // 추가
+  TrendingUp, // 추가 (오른층수용)
 } from "lucide-react";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Button } from "./ui/button";
@@ -32,6 +35,7 @@ import {
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import { toast } from "sonner@2.0.3";
+import { motion, AnimatePresence } from "framer-motion";
 
 // 원본 필터 목록
 const ORIGINAL_FILTERS = [
@@ -246,9 +250,9 @@ export function UploadPage({
       console.log("사진 업로드:", selectedImage);
 
       // 선택된 필터 가져오기
-      const filterStyle = ORIGINAL_FILTERS.find(
-        (f) => f.name === selectedFilter,
-      )?.filter || "none";
+      const filterStyle =
+        ORIGINAL_FILTERS.find((f) => f.name === selectedFilter)
+          ?.filter || "none";
 
       // 필터가 "Normal"이 아니면 Canvas를 사용하여 필터 적용된 이미지 생성
       if (filterStyle !== "none" && selectedImage) {
@@ -266,7 +270,10 @@ export function UploadPage({
             ctx.drawImage(img, 0, 0);
 
             // 필터가 적용된 이미지를 dataURL로 변환
-            const filteredImageUrl = canvas.toDataURL("image/jpeg", 0.95);
+            const filteredImageUrl = canvas.toDataURL(
+              "image/jpeg",
+              0.95,
+            );
 
             // 업로드 실행
             onUpload({
@@ -571,8 +578,8 @@ export function UploadPage({
 
                   {/* 하단 텍스트 오버레이 */}
                   {textInput && (
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <p className="text-white text-lg bg-black/60 backdrop-blur-sm px-4 py-3 rounded-lg">
+                    <div className="absolute bottom-20 left-4 right-4">
+                      <p className="text-black text-lg bg-white/60 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-md">
                         {textInput}
                       </p>
                     </div>
@@ -604,7 +611,7 @@ export function UploadPage({
         {/* ------------------------------------------------------------------------- */}
 
         {/* 상단 Header (fixed) */}
-        <header className="fixed top-0 left-0 right-0 z-40 px-4 py-4 flex items-center justify-center w-full bg-white max-w-[500px] mx-auto">
+        <header className="fixed top-0 left-0 right-0 z-40 px-4 py-4 flex items-center justify-center w-full bg-white max-w-[500px] mx-auto min-h-[110px]">
           {isFilterMode ? (
             /* 필터 모드일 때: 완료 버튼 */
             <button
@@ -877,113 +884,164 @@ export function UploadPage({
         </div>
       )}
 
-      {/* 건강기록 선택 모달 */}
-      <AlertDialog
-        open={showHealthModal}
-        onOpenChange={setShowHealthModal}
-      >
-        <AlertDialogContent className="max-w-[380px]">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <Heart size={20} className="text-[#F44336]" />
-              건강기록 선택
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              사진에 추가할 건강기록을 선택하세요
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <div className="flex flex-col gap-2 py-4">
-            <button
-              onClick={() =>
-                handleHealthRecordSelect("걸음수 8,542보")
-              }
-              className="flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#FFEBEE] rounded-full flex items-center justify-center">
-                  <span className="text-lg">🚶</span>
-                </div>
-                <div className="text-left">
-                  <p className="font-medium">걸음수</p>
-                  <p className="text-sm text-gray-500">
-                    8,542보
-                  </p>
-                </div>
-              </div>
-              <Check size={20} className="text-[#36D2C5]" />
-            </button>
-
-            <button
-              onClick={() =>
-                handleHealthRecordSelect("심박수 72 BPM")
-              }
-              className="flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#FFEBEE] rounded-full flex items-center justify-center">
-                  <Heart size={20} className="text-[#F44336]" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium">심박수</p>
-                  <p className="text-sm text-gray-500">
-                    72 BPM
-                  </p>
-                </div>
-              </div>
-              <Check size={20} className="text-[#36D2C5]" />
-            </button>
-
-            <button
-              onClick={() =>
-                handleHealthRecordSelect("수면 7시간 30분")
-              }
-              className="flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#FFEBEE] rounded-full flex items-center justify-center">
-                  <span className="text-lg">😴</span>
-                </div>
-                <div className="text-left">
-                  <p className="font-medium">수면</p>
-                  <p className="text-sm text-gray-500">
-                    7시간 30분
-                  </p>
-                </div>
-              </div>
-              <Check size={20} className="text-[#36D2C5]" />
-            </button>
-
-            <button
-              onClick={() =>
-                handleHealthRecordSelect("칼로리 1,850 kcal")
-              }
-              className="flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#FFEBEE] rounded-full flex items-center justify-center">
-                  <span className="text-lg">🔥</span>
-                </div>
-                <div className="text-left">
-                  <p className="font-medium">칼로리</p>
-                  <p className="text-sm text-gray-500">
-                    1,850 kcal
-                  </p>
-                </div>
-              </div>
-              <Check size={20} className="text-[#36D2C5]" />
-            </button>
-          </div>
-
-          <AlertDialogFooter>
-            <AlertDialogCancel
+      {/* 건강기록 선택 모달 - 하단 슬라이드 업 */}
+      <AnimatePresence>
+        {showHealthModal && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center">
+            {/* 배경 오버레이 */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 bg-black/30"
               onClick={() => setShowHealthModal(false)}
+            />
+
+            {/* 모달 창 */}
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{
+                type: "spring",
+                damping: 30,
+                stiffness: 300,
+              }}
+              className="relative w-full max-w-[500px] bg-white rounded-t-2xl p-6 shadow-2xl"
             >
-              취소
-            </AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              {/* 3단 구성: 운동 / 감정 / 챌린지 */}
+              <div className="space-y-6">
+                {/* 1. 오늘 운동 기록 */}
+                <div className="space-y-3">
+                  <h3 className="text-[17px] font-bold text-[#1A1A1A]">
+                    오늘 운동 기록
+                  </h3>
+                  <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+                    <button
+                      onClick={() =>
+                        handleHealthRecordSelect("걸음수 8,542보")
+                      }
+                      className="flex items-center gap-1.5 bg-[#555555] text-white px-4 py-2.5 rounded-full whitespace-nowrap"
+                    >
+                      <Footprints
+                        size={16}
+                        className="text-gray-300"
+                      />
+                      <span className="text-[15px] font-medium">
+                        걸음수
+                      </span>
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleHealthRecordSelect(
+                          "소모칼로리 450kcal",
+                        )
+                      }
+                      className="flex items-center gap-1.5 bg-[#555555] text-white px-4 py-2.5 rounded-full whitespace-nowrap"
+                    >
+                      <Flame
+                        size={16}
+                        className="text-orange-400"
+                        fill="currentColor"
+                      />
+                      <span className="text-[15px] font-medium">
+                        소모칼로리
+                      </span>
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleHealthRecordSelect("오른층수 12층")
+                      }
+                      className="flex items-center gap-1.5 bg-[#555555] text-white px-4 py-2.5 rounded-full whitespace-nowrap"
+                    >
+                      <TrendingUp
+                        size={16}
+                        className="text-yellow-500"
+                      />
+                      <span className="text-[15px] font-medium">
+                        오른층수
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 2. 오늘 감정 기록 */}
+                <div className="space-y-3">
+                  <h3 className="text-[17px] font-bold text-[#1A1A1A]">
+                    오늘 감정 기록
+                  </h3>
+                  <div className="flex justify-between gap-2 overflow-x-auto scrollbar-hide pb-1">
+                    {["😄", "😊", "😐", "😔", "😫", "😢", "😭"].map(
+                      (emoji, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() =>
+                            handleHealthRecordSelect(
+                              `오늘의 기분 ${emoji}`,
+                            )
+                          }
+                          className="w-11 h-11 flex items-center justify-center bg-[#555555] rounded-full text-2xl shrink-0 hover:bg-[#444444] transition-colors"
+                        >
+                          {emoji}
+                        </button>
+                      ),
+                    )}
+                  </div>
+                </div>
+
+                {/* 3. 진행 중인 챌린지 */}
+                <div className="space-y-3">
+                  <h3 className="text-[17px] font-bold text-[#1A1A1A]">
+                    진행 중인 챌린지
+                  </h3>
+                  <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+                    <button
+                      onClick={() =>
+                        handleHealthRecordSelect(
+                          "챌린지: 5만보 걷기",
+                        )
+                      }
+                      className="flex items-center gap-2 bg-[#555555] text-white px-4 py-2.5 rounded-full whitespace-nowrap"
+                    >
+                      <span className="text-lg">👟</span>
+                      <span className="text-[15px] font-medium">
+                        5만보 걷기
+                      </span>
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleHealthRecordSelect(
+                          "챌린지: 주 1회 함께 걷기",
+                        )
+                      }
+                      className="flex items-center gap-2 bg-[#555555] text-white px-4 py-2.5 rounded-full whitespace-nowrap"
+                    >
+                      <span className="text-lg">👥</span>
+                      <span className="text-[15px] font-medium">
+                        주 1회 함께 걷기
+                      </span>
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleHealthRecordSelect(
+                          "챌린지: 건강 식단",
+                        )
+                      }
+                      className="flex items-center gap-2 bg-[#555555] text-white px-4 py-2.5 rounded-full whitespace-nowrap"
+                    >
+                      <span className="text-lg">🥗</span>
+                      <span className="text-[15px] font-medium">
+                        건강 식단
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

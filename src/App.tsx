@@ -86,6 +86,8 @@ export default function App() {
   // 로그인 플로우 상태: 'welcome' | 'social' | 'email'
   const [loginStep, setLoginStep] = useState<'welcome' | 'social' | 'email'>('welcome');
   const [userName, setUserName] = useState("김건강");
+  // 사용자 프로필 이미지 관리 (없으면 기본 이미지)
+  const [userAvatar, setUserAvatar] = useState("https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80");
   const [currentPage, setCurrentPage] = useState<Page>("home");
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
   
@@ -98,196 +100,58 @@ export default function App() {
   // 리뷰 작성한 병원 ID 목록 관리
   const [reviewedHospitals, setReviewedHospitals] = useState<number[]>([]);
   
-  // 작성한 리뷰 목록 관리
-  const [myReviews, setMyReviews] = useState<Review[]>([]);
-  
-  // 샘플 리뷰 데이터 (모든 병원에 표시될 기본 리뷰)
-  const sampleReviews = [
-    // 매일건강의원 (id: 1) - 기존 3개 유지
+  // 작성한 리뷰 목록 관리 (초기 목데이터 포함)
+  const [myReviews, setMyReviews] = useState<Review[]>([
     {
-      id: 9001,
-      hospitalId: 1, // 매일건강의원
-      hospitalName: "매일건강의원",
-      hospitalImage: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80",
-      visitDate: "2025.05.22",
+      id: 1,
+      hospitalId: 1,
+      hospitalName: "바른정형외과의원",
+      hospitalImage: "https://example.com/hospital1.jpg",
+      visitDate: "2025.08.05",
       rating: 5,
-      keywords: ["진료 만족해요", "친절해요"],
-      reviewText: "목이 아프고 근육통이 심해서 방문했는데 친절하게 진료 잘 봐주셔서 좋았습니다! 목 상태 확인하시고 간단한 증상 상담 후 약 처방해 주셨어요. 처방받은 약 먹고 한숨 잤더니 한결 개운해졌습니다.\n\n갑자기 아파서 가장 가까운 데로 바로 접수 후에 대기 없이 진료받을 수 있었어요. 기운 없었는데 빨리 진료 끝나서 만족합니다. 서초동 근처에 병원 찾으시면 추천해요 ㅎㅎ",
-      userName: "김**님",
-      userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
-      createdAt: "2025-05-22T10:30:00Z",
-      likes: 6,
+      keywords: [
+        "회복이 빨라요",
+        "친절해요",
+        "과잉진료가 없어요",
+      ],
+      reviewText:
+        "대기 많아서 대리접수 해드렸어요. 꾸준히 물리 받고 많이 좋아지셨습니다 첨엔 가만히 있어도 통증이 심했는데 3개월 정도 다녔는데 이제 통증도 없으시다고 하네요. 앞으로도 잘부탁드립니다",
+      userName: "김철수",
+      userAvatar: "https://example.com/avatar1.jpg",
+      createdAt: "2024-11-15T10:00:00Z",
       visitType: "첫방문",
     },
     {
-      id: 9002,
-      hospitalId: 1, // 매일건강의원
-      hospitalName: "매일건강의원",
-      hospitalImage: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80",
-      visitDate: "2025.01.29",
+      id: 2,
+      hospitalId: 2,
+      hospitalName: "고운피부과",
+      hospitalImage: "https://example.com/hospital2.jpg",
+      visitDate: "2025.07.14",
       rating: 5,
-      keywords: ["진료 만족해요", "재진료 희망해요", "친절해요"],
-      reviewText: "만족스러운 첫 방문! 이사 와서 처음 방문했는데, 앞으로 꾸준히 다닐 것 같습니다. 제 건강을 믿고 맡길 수 있는 주치의를 만난 것 같아 든든해요.",
-      userName: "박**님",
-      userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80",
-      createdAt: "2025-01-29T14:20:00Z",
-      likes: 15,
+      keywords: ["쾌적해요", "꼼꼼해요"],
+      reviewText:
+        "토닝이랑 재생관리 받으려고 방문했어요. 장비도 최신 모델링이고, 시술 과정도 꼼꼼해서 믿음이 갑니다.",
+      userName: "이영희",
+      userAvatar: "https://example.com/avatar2.jpg",
+      createdAt: "2024-11-10T14:00:00Z",
       visitType: "첫방문",
     },
     {
-      id: 9003,
-      hospitalId: 1, // 매일건강의원
-      hospitalName: "매일건강의원",
-      hospitalImage: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80",
-      visitDate: "2024.12.10",
-      rating: 4,
-      keywords: ["대기시간이 짧아요", "친절해요"],
-      reviewText: "항상 친절하게 맞아주셔서 감사합니다. 대기 시간이 짧아서 바쁜 직장인에게 딱이에요.",
-      userName: "이**님",
-      userAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
-      createdAt: "2024-12-10T16:45:00Z",
-      likes: 2,
+      id: 3,
+      hospitalId: 3,
+      hospitalName: "오늘도강한내과의원",
+      hospitalImage: "https://example.com/hospital3.jpg",
+      visitDate: "2025.07.02",
+      rating: 5,
+      keywords: ["꼼꼼해요", "과잉진료가 없어요"],
+      reviewText:
+        "아빠 혈압약 받아왔습니다. 원장님 언제나 친절하고 좋으세요!",
+      userName: "박민수",
+      userAvatar: "https://example.com/avatar3.jpg",
+      createdAt: "2024-10-25T12:00:00Z",
       visitType: "재방문",
     },
-    // 365클리닉 강남본점 (id: 2) - 신규 3개
-    {
-      id: 9004,
-      hospitalId: 2,
-      hospitalName: "365클리닉 강남본점",
-      hospitalImage: "https://via.placeholder.com/100x100/E7F3FF/2F80ED?text=Logo",
-      visitDate: "2025.03.15",
-      rating: 5,
-      keywords: ["시술 만족해요", "친절해요", "시설이 깨끗해요"],
-      reviewText: "피부 레이저 시술 받았는데 정말 만족스러워요. 원장님께서 꼼꼼하게 상담해주시고 시술도 세심하게 해주셔서 좋았습니다. 시설도 깨끗하고 직원분들도 친절하세요!",
-      userName: "최**님",
-      userAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80",
-      createdAt: "2025-03-15T11:00:00Z",
-      likes: 8,
-      visitType: "첫방문",
-    },
-    {
-      id: 9005,
-      hospitalId: 2,
-      hospitalName: "365클리닉 강남본점",
-      hospitalImage: "https://via.placeholder.com/100x100/E7F3FF/2F80ED?text=Logo",
-      visitDate: "2025.02.20",
-      rating: 4,
-      keywords: ["재진료 희망해요", "시술 만족해요"],
-      reviewText: "여드름 치료로 몇 번 방문했는데 점점 좋아지고 있어요. 꾸준히 다닐 예정입니다.",
-      userName: "정**님",
-      userAvatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80",
-      createdAt: "2025-02-20T15:30:00Z",
-      likes: 4,
-      visitType: "재방문",
-    },
-    {
-      id: 9006,
-      hospitalId: 2,
-      hospitalName: "365클리닉 강남본점",
-      hospitalImage: "https://via.placeholder.com/100x100/E7F3FF/2F80ED?text=Logo",
-      visitDate: "2025.01.10",
-      rating: 5,
-      keywords: ["친절해요", "시술 만족해요", "대기시간이 짧아요"],
-      reviewText: "예약 시간 잘 지켜주셔서 대기 시간이 거의 없었어요. 피부 상담도 친절하게 해주시고 효과도 좋아서 만족합니다!",
-      userName: "한**님",
-      userAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80",
-      createdAt: "2025-01-10T14:00:00Z",
-      likes: 12,
-      visitType: "첫방문",
-    },
-    // 사랑니쏙쏙 강남본점 (id: 3) - 신규 3개
-    {
-      id: 9007,
-      hospitalId: 3,
-      hospitalName: "사랑니쏙쏙 강남본점",
-      hospitalImage: "https://via.placeholder.com/100x100/E8F8F7/00C2B3?text=Logo",
-      visitDate: "2025.04.05",
-      rating: 5,
-      keywords: ["진료 만족해요", "친절해요", "시설이 깨끗해요"],
-      reviewText: "사랑니 발치 정말 잘 해주셔서 감사합니다. 생각보다 아프지 않았고 회복도 빨랐어요. 원장님이 매우 꼼꼼하시고 친절하셨습니다!",
-      userName: "강**님",
-      userAvatar: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=100&q=80",
-      createdAt: "2025-04-05T10:20:00Z",
-      likes: 10,
-      visitType: "첫방문",
-    },
-    {
-      id: 9008,
-      hospitalId: 3,
-      hospitalName: "사랑니쏙쏙 강남본점",
-      hospitalImage: "https://via.placeholder.com/100x100/E8F8F7/00C2B3?text=Logo",
-      visitDate: "2025.03.12",
-      rating: 4,
-      keywords: ["진료 만족해요", "대기시간이 짧아요"],
-      reviewText: "예약제라 대기 시간이 짧아서 좋았어요. 사랑니 발치 후 붓기도 적고 통증도 거의 없었습니다.",
-      userName: "윤**님",
-      userAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=80",
-      createdAt: "2025-03-12T16:00:00Z",
-      likes: 5,
-      visitType: "첫방문",
-    },
-    {
-      id: 9009,
-      hospitalId: 3,
-      hospitalName: "사랑니쏙쏙 강남본점",
-      hospitalImage: "https://via.placeholder.com/100x100/E8F8F7/00C2B3?text=Logo",
-      visitDate: "2025.02.28",
-      rating: 5,
-      keywords: ["친절해요", "진료 만족해요", "재진료 희망해요"],
-      reviewText: "처음엔 무서웠는데 원장님이 차근차근 설명해주셔서 안심하고 시술받을 수 있었어요. 다음에 다른 사랑니도 여기서 뽑으려고요!",
-      userName: "임**님",
-      userAvatar: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=100&q=80",
-      createdAt: "2025-02-28T11:30:00Z",
-      likes: 7,
-      visitType: "첫방문",
-    },
-    // 강남예쁜이치과의원 (id: 4) - 신규 3개
-    {
-      id: 9010,
-      hospitalId: 4,
-      hospitalName: "강남예쁜이치과의원",
-      hospitalImage: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop",
-      visitDate: "2025.05.01",
-      rating: 5,
-      keywords: ["시술 만족해요", "친절해요", "시설이 깨끗해요"],
-      reviewText: "라미네이트 시술 받았는데 결과가 정말 만족스러워요. 상담부터 시술까지 모든 과정이 체계적이고 친절했습니다. 가격 대비 효과 최고!",
-      userName: "송**님",
-      userAvatar: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=100&q=80",
-      createdAt: "2025-05-01T13:45:00Z",
-      likes: 18,
-      visitType: "첫방문",
-    },
-    {
-      id: 9011,
-      hospitalId: 4,
-      hospitalName: "강남예쁜이치과의원",
-      hospitalImage: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop",
-      visitDate: "2025.04.20",
-      rating: 5,
-      keywords: ["친절해요", "진료 만족해요", "재진료 희망해요"],
-      reviewText: "임플란트 상담 받으러 갔는데 원장님이 정말 자세하게 설명해주셨어요. 다른 곳보다 훨씬 신뢰가 갑니다. 여기서 진행하기로 결정했어요!",
-      userName: "오**님",
-      userAvatar: "https://images.unsplash.com/photo-1463453091185-61582044d556?w=100&q=80",
-      createdAt: "2025-04-20T10:15:00Z",
-      likes: 9,
-      visitType: "첫방문",
-    },
-    {
-      id: 9012,
-      hospitalId: 4,
-      hospitalName: "강남예쁜이치과의원",
-      hospitalImage: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop",
-      visitDate: "2025.03.28",
-      rating: 4,
-      keywords: ["시설이 깨끗해요", "시술 만족해요"],
-      reviewText: "치아 미백 받았는데 시설이 정말 깨끗하고 좋아요. 효과도 만족스럽습니다. 다만 가격이 조금 있는 편이에요.",
-      userName: "장**님",
-      userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80",
-      createdAt: "2025-03-28T14:50:00Z",
-      likes: 6,
-      visitType: "재방문",
-    },
-  ];
+  ]);
 
   // 병원별 리뷰 개수를 계산하는 함수
   const getHospitalReviewCount = (hospitalId: number): number => {
@@ -357,7 +221,7 @@ export default function App() {
       userAvatar:
         "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
       caption: "챌린지 첫 시작!",
-      userName: "김건강",
+      userName: "관리자", // 👈 현재 로그인된 사용자와 일치시킴
       textOverlay: "오늘부터 시작하는 건강한 습관!",
       comments: [
         {
@@ -505,7 +369,7 @@ export default function App() {
   const handleUpload = (newPost: Omit<Post, "id" | "userName" | "userAvatar">) => {
     const post: Post = {
       ...newPost,
-      id: posts.length + 1,
+      id: Math.max(0, ...posts.map(p => p.id)) + 1,
       userName: userName,
       userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
     };
@@ -528,6 +392,11 @@ export default function App() {
   // 포스트 삭제 함수
   const handleDeletePost = (postId: number) => {
     setPosts(posts.filter(post => post.id !== postId));
+  };
+
+  // 리뷰 삭제 함수
+  const handleDeleteReview = (reviewId: number) => {
+    setMyReviews(myReviews.filter(review => review.id !== reviewId));
   };
 
   // 로그인 플로우 처리
@@ -627,17 +496,20 @@ export default function App() {
             onDeletePost={handleDeletePost}
             posts={posts}
             currentUserName={userName} // 👈 현재 로그인된 사용자 이름 전달
+            currentUserAvatar={userAvatar} // 👈 현재 로그인된 사용자 프로필 이미지 전달
           />
         )}
         {/* 👇 3. '준비중' 텍스트 대신 ProfilePage 컴포넌트로 교체 */}
         {currentPage === "profile" && (
           <ProfilePage
             userName={userName}
+            userAvatar={userAvatar} // 👈 프로필 이미지 전달
             currentPage={currentPage}
             onPageChange={setCurrentPage}
             onBack={() => setCurrentPage("home")} // '뒤로가기' 누르면 홈으로
             onMyReviewsClick={() => setCurrentPage("my-reviews")}
             onFavoriteHospitalsClick={() => setCurrentPage("favorite-hospitals")}
+            myReviewsCount={myReviews.length} // 👈 리뷰 개수 전달
           />
         )}
         {/* 👇 4. '업로드' 페이지 추가 */}
@@ -671,6 +543,7 @@ export default function App() {
           <MyReviewsPage
             onBack={() => setCurrentPage("home")}
             reviews={myReviews}
+            onDeleteReview={handleDeleteReview}
           />
         )}
         {/* 👇 7. '즐겨찾는 병원' 페이지 추가 */}

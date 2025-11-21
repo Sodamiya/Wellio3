@@ -3,6 +3,7 @@ import { BottomNav } from "./BottomNav";
 
 interface ProfilePageProps {
   userName: string;
+  userAvatar?: string; // 👈 프로필 이미지 추가
   currentPage: string;
   onPageChange: (
     page: "home" | "community" | "hospital" | "profile" | "medical-history",
@@ -10,15 +11,18 @@ interface ProfilePageProps {
   onBack: () => void;
   onMyReviewsClick: () => void;
   onFavoriteHospitalsClick: () => void;
+  myReviewsCount?: number; // 👈 리뷰 개수 추가
 }
 
 export function ProfilePage({
   userName,
+  userAvatar, // 👈 프로필 이미지 받기
   currentPage,
   onPageChange,
   onBack,
   onMyReviewsClick,
   onFavoriteHospitalsClick,
+  myReviewsCount = 0, // 👈 리뷰 개수 받기 (기본값 0)
 }: ProfilePageProps) {
   return (
     <div className="flex flex-col min-h-screen">
@@ -37,7 +41,7 @@ export function ProfilePage({
         <div className="bg-white py-6 px-4 sm:px-6 md:px-8 flex items-center">
           <div className="w-[72px] h-[72px] md:w-20 md:h-20 rounded-full overflow-hidden relative">
             <img
-              src="https://via.placeholder.com/72x72"
+              src={userAvatar || "https://via.placeholder.com/72x72"}
               alt="Profile"
               className="w-full h-full object-cover"
             />

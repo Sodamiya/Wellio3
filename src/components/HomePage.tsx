@@ -11,7 +11,12 @@ interface HomePageProps {
   userName: string;
   currentPage: string;
   onPageChange: (
-    page: "home" | "community" | "hospital" | "profile" | "medical-history",
+    page:
+      | "home"
+      | "community"
+      | "hospital"
+      | "profile"
+      | "medical-history",
   ) => void;
   onHospitalClick?: (hospital: any) => void;
   getHospitalReviewCount?: (hospitalId: number) => number;
@@ -26,7 +31,11 @@ export function HomePage({
 }: HomePageProps) {
   return (
     <>
-      <Header onNotificationClick={() => onPageChange("notifications" as any)} />
+      <Header
+        onNotificationClick={() =>
+          onPageChange("notifications" as any)
+        }
+      />
 
       {/* [수정] pt-4 제거: UserGreeting의 배경 SVG가 
         화면 상단(헤더 뒤)까지 꽉 차도록 
@@ -40,10 +49,6 @@ export function HomePage({
         </div>
 
         <div className="px-4 sm:px-6 md:px-8 mt-6">
-          <PromoBanner />
-        </div>
-
-        <div className="px-4 sm:px-6 md:px-8 mt-6">
           <CTAButtons
             onHospitalClick={() => onPageChange("hospital")}
           />
@@ -54,6 +59,9 @@ export function HomePage({
           <SecondaryMenu />
         </div>
 
+        <div className="px-4 sm:px-6 md:px-8 mt-6">
+          <PromoBanner />
+        </div>
         <div className="mt-8">
           {" "}
           <HealthKnowledge />

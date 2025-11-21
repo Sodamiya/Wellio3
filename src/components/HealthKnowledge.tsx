@@ -1,6 +1,6 @@
-import image_ba471be49c63bdd07959dbe65d56797ab51ab9a5 from 'figma:asset/ba471be49c63bdd07959dbe65d56797ab51ab9a5.png';
-import image_b5407d732c19e4bd29e79664b6917fd7f26d6faf from 'figma:asset/b5407d732c19e4bd29e79664b6917fd7f26d6faf.png';
-import image_079cd83ca9fe115ba1d0bb01d0a8e56210a3f5af from 'figma:asset/079cd83ca9fe115ba1d0bb01d0a8e56210a3f5af.png';
+import image_ba471be49c63bdd07959dbe65d56797ab51ab9a5 from "figma:asset/ba471be49c63bdd07959dbe65d56797ab51ab9a5.png";
+import image_b5407d732c19e4bd29e79664b6917fd7f26d6faf from "figma:asset/b5407d732c19e4bd29e79664b6917fd7f26d6faf.png";
+import image_079cd83ca9fe115ba1d0bb01d0a8e56210a3f5af from "figma:asset/079cd83ca9fe115ba1d0bb01d0a8e56210a3f5af.png";
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -9,8 +9,7 @@ import "swiper/css";
 const articles = [
   {
     id: 1,
-    imageSrc:
-      image_079cd83ca9fe115ba1d0bb01d0a8e56210a3f5af,
+    imageSrc: image_079cd83ca9fe115ba1d0bb01d0a8e56210a3f5af,
     title: "혹시 나도 디스크?",
     description:
       "시도 때도 없이 찌릿거리는 허리, 혹시 디스크가 아닌 지 확인해보세요",
@@ -18,8 +17,7 @@ const articles = [
   },
   {
     id: 2,
-    imageSrc:
-      image_b5407d732c19e4bd29e79664b6917fd7f26d6faf,
+    imageSrc: image_b5407d732c19e4bd29e79664b6917fd7f26d6faf,
     title: "현대인의 편두통",
     description:
       "지긋지긋한 편두통, 간단한 마사지로 완화하는 방법",
@@ -27,8 +25,7 @@ const articles = [
   },
   {
     id: 3,
-    imageSrc:
-      image_ba471be49c63bdd07959dbe65d56797ab51ab9a5,
+    imageSrc: image_ba471be49c63bdd07959dbe65d56797ab51ab9a5,
     title: "환절기 비염",
     description:
       "코막힘과 재채기, 알레르기 비염 관리법을 알아보세요",
@@ -89,6 +86,7 @@ export function HealthKnowledge() {
           spaceBetween={16}
           grabCursor={true}
           className="!overflow-visible"
+          slidesOffsetAfter={32}
         >
           {articles.map((article) => (
             // [중요] SwiperSlide에 고정 너비 지정 (260px)
