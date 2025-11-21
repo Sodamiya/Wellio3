@@ -74,7 +74,8 @@ interface Review {
   userName: string;
   userAvatar: string;
   createdAt: string;
-  likes?: number;
+  likes: number;
+  likedBy: string[]; // 좋아요 누른 사용자 목록
   visitType?: "첫방문" | "재방문";
 }
 
@@ -85,7 +86,7 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   // 로그인 플로우 상태: 'welcome' | 'social' | 'email'
   const [loginStep, setLoginStep] = useState<'welcome' | 'social' | 'email'>('welcome');
-  const [userName, setUserName] = useState("김건강");
+  const [userName, setUserName] = useState("관리자");
   // 사용자 프로필 이미지 관리 (없으면 기본 이미지)
   const [userAvatar, setUserAvatar] = useState("https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80");
   const [currentPage, setCurrentPage] = useState<Page>("home");
@@ -99,6 +100,43 @@ export default function App() {
   
   // 리뷰 작성한 병원 ID 목록 관리
   const [reviewedHospitals, setReviewedHospitals] = useState<number[]>([]);
+  
+  // 진료내역 데이터 관리
+  const [medicalRecords, setMedicalRecords] = useState([
+    {
+      id: 1,
+      code: "20250811-012345",
+      patientName: "김동석",
+      patientAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
+      hospitalName: "매일건강의원",
+      visitDate: "2025.08.11",
+      visitTime: "14:00",
+      doctor: "이준호",
+      memo: "아빠 감기몸살로 내원, 3일 뒤 재진"
+    },
+    {
+      id: 2,
+      code: "20250805-012345",
+      patientName: "박승희",
+      patientAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+      hospitalName: "바른정형외과의원",
+      visitDate: "2025.08.05",
+      visitTime: "10:25",
+      doctor: "김슬기",
+      memo: "엄마 2일마다 물리치료"
+    },
+    {
+      id: 3,
+      code: "REC-2024-003",
+      patientName: "김웰리",
+      patientAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+      hospitalName: "서울대학교병원",
+      visitDate: "2024.11.05",
+      visitTime: "16:00",
+      doctor: "박민준 교수",
+      memo: "정기 검진 완료, 특이사항 없음"
+    },
+  ]);
   
   // 작성한 리뷰 목록 관리 (초기 목데이터 포함)
   const [myReviews, setMyReviews] = useState<Review[]>([
@@ -120,6 +158,8 @@ export default function App() {
       userAvatar: "https://example.com/avatar1.jpg",
       createdAt: "2024-11-15T10:00:00Z",
       visitType: "첫방문",
+      likes: 0,
+      likedBy: [],
     },
     {
       id: 2,
@@ -135,6 +175,8 @@ export default function App() {
       userAvatar: "https://example.com/avatar2.jpg",
       createdAt: "2024-11-10T14:00:00Z",
       visitType: "첫방문",
+      likes: 0,
+      likedBy: [],
     },
     {
       id: 3,
@@ -150,11 +192,13 @@ export default function App() {
       userAvatar: "https://example.com/avatar3.jpg",
       createdAt: "2024-10-25T12:00:00Z",
       visitType: "재방문",
+      likes: 0,
+      likedBy: [],
     },
   ]);
 
-  // 샘플 리뷰 데이터 (다른 사용자들의 리뷰)
-  const sampleReviews: Review[] = [
+  // 샘플 리뷰 데이터 (다른 사용자들의 리뷰) - state로 관리
+  const [sampleReviews, setSampleReviews] = useState<Review[]>([
     // 병원 ID 1: 바른정형외과의원 (6개 리뷰)
     {
       id: 1001,
@@ -170,6 +214,7 @@ export default function App() {
       createdAt: "2024-10-20T14:30:00Z",
       visitType: "첫방문",
       likes: 12,
+      likedBy: ["김건강", "활력"],
     },
     {
       id: 1002,
@@ -185,6 +230,7 @@ export default function App() {
       createdAt: "2024-09-15T10:00:00Z",
       visitType: "재방문",
       likes: 8,
+      likedBy: ["김건강"],
     },
     {
       id: 1003,
@@ -200,6 +246,7 @@ export default function App() {
       createdAt: "2024-08-25T09:15:00Z",
       visitType: "첫방문",
       likes: 7,
+      likedBy: ["김건강"],
     },
     {
       id: 1004,
@@ -215,6 +262,7 @@ export default function App() {
       createdAt: "2024-07-18T13:20:00Z",
       visitType: "재방문",
       likes: 14,
+      likedBy: ["김건강", "박활력"],
     },
     {
       id: 1005,
@@ -230,6 +278,7 @@ export default function App() {
       createdAt: "2024-06-30T11:45:00Z",
       visitType: "첫방문",
       likes: 9,
+      likedBy: ["김건강"],
     },
     {
       id: 1006,
@@ -245,6 +294,7 @@ export default function App() {
       createdAt: "2024-05-22T15:30:00Z",
       visitType: "재방문",
       likes: 11,
+      likedBy: ["김건강"],
     },
     
     // 병원 ID 2: 고운피부과 (6개 리뷰)
@@ -262,6 +312,7 @@ export default function App() {
       createdAt: "2024-11-01T16:20:00Z",
       visitType: "첫방문",
       likes: 15,
+      likedBy: ["김건강", "박활력"],
     },
     {
       id: 1008,
@@ -277,6 +328,7 @@ export default function App() {
       createdAt: "2024-10-10T11:45:00Z",
       visitType: "재방문",
       likes: 10,
+      likedBy: ["김건강"],
     },
     {
       id: 1009,
@@ -292,6 +344,7 @@ export default function App() {
       createdAt: "2024-09-05T14:00:00Z",
       visitType: "첫방문",
       likes: 13,
+      likedBy: ["김건강"],
     },
     {
       id: 1010,
@@ -307,6 +360,7 @@ export default function App() {
       createdAt: "2024-08-12T10:30:00Z",
       visitType: "첫방문",
       likes: 8,
+      likedBy: ["김건강"],
     },
     {
       id: 1011,
@@ -322,6 +376,7 @@ export default function App() {
       createdAt: "2024-07-20T16:45:00Z",
       visitType: "재방문",
       likes: 16,
+      likedBy: ["김건강", "박활력"],
     },
     {
       id: 1012,
@@ -337,6 +392,7 @@ export default function App() {
       createdAt: "2024-06-15T13:20:00Z",
       visitType: "재방문",
       likes: 12,
+      likedBy: ["김건강"],
     },
     
     // 병원 ID 3: 오늘도강한내과의원 (6개 리뷰)
@@ -354,6 +410,7 @@ export default function App() {
       createdAt: "2024-11-05T09:30:00Z",
       visitType: "재방문",
       likes: 18,
+      likedBy: ["김건강", "박활력"],
     },
     {
       id: 1014,
@@ -369,6 +426,7 @@ export default function App() {
       createdAt: "2024-10-15T11:00:00Z",
       visitType: "첫방문",
       likes: 9,
+      likedBy: ["김건강"],
     },
     {
       id: 1015,
@@ -384,6 +442,7 @@ export default function App() {
       createdAt: "2024-09-22T14:15:00Z",
       visitType: "재방문",
       likes: 11,
+      likedBy: ["김건강"],
     },
     {
       id: 1016,
@@ -399,6 +458,7 @@ export default function App() {
       createdAt: "2024-08-30T10:40:00Z",
       visitType: "첫방문",
       likes: 14,
+      likedBy: ["김건강"],
     },
     {
       id: 1017,
@@ -414,6 +474,7 @@ export default function App() {
       createdAt: "2024-07-25T15:50:00Z",
       visitType: "재방문",
       likes: 16,
+      likedBy: ["김건강", "박활력"],
     },
     {
       id: 1018,
@@ -429,8 +490,9 @@ export default function App() {
       createdAt: "2024-06-10T09:20:00Z",
       visitType: "첫방문",
       likes: 13,
+      likedBy: ["김건강"],
     },
-  ];
+  ]);
 
   // 병원별 리뷰 개수를 계산하는 함수
   const getHospitalReviewCount = (hospitalId: number): number => {
@@ -480,6 +542,48 @@ export default function App() {
       .sort((a, b) => b.count - a.count);
     
     return stats;
+  };
+  
+  // 리뷰 삭제 함수
+  const handleDeleteReview = (reviewId: number) => {
+    setMyReviews(myReviews.filter(review => review.id !== reviewId));
+  };
+
+  // 도움돼요 토글 함수
+  const handleToggleLike = (reviewId: number) => {
+    // sampleReviews에서 해당 리뷰를 찾아 업데이트
+    setSampleReviews(prevReviews =>
+      prevReviews.map(review => {
+        if (review.id === reviewId) {
+          const isLiked = review.likedBy.includes(userName);
+          return {
+            ...review,
+            likes: isLiked ? review.likes - 1 : review.likes + 1,
+            likedBy: isLiked
+              ? review.likedBy.filter(name => name !== userName)
+              : [...review.likedBy, userName]
+          };
+        }
+        return review;
+      })
+    );
+    
+    // myReviews에서 해당 리뷰를 찾아 업데이트
+    setMyReviews(prevReviews =>
+      prevReviews.map(review => {
+        if (review.id === reviewId) {
+          const isLiked = review.likedBy.includes(userName);
+          return {
+            ...review,
+            likes: isLiked ? review.likes - 1 : review.likes + 1,
+            likedBy: isLiked
+              ? review.likedBy.filter(name => name !== userName)
+              : [...review.likedBy, userName]
+          };
+        }
+        return review;
+      })
+    );
   };
   
   // 진료내역에서 선택한 진료 기록 관리
@@ -547,9 +651,9 @@ export default function App() {
         "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80",
       badge: "💪 매일 운동하기",
       userAvatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80",
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
       caption: "오늘도 달렸어요!",
-      userName: "박활력",
+      userName: "관리자", // 👈 첫 번째 게시글을 내 게시글로 변경
       location: "한강공원",
       time: "오전 6:30",
       weather: "맑음 18°C",
@@ -673,9 +777,22 @@ export default function App() {
     setPosts(posts.filter(post => post.id !== postId));
   };
 
-  // 리뷰 삭제 함수
-  const handleDeleteReview = (reviewId: number) => {
-    setMyReviews(myReviews.filter(review => review.id !== reviewId));
+  // 메모 업데이트 함수
+  const handleUpdateMemo = (recordId: number, newMemo: string) => {
+    setMedicalRecords(prevRecords =>
+      prevRecords.map(record =>
+        record.id === recordId ? { ...record, memo: newMemo } : record
+      )
+    );
+  };
+
+  // 프로필 이미지 업데이트 함수
+  const handleUpdateAvatar = (file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUserAvatar(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   // 로그인 플로우 처리
@@ -762,8 +879,10 @@ export default function App() {
             reviewCount={getHospitalReviewCount(selectedHospital.id)}
             averageRating={getHospitalAverageRating(selectedHospital.id)}
             keywordStats={getHospitalKeywordStats(selectedHospital.id)}
+            onToggleLike={handleToggleLike}
+            currentUserName={userName}
             previewReviews={[
-              // 샘플 리뷰 먼저 (최대 5개)
+              // 샘플 리뷰 먼저
               ...sampleReviews
                 .filter(review => review.hospitalId === selectedHospital.id)
                 .map(review => ({
@@ -774,8 +893,9 @@ export default function App() {
                   tags: review.keywords,
                   content: review.reviewText,
                   likes: review.likes || 0,
+                  liked: review.likedBy?.includes(userName) || false, // 사용자가 좋아요를 눌렀는지 확인
                 })),
-              // 사용자가 작성한 리뷰 추가 (최대 5개)
+              // 사용자가 작성한 리뷰 추가
               ...myReviews
                 .filter(review => review.hospitalId === selectedHospital.id)
                 .map(review => ({
@@ -790,8 +910,9 @@ export default function App() {
                   tags: review.keywords,
                   content: review.reviewText,
                   likes: review.likes || 0,
+                  liked: review.likedBy?.includes(userName) || false, // 사용자가 좋아요를 눌렀는지 확인
                 }))
-            ].slice(0, 5)}
+            ]}
           />
         )}
         {currentPage === "community" && (
@@ -819,6 +940,7 @@ export default function App() {
             onMyReviewsClick={() => setCurrentPage("my-reviews")}
             onFavoriteHospitalsClick={() => setCurrentPage("favorite-hospitals")}
             myReviewsCount={myReviews.length} // 👈 리뷰 개수 전달
+            onUpdateAvatar={handleUpdateAvatar} // 👈 프로필 이미지 업데이트 함수 전달
           />
         )}
         {/* 👇 4. '업로드' 페이지 추가 */}
@@ -845,6 +967,8 @@ export default function App() {
             }}
             reviewedHospitals={reviewedHospitals}
             onViewReviews={() => setCurrentPage("my-reviews")}
+            records={medicalRecords}
+            onUpdateMemo={handleUpdateMemo}
           />
         )}
         {/* 👇 6. '내 리뷰' 페이지 추가 */}
@@ -906,6 +1030,8 @@ export default function App() {
             onBack={() => setCurrentPage("hospital-detail")}
             hospitalName={selectedHospital.name}
             keywordStats={getHospitalKeywordStats(selectedHospital.id)}
+            onToggleLike={handleToggleLike}
+            currentUserName={userName}
             reviews={[
               // 샘플 리뷰 먼저
               ...sampleReviews
@@ -914,13 +1040,14 @@ export default function App() {
                   id: review.id,
                   author: review.userName,
                   date: review.visitDate,
-                  visitType: review.visitType || "첫방문",
                   rating: review.rating,
-                  likes: review.likes || 0,
                   tags: review.keywords,
                   content: review.reviewText,
+                  likes: review.likes || 0,
+                  liked: (review.likedBy || []).includes(userName), // 사용자가 좋아요를 눌렀는지 확인
+                  visitType: review.visitType || "첫방문",
                 })),
-              // 사용자가 작성한 리뷰 추가
+              // 사용자가 작성한 리뷰 추가 (최대 5개)
               ...myReviews
                 .filter(review => review.hospitalId === selectedHospital.id)
                 .map(review => ({
@@ -931,11 +1058,12 @@ export default function App() {
                     month: '2-digit', 
                     day: '2-digit' 
                   }).replace(/\. /g, '.').replace(/\.$/, ''),
-                  visitType: review.visitType || "재방문",
                   rating: review.rating,
-                  likes: review.likes || 0,
                   tags: review.keywords,
                   content: review.reviewText,
+                  likes: review.likes || 0,
+                  liked: (review.likedBy || []).includes(userName), // 사용자가 좋아요를 눌렀는지 확인
+                  visitType: review.visitType || "첫방문",
                 }))
             ]}
           />

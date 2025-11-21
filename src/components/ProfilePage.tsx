@@ -1,5 +1,6 @@
 import { Header } from "./Header";
 import { BottomNav } from "./BottomNav";
+import { useRef } from "react";
 
 interface ProfilePageProps {
   userName: string;
@@ -12,6 +13,7 @@ interface ProfilePageProps {
   onMyReviewsClick: () => void;
   onFavoriteHospitalsClick: () => void;
   myReviewsCount?: number; // 👈 리뷰 개수 추가
+  onUpdateAvatar?: (file: File) => void; // 👈 프로필 이미지 업데이트 함수 추가
 }
 
 export function ProfilePage({
@@ -23,7 +25,23 @@ export function ProfilePage({
   onMyReviewsClick,
   onFavoriteHospitalsClick,
   myReviewsCount = 0, // 👈 리뷰 개수 받기 (기본값 0)
+  onUpdateAvatar, // 👈 프로필 이미지 업데이트 함수 받기
 }: ProfilePageProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && onUpdateAvatar) {
+      onUpdateAvatar(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Profile Header */}
@@ -39,25 +57,38 @@ export function ProfilePage({
       <main className="flex-grow bg-[#F7F7F7] pt-16 pb-24">
         {/* User Info Section */}
         <div className="bg-white py-6 px-4 sm:px-6 md:px-8 relative">
-          {/* 프로필 수정 버튼 - 우측 상단에 배치 */}
-          <button className="absolute top-6 right-4 sm:right-6 md:right-8 bg-white rounded-full p-2 border border-gray-300 shadow-sm hover:bg-gray-50 transition-colors">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-gray-700"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.75 2.112l-6.819 6.819a2 2 0 00-.546.732l-1.63 4.891a1 1 0 001.242 1.242l4.89-1.63a2 2 0 00.732-.546l6.818-6.819-2.828-2.828z" />
-            </svg>
-          </button>
-          
           {/* 프로필 정보 */}
           <div className="flex items-center">
-            <div className="w-[72px] h-[72px] md:w-20 md:h-20 rounded-full overflow-hidden">
-              <img
-                src={userAvatar || "https://via.placeholder.com/72x72"}
-                alt="Profile"
-                className="w-full h-full object-cover"
+            {/* 프로필 이미지와 수정 버튼을 함께 감싸는 컨테이너 */}
+            <div className="relative w-[72px] h-[72px] md:w-20 md:h-20">
+              <div className="w-full h-full rounded-full overflow-hidden">
+                <img
+                  src={userAvatar || "https://via.placeholder.com/72x72"}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {/* 프로필 수정 버튼 - 프로필 이미지 하단에 겹치게 배치 */}
+              <button
+                onClick={triggerFileInput}
+                className="absolute bottom-0 right-0 bg-white rounded-full p-1.5 border-2 border-white shadow-md hover:bg-gray-50 transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 text-gray-700"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.75 2.112l-6.819 6.819a2 2 0 00-.546.732l-1.63 4.891a1 1 0 001.242 1.242l4.89-1.63a2 2 0 00.732-.546l6.818-6.819-2.828-2.828z" />
+                </svg>
+              </button>
+              {/* 숨겨진 파일 input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
               />
             </div>
             <div className="ml-4">

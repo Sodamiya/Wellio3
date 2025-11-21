@@ -2,7 +2,7 @@
 
 import { ArrowLeft, Star, ThumbsUp, Bot, ChevronDown } from "lucide-react";
 import { Progress } from "./ui/progress";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface Review {
   id: number;
@@ -11,6 +11,7 @@ interface Review {
   visitType: string;
   rating: number;
   likes: number;
+  liked?: boolean; // 사용자가 좋아요를 눌렀는지 여부
   tags: string[];
   content: string;
 }
@@ -26,6 +27,8 @@ interface HospitalReviewsPageProps {
   hospitalName?: string;
   reviews?: Review[];
   keywordStats?: KeywordStat[];
+  onToggleLike?: (reviewId: number) => void; // 좋아요 토글 핸들러
+  currentUserName?: string; // 현재 사용자 이름
 }
 
 export function HospitalReviewsPage({
@@ -33,11 +36,28 @@ export function HospitalReviewsPage({
   hospitalName = "매일건강의원",
   reviews = [],
   keywordStats = [],
+  onToggleLike,
+  currentUserName,
 }: HospitalReviewsPageProps) {
   // 페이지 진입 시 최상단으로 스크롤
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // 필터 상태 관리 ('popular' | 'latest')
+  const [sortFilter, setSortFilter] = useState<'popular' | 'latest'>('popular');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  // 리뷰 정렬
+  const sortedReviews = [...reviews].sort((a, b) => {
+    if (sortFilter === 'popular') {
+      // 인기순: likes 내림차순
+      return b.likes - a.likes;
+    } else {
+      // 최신순: date 내림차순 (날짜 문자열 비교)
+      return b.date.localeCompare(a.date);
+    }
+  });
 
   // 리뷰 키워드 통계 데이터 (keywordStats가 비어있으면 기본값 사용)
   const reviewStats = keywordStats.length > 0
@@ -116,9 +136,40 @@ export function HospitalReviewsPage({
 
         {/* 3. 필터 및 총 개수 */}
         <div className="px-5 py-4 flex items-center justify-between bg-white">
-          <button className="flex items-center gap-1 px-3 py-1.5 border border-gray-300 rounded-full text-sm font-medium text-gray-700">
-            추천순 <ChevronDown size={16} />
-          </button>
+          <div className="relative">
+            <button
+              className="flex items-center gap-1 px-3 py-1.5 border border-gray-300 rounded-full text-sm font-medium text-gray-700"
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+            >
+              {sortFilter === 'popular' ? '인기순' : '최신순'} <ChevronDown size={16} />
+            </button>
+            {isFilterOpen && (
+              <div className="absolute top-full mt-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-10 w-24">
+                <button
+                  className={`w-full px-4 py-2 text-sm text-left hover:bg-gray-50 ${
+                    sortFilter === 'popular' ? 'font-bold text-[#36D2C5]' : ''
+                  }`}
+                  onClick={() => {
+                    setSortFilter('popular');
+                    setIsFilterOpen(false);
+                  }}
+                >
+                  인기순
+                </button>
+                <button
+                  className={`w-full px-4 py-2 text-sm text-left hover:bg-gray-50 border-t border-gray-100 ${
+                    sortFilter === 'latest' ? 'font-bold text-[#36D2C5]' : ''
+                  }`}
+                  onClick={() => {
+                    setSortFilter('latest');
+                    setIsFilterOpen(false);
+                  }}
+                >
+                  최신순
+                </button>
+              </div>
+            )}
+          </div>
           <span className="text-sm text-gray-500 font-medium">총 {reviews.length}개</span>
         </div>
 
@@ -131,7 +182,7 @@ export function HospitalReviewsPage({
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
-            {reviews.map((review) => (
+            {sortedReviews.map((review) => (
               <div key={review.id} className="px-5 py-6">
                 {/* 헤더: 별점, 유저정보, 좋아요 */}
                 <div className="flex justify-between items-start mb-3">
@@ -160,8 +211,13 @@ export function HospitalReviewsPage({
                     </div>
                   </div>
                   
-                  <button className="flex items-center gap-1 text-gray-400">
-                    <ThumbsUp size={16} />
+                  <button
+                    onClick={() => onToggleLike && onToggleLike(review.id)}
+                    className={`flex items-center gap-1 transition-colors ${
+                      review.liked ? 'text-[#36D2C5]' : 'text-gray-400'
+                    }`}
+                  >
+                    <ThumbsUp size={16} className={review.liked ? 'fill-[#36D2C5]' : ''} />
                     <span className="text-sm">{review.likes}</span>
                   </button>
                 </div>

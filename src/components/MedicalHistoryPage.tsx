@@ -10,6 +10,8 @@ interface MedicalHistoryPageProps {
   onWriteReview?: (record: MedicalRecord) => void; // 리뷰 작성 페이지로 이동 (병원 정보 전달)
   reviewedHospitals?: number[]; // 리뷰 작성한 병원 ID 목록
   onViewReviews?: () => void; // 나의후기 페이지로 이동
+  records?: MedicalRecord[]; // 진료내역 데이터
+  onUpdateMemo?: (recordId: number, newMemo: string) => void; // 메모 업데이트 함수
 }
 
 interface MedicalRecord {
@@ -120,7 +122,7 @@ const getDayOfWeek = (dateString: string) => {
   return '';
 }
 
-export function MedicalHistoryPage({ onBack, onWriteReview, reviewedHospitals = [], onViewReviews }: MedicalHistoryPageProps) {
+export function MedicalHistoryPage({ onBack, onWriteReview, reviewedHospitals = [], onViewReviews, records, onUpdateMemo }: MedicalHistoryPageProps) {
   const [activeTab, setActiveTab] = useState<"treatment" | "medical">("treatment");
   const [selectedFilter, setSelectedFilter] = useState<string>("period"); 
 
@@ -131,6 +133,9 @@ export function MedicalHistoryPage({ onBack, onWriteReview, reviewedHospitals = 
     { id: "kim-ds", label: "김동석" },
     { id: "kim-ds2", label: "김동석" }, 
   ];
+
+  // records가 전달되지 않으면 mockRecords를 사용
+  const displayRecords = records || mockRecords;
 
   return (
     <div className="relative bg-white flex flex-col max-w-[500px] mx-auto min-h-screen">
@@ -213,7 +218,7 @@ export function MedicalHistoryPage({ onBack, onWriteReview, reviewedHospitals = 
         {activeTab === "treatment" ? (
           // 진료내역 (이전 수정 내용 유지)
           <div className="space-y-4 pt-4">
-            {mockRecords.map((record) => (
+            {displayRecords.map((record) => (
               <div
                 key={record.id}
                 className="bg-white rounded-xl p-4 shadow-sm space-y-3 border border-gray-100"
@@ -256,8 +261,20 @@ export function MedicalHistoryPage({ onBack, onWriteReview, reviewedHospitals = 
 
                 {/* 5. 한줄메모 */}
                 <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 flex items-start gap-2">
-                    <Edit size={16} className="text-gray-500 mt-0.5" />
-                    <span>{record.memo}</span>
+                    <Edit size={16} className="text-gray-500 mt-0.5 flex-shrink-0" />
+                    <div
+                      contentEditable
+                      suppressContentEditableWarning
+                      onBlur={(e) => {
+                        const newMemo = e.currentTarget.textContent || '';
+                        if (newMemo !== record.memo) {
+                          onUpdateMemo?.(record.id, newMemo);
+                        }
+                      }}
+                      className="flex-1 outline-none"
+                    >
+                      {record.memo}
+                    </div>
                 </div>
 
                 {/* 6. 버튼 */}

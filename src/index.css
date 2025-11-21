@@ -530,12 +530,12 @@
     top: calc(var(--spacing) * 4);
   }
 
-  .top-6 {
-    top: calc(var(--spacing) * 6);
-  }
-
   .top-\[50\%\] {
     top: 50%;
+  }
+
+  .top-full {
+    top: 100%;
   }
 
   .-right-1 {
@@ -1084,6 +1084,10 @@
 
   .w-20 {
     width: calc(var(--spacing) * 20);
+  }
+
+  .w-24 {
+    width: calc(var(--spacing) * 24);
   }
 
   .w-32 {
@@ -2003,6 +2007,10 @@
   .to-white {
     --tw-gradient-to: var(--color-white);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+
+  .fill-\[\#36D2C5\] {
+    fill: #36d2c5;
   }
 
   .fill-\[\#FFB800\] {
@@ -3161,12 +3169,6 @@
   }
 
   @media (width >= 40rem) {
-    .sm\:right-6 {
-      right: calc(var(--spacing) * 6);
-    }
-  }
-
-  @media (width >= 40rem) {
     .sm\:mx-6 {
       margin-inline: calc(var(--spacing) * 6);
     }
@@ -3211,12 +3213,6 @@
   @media (width >= 40rem) {
     .sm\:text-left {
       text-align: left;
-    }
-  }
-
-  @media (width >= 48rem) {
-    .md\:right-8 {
-      right: calc(var(--spacing) * 8);
     }
   }
 

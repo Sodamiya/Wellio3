@@ -53,7 +53,10 @@ interface HospitalDetailPageProps {
     tags: string[];
     content: string;
     likes: number;
+    liked?: boolean; // 사용자가 좋아요를 눌렀는지 여부
   }>;
+  onToggleLike?: (reviewId: number) => void; // 좋아요 토글 핸들러
+  currentUserName?: string; // 현재 사용자 이름
 }
 
 export function HospitalDetailPage({
@@ -64,12 +67,29 @@ export function HospitalDetailPage({
   averageRating = 0,
   keywordStats = [],
   previewReviews = [],
+  onToggleLike,
+  currentUserName,
 }: HospitalDetailPageProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  
+  // 필터 상태 관리
+  const [sortFilter, setSortFilter] = useState<'popular' | 'latest'>('popular');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  // 리뷰 정렬 및 미리보기 3개만 표시
+  const sortedReviews = [...previewReviews].sort((a, b) => {
+    if (sortFilter === 'popular') {
+      // 인기순: likes 내림차순
+      return b.likes - a.likes;
+    } else {
+      // 최신순: date 내림차순 (날짜 문자열 비교)
+      return b.date.localeCompare(a.date);
+    }
+  });
 
   // 미리보기용 리뷰 데이터 (3개만 표시)
-  const userReviews = previewReviews.length > 0 ? previewReviews.slice(0, 3) : [
+  const userReviews = sortedReviews.length > 0 ? sortedReviews.slice(0, 3) : [
     {
       id: 1,
       author: "김**님",
@@ -430,7 +450,7 @@ export function HospitalDetailPage({
               </div>
 
               <div className="flex-1 space-y-3">
-                {keywordStats.map((item) => (
+                {keywordStats.slice(0, 3).map((item) => (
                   <div key={item.keyword} className="space-y-1">
                     <div className="flex justify-between text-xs text-gray-600">
                       <span>{item.keyword}</span>
@@ -466,10 +486,39 @@ export function HospitalDetailPage({
 
           {/* 리뷰 리스트 카드 */}
           <div className="bg-white rounded-2xl p-5 shadow-sm">
-            <div className="mb-4">
-              <button className="flex items-center gap-1 border border-gray-200 rounded-full px-3 py-1.5 text-sm text-gray-700">
-                인기순 <ChevronDown size={14} />
+            <div className="mb-4 relative">
+              <button
+                className="flex items-center gap-1 border border-gray-200 rounded-full px-3 py-1.5 text-sm text-gray-700"
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+              >
+                {sortFilter === 'popular' ? '인기순' : '최신순'} <ChevronDown size={14} />
               </button>
+              {isFilterOpen && (
+                <div className="absolute top-full mt-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-10 w-24">
+                  <button
+                    className={`w-full px-4 py-2 text-sm text-left hover:bg-gray-50 ${
+                      sortFilter === 'popular' ? 'font-bold text-[#36D2C5]' : ''
+                    }`}
+                    onClick={() => {
+                      setSortFilter('popular');
+                      setIsFilterOpen(false);
+                    }}
+                  >
+                    인기순
+                  </button>
+                  <button
+                    className={`w-full px-4 py-2 text-sm text-left hover:bg-gray-50 border-t border-gray-100 ${
+                      sortFilter === 'latest' ? 'font-bold text-[#36D2C5]' : ''
+                    }`}
+                    onClick={() => {
+                      setSortFilter('latest');
+                      setIsFilterOpen(false);
+                    }}
+                  >
+                    최신순
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="space-y-6">
@@ -495,10 +544,15 @@ export function HospitalDetailPage({
                         {review.author} | {review.date}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 text-gray-400 text-xs">
-                      <ThumbsUp size={14} />
+                    <button
+                      onClick={() => onToggleLike?.(review.id)}
+                      className={`flex items-center gap-1 text-xs transition-colors ${
+                        review.liked ? 'text-[#36D2C5]' : 'text-gray-400'
+                      }`}
+                    >
+                      <ThumbsUp size={14} className={review.liked ? 'fill-[#36D2C5]' : ''} />
                       <span>{review.likes}</span>
-                    </div>
+                    </button>
                   </div>
 
                   <div className="flex flex-wrap gap-1.5 mb-3">

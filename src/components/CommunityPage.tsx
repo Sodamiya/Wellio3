@@ -712,7 +712,7 @@ export function CommunityPage({
                           <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2">
                               <ImageWithFallback
-                                src={post.userAvatar}
+                                src={post.userName === currentUserName ? currentUserAvatar : post.userAvatar}
                                 alt={post.userName}
                                 className="w-8 h-8 rounded-full border-2 border-white"
                               />
