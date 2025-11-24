@@ -861,13 +861,15 @@ export function CommunityPage({
                                   e.stopPropagation()
                                 }
                               >
-                                <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm">
+                                {/* [수정] 캡슐 컨테이너: pl-1로 왼쪽 여백 줄이고, py-2로 높이 설정 */}
+                                <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full pl-1 pr-5 py-3 gap-3 shadow-sm border border-white/20">
                                   <ImageWithFallback
                                     src={post.userAvatar}
                                     alt={post.userName}
-                                    className="w-7 h-7 rounded-full object-cover"
+                                    // [수정] 이미지: w-11 h-11 (44px), -my-4(높이무시), -ml-2(왼쪽돌출)
+                                    className="w-12 h-12 rounded-full object-cover border-2 border-white -my-4 -ml-2 shadow-sm"
                                   />
-                                  <p className="text-sm text-gray-900 whitespace-nowrap">
+                                  <p className="text-[15px] text-gray-900 whitespace-nowrap font-medium leading-none">
                                     {post.textOverlay}
                                   </p>
                                 </div>
@@ -878,7 +880,8 @@ export function CommunityPage({
                               post.comments,
                             ).length > 0 && (
                               <div
-                                className="absolute bottom-20 right-4 flex flex-col gap-2 items-end max-w-[70%] max-h-[50vh] overflow-y-auto z-20"
+                                // [수정] right-4 -> right-0 변경. p-4가 있으므로 시각적으로는 16px 떨어짐.
+                                className="absolute bottom-20 right-0 flex flex-col gap-5 items-end max-w-[70%] max-h-[50vh] overflow-y-auto z-20 p-4 scrollbar-hide"
                                 onClick={(e) =>
                                   e.stopPropagation()
                                 }
@@ -889,16 +892,18 @@ export function CommunityPage({
                                 ).map((comment, idx) => (
                                   <div
                                     key={`comment-${post.id}-${idx}-${comment.userName}-${comment.timestamp}`}
-                                    className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm"
+                                    // [수정] 댓글 캡슐: 우측 정렬이므로 flex-row-reverse 및 padding 반전 (pl-5 pr-1)
+                                    className="inline-flex flex-row-reverse items-center bg-white/90 backdrop-blur-sm rounded-full pl-5 pr-1 py-3 gap-3 shadow-sm border border-white/20"
                                   >
-                                    <p className="text-sm text-gray-900 whitespace-nowrap">
-                                      {comment.text}
-                                    </p>
                                     <ImageWithFallback
                                       src={comment.userAvatar}
                                       alt={comment.userName}
-                                      className="w-7 h-7 rounded-full object-cover"
+                                      // [수정] 이미지: w-11 h-11, -my-4, -mr-2(오른쪽돌출)
+                                      className="w-10 h-10 rounded-full object-cover border-2 border-white -my-4 -mr-0.5 shadow-sm"
                                     />
+                                    <p className="text-[15px] text-gray-900 whitespace-nowrap font-medium leading-none">
+                                      {comment.text}
+                                    </p>
                                   </div>
                                 ))}
                               </div>
@@ -974,7 +979,8 @@ export function CommunityPage({
                                       : post.userAvatar
                                   }
                                   alt={post.userName}
-                                  className="w-8 h-8 rounded-full border-2 border-white"
+                                  // [수정] w-8 h-8 -> w-10 h-10 으로 확대
+                                  className="w-12 h-12 rounded-full border-2 border-white"
                                 />
                                 {post.textOverlay && (
                                   <span className="text-white font-semibold text-sm line-clamp-1">
