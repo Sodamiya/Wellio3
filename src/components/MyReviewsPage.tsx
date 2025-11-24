@@ -16,6 +16,7 @@ interface MyReviewsPageProps {
   onBack: () => void;
   reviews?: Review[];
   onDeleteReview?: (id: number) => void;
+  onEditReview?: (review: Review) => void;
 }
 
 interface Review {
@@ -37,6 +38,7 @@ export function MyReviewsPage({
   onBack,
   reviews = [],
   onDeleteReview,
+  onEditReview,
 }: MyReviewsPageProps) {
   const [displayReviews, setDisplayReviews] = useState(reviews);
 
@@ -111,8 +113,9 @@ export function MyReviewsPage({
     review: Review,
   ) => {
     e.stopPropagation();
-    setEditingReviewId(review.id);
-    setEditText(review.reviewText);
+    if (onEditReview) {
+      onEditReview(review);
+    }
   };
 
   const handleCancelEdit = (e: React.MouseEvent) => {
@@ -130,6 +133,12 @@ export function MyReviewsPage({
     );
     setEditingReviewId(null);
     setEditText("");
+    if (onEditReview) {
+      const updatedReview = displayReviews.find((r) => r.id === id);
+      if (updatedReview) {
+        onEditReview(updatedReview);
+      }
+    }
   };
 
   const handleConfirmDelete = () => {

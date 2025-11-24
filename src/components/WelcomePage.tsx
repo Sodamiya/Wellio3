@@ -32,7 +32,7 @@ export function WelcomePage({ onGuestMode, onSignUp }: WelcomePageProps) {
           onClick={onGuestMode}
           className="w-full px-4 py-[15px] rounded-xl bg-[#21d2c4] text-white font-semibold hover:bg-[#1bc0b2] transition-colors"
         >
-          기본 계정으로 둘러보기
+          관리자 계정으로 둘러보기
         </button>
         <button
           onClick={onSignUp}

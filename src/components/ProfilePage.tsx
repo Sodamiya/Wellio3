@@ -237,7 +237,16 @@ export function ProfilePage({
             ].map((feature, index) => (
               <li
                 key={index}
-                className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between last:border-b-0"
+                className={`px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between last:border-b-0 ${
+                  feature === "가까운 병원 찾기"
+                    ? "cursor-pointer hover:bg-gray-50 transition-colors"
+                    : ""
+                }`}
+                onClick={() => {
+                  if (feature === "가까운 병원 찾기") {
+                    onPageChange("hospital");
+                  }
+                }}
               >
                 <span className="text-gray-700">{feature}</span>
                 <svg

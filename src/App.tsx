@@ -31,6 +31,11 @@ interface Hospital {
   imageUrl: string;
   latitude?: number;
   longitude?: number;
+  distance?: string;
+  isAvailableNow?: boolean;
+  specialtyText?: string;
+  rating?: number;
+  reviews?: number;
 }
 
 // 포스트 타입 정의
@@ -92,11 +97,66 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("home");
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
   
+  // 수정할 리뷰 저장
+  const [editingReview, setEditingReview] = useState<Review | null>(null);
+  
   // 알림 페이지에서 돌아갈 페이지 추적
   const [previousPage, setPreviousPage] = useState<Page>("home");
   
   // 찜한 병원 목록 관리
-  const [favoriteHospitals, setFavoriteHospitals] = useState<Hospital[]>([]);
+  const [favoriteHospitals, setFavoriteHospitals] = useState<Hospital[]>([
+    {
+      id: 1,
+      name: "매일건강의원",
+      department: "가정의학과",
+      specialtyText: "가정의학과와 전문의 2명",
+      address: "서울 서초구 서초대로 59번길 19, 201호",
+      phone: "02-1234-5678",
+      hours: "10:00-20:00",
+      distance: "37m",
+      description: "환자 중심의 진료를 제공하는 가정의학과 전문 병원입니다. 만성질환 관리부터 건강검진까지 종합적인 의료 서비스를 제공합니다.",
+      imageUrl: "https://images.unsplash.com/photo-1580281658136-17c835359e86?w=100&h=100&fit=crop",
+      latitude: 37.4949,
+      longitude: 127.0283,
+      isAvailableNow: true,
+      rating: 4.8,
+      reviews: 223,
+    },
+    {
+      id: 2,
+      name: "365클리닉 강남본점",
+      department: "피부과",
+      specialtyText: "피부과와 전문의 3명",
+      address: "서울 서초구 서초대로 16가길, 3층",
+      phone: "02-2345-6789",
+      hours: "09:30-20:30",
+      distance: "58m",
+      description: "최신 피부과 시술 장비를 갖춘 전문 클리닉입니다. 여드름, 미백, 안티에이징 등 다양한 피부 치료를 제공합니다.",
+      imageUrl: "https://via.placeholder.com/100x100/E7F3FF/2F80ED?text=Logo",
+      latitude: 37.4950,
+      longitude: 127.0285,
+      isAvailableNow: true,
+      rating: 4.6,
+      reviews: 12,
+    },
+    {
+      id: 3,
+      name: "사랑니쏙쏙 강남본점",
+      department: "치과",
+      specialtyText: "치과",
+      address: "서울 서초구 강남대로 102",
+      phone: "02-3456-7890",
+      hours: "10:00-18:00",
+      distance: "167m",
+      description: "사랑니 발치 전문 치과입니다. 통증 최소화와 빠른 회복을 위한 최신 시술 방법을 사용합니다.",
+      imageUrl: "https://via.placeholder.com/100x100/E8F8F7/00C2B3?text=Logo",
+      latitude: 37.4955,
+      longitude: 127.0290,
+      isAvailableNow: true,
+      rating: 4.7,
+      reviews: 41,
+    },
+  ]);
   
   // 리뷰 작성한 병원 ID 목록 관리
   const [reviewedHospitals, setReviewedHospitals] = useState<number[]>([]);
@@ -1004,8 +1064,8 @@ export default function App() {
       return (
         <WelcomePage
           onGuestMode={() => {
-            // 기본 계정으로 둘러보기 - 온보딩 시작
-            setUserName("게스트");
+            // 관리자 계정으로 둘러보기 - 온보딩 시작
+            setUserName("관리자");
             setIsLoggedIn(true);
             setShowOnboarding(true);
           }}
@@ -1182,6 +1242,17 @@ export default function App() {
             onBack={() => setCurrentPage("home")}
             reviews={myReviews}
             onDeleteReview={handleDeleteReview}
+            onEditReview={(review) => {
+              // 수정할 리뷰 정보를 저장하고 리뷰 작성 페이지로 이동
+              setEditingReview(review);
+              setSelectedMedicalRecord({
+                id: review.hospitalId,
+                hospitalName: review.hospitalName,
+                visitDate: review.visitDate,
+                visitTime: "",
+              });
+              setCurrentPage("write-review");
+            }}
           />
         )}
         {/* 👇 7. '즐겨찾는 병원' 페이지 추가 */}
@@ -1207,19 +1278,38 @@ export default function App() {
           <ReviewWritePage
             onBack={() => {
               // 뒤로가기 시 진료내역으로 이동
+              setEditingReview(null); // 수정 모드 해제
               setCurrentPage("medical-history");
             }}
             onComplete={(reviewData: Omit<Review, "id" | "createdAt">) => {
-              // 새로운 리뷰 생성
-              const newReview: Review = {
-                ...reviewData,
-                id: myReviews.length + 1,
-                createdAt: new Date().toISOString(),
-              };
-              // 리뷰 목록에 추가
-              setMyReviews([newReview, ...myReviews]);
-              // 리뷰 작성한 병원 ID 추가
-              setReviewedHospitals([...reviewedHospitals, reviewData.hospitalId]);
+              if (editingReview) {
+                // 기존 리뷰 수정
+                setMyReviews(prevReviews =>
+                  prevReviews.map(review =>
+                    review.id === editingReview.id
+                      ? {
+                          ...review,
+                          rating: reviewData.rating,
+                          keywords: reviewData.keywords,
+                          reviewText: reviewData.reviewText,
+                          visitType: reviewData.visitType,
+                        }
+                      : review
+                  )
+                );
+                setEditingReview(null); // 수정 모드 해제
+              } else {
+                // 새로운 리뷰 생성
+                const newReview: Review = {
+                  ...reviewData,
+                  id: myReviews.length + 1,
+                  createdAt: new Date().toISOString(),
+                };
+                // 리뷰 목록에 추가
+                setMyReviews([newReview, ...myReviews]);
+                // 리뷰 작성한 병원 ID 추가
+                setReviewedHospitals([...reviewedHospitals, reviewData.hospitalId]);
+              }
               // 나의후기 페이지로 이동
               setCurrentPage("my-reviews");
             }}
@@ -1227,6 +1317,7 @@ export default function App() {
             hospitalName={selectedMedicalRecord.hospitalName}
             visitDate={`${selectedMedicalRecord.visitDate} ${selectedMedicalRecord.visitTime}`}
             hospitalId={selectedMedicalRecord.id}
+            editingReview={editingReview}
           />
         )}
         {/* 👇 10. '병원 리뷰' 페이지 추가 */}
@@ -1274,7 +1365,7 @@ export default function App() {
           />
         )}
       </div>
-      {/* 👇 Toaster 추가 - 화면 하단에 토스트 메시지 표시 */}
+      {/* 👇 Toaster 추가 - 화면 ��단에 토스트 메시지 표시 */}
       <Toaster position="bottom-center" />
     </div>
   );

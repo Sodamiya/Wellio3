@@ -49,7 +49,13 @@ export function HospitalCard({
 
   return (
     <div
-      onClick={onClick}
+      onClick={(e) => {
+        if (hospital.name === "매일건강의원") {
+          onClick?.(e);
+        } else {
+          toast.info("준비 중입니다.");
+        }
+      }}
       // [스타일] 카드형 디자인 (그림자, 둥근 모서리, 좌우 여백)
       className="flex flex-col bg-white p-5 mx-4 mb-4 rounded-[24px] border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.03)] cursor-pointer hover:shadow-md transition-shadow"
     >

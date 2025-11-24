@@ -16,7 +16,7 @@ import {
   Smile,
   Trash2,
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { motion, AnimatePresence } from "motion/react";
@@ -377,8 +377,15 @@ export function CommunityPage({
     (p) => p.id === expandedPostId,
   );
 
+  // 초기 로드 시 첫 번째 피드의 ID를 currentPostId로 설정
+  useEffect(() => {
+    if (filteredPosts.length > 0 && !currentPostId) {
+      setCurrentPostId(filteredPosts[0].id);
+    }
+  }, [filteredPosts, currentPostId]);
+
   return (
-    <div className="relative bg-white flex flex-col max-w-[500px] mx-auto min-h-screen pb-40">
+    <div className="relative bg-white flex flex-col max-w-[500px] mx-auto h-screen overflow-hidden">
       {/* Header */}
       <header className="sticky top-0 z-30 px-4 flex flex-col justify-center w-full bg-white min-h-[110px]">
         {isSearchActive ? (
@@ -453,13 +460,9 @@ export function CommunityPage({
             </button>
             <button
               onClick={() => setIsReactionView(true)}
-              className="absolute right-0 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+              className="absolute right-0 w-10 h-10 flex items-center justify-center rounded-full bg-[#F5F5F5]/80 backdrop-blur-md text-gray-500 hover:text-gray-800 transition-colors"
             >
-              <Heart
-                size={24}
-                className="text-[#36D2C5]"
-                fill="#36D2C5"
-              />
+              <Smile size={24} />
             </button>
           </div>
         ) : (
@@ -597,7 +600,7 @@ export function CommunityPage({
         {isReactionView ? (
           <div className="pb-20">
             {/* 리액션 필터 바 (가로 스크롤) */}
-            <div className="px-4 py-4 flex gap-3 overflow-x-auto scrollbar-hide bg-white sticky top-[110px] z-20">
+            <div className="px-4 py-4 flex gap-3 overflow-x-auto scrollbar-hide bg-white sticky top-[110px] z-20 justify-center">
               {/* ALL 버튼 */}
               <button
                 onClick={() => setReactionFilter("ALL")}
@@ -688,8 +691,7 @@ export function CommunityPage({
                 <motion.div
                   key={post.id}
                   layoutId={`post-${post.id}`}
-                  className="aspect-square relative overflow-hidden rounded-sm cursor-pointer hover:opacity-80 transition-opacity group"
-                  // [추가] z-index 유지 (확대 또는 축소 중일 때)
+                  className="aspect-square relative overflow-hidden rounded-sm cursor-pointer hover:opacity-80 transition-opacity"
                   style={{
                     zIndex:
                       expandedPostId === post.id ||
@@ -698,7 +700,6 @@ export function CommunityPage({
                         : 0,
                   }}
                   onLayoutAnimationComplete={() => {
-                    // 애니메이션 완료 시 lastExpandedId 초기화
                     if (lastExpandedId === post.id) {
                       setLastExpandedId(null);
                     }
@@ -710,23 +711,6 @@ export function CommunityPage({
                     alt={post.caption}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
-                      <ImageWithFallback
-                        src={post.userAvatar}
-                        alt={post.userName}
-                        className="w-6 h-6 rounded-full border border-white object-cover"
-                      />
-                      <span className="text-white text-xs font-medium">
-                        {post.userName}
-                      </span>
-                    </div>
-                  </div>
-                  {post.badge && (
-                    <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-0.5 text-[10px] font-medium shadow-sm">
-                      {post.badge}
-                    </div>
-                  )}
                 </motion.div>
               ))}
             </div>
@@ -736,6 +720,12 @@ export function CommunityPage({
             direction={"vertical"}
             className="w-full h-[calc(100vh-110px)]"
             allowTouchMove={dragStartX === null}
+            onSlideChange={(swiper) => {
+              const activeIndex = swiper.activeIndex;
+              if (filteredPosts[activeIndex]) {
+                setCurrentPostId(filteredPosts[activeIndex].id);
+              }
+            }}
             onSliderMove={() => {
               setIsScrolling(true);
               if (scrollTimerRef.current) {
@@ -774,7 +764,7 @@ export function CommunityPage({
                       )}
                       <motion.div
                         className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg touch-none"
-                        drag={!isScrolling ? "x" : false}
+                        drag={!isScrolling && post.userName === currentUser.userName ? "x" : false}
                         dragConstraints={{
                           left: -200,
                           right: 0,
@@ -804,13 +794,11 @@ export function CommunityPage({
                             setSelectedPostForReaction(post.id);
                         }}
                       >
-                        {/* ... (기존 코드와 동일) ... */}
                         <ImageWithFallback
                           src={post.image}
                           alt="Community post"
                           className="w-full h-full object-cover bg-gray-100 pointer-events-none"
                         />
-                        {/* ... (기존 코드와 동일) ... */}
                         {selectedPostForReaction ===
                           post.id && (
                           <div
@@ -824,44 +812,38 @@ export function CommunityPage({
                               post.id,
                               post.reactions,
                             ).length > 0 && (
-                              <div
-                                className="absolute top-4 right-4 flex flex-wrap gap-2 justify-end max-w-[60%] z-20"
-                                onClick={(e) =>
-                                  e.stopPropagation()
-                                }
-                              >
-                                {getAllReactions(
-                                  post.id,
-                                  post.reactions,
-                                ).flatMap((reaction) =>
-                                  reaction.users.map(
-                                    (user, userIdx) => (
-                                      <div
-                                        key={`${reaction.emoji}-${user.userName}-${userIdx}`}
-                                        className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1.5 flex items-center gap-1.5"
-                                      >
-                                        <span className="text-base">
-                                          {reaction.emoji}
-                                        </span>
-                                        <ImageWithFallback
-                                          src={user.userAvatar}
-                                          alt={user.userName}
-                                          className="w-6 h-6 rounded-full border border-white"
-                                        />
-                                      </div>
+                                <div
+                                  className="absolute top-4 right-4 flex flex-wrap gap-2 justify-end max-w-[60%] z-20"
+                                >
+                                  {getAllReactions(
+                                    post.id,
+                                    post.reactions,
+                                  ).flatMap((reaction) =>
+                                    reaction.users.map(
+                                      (user, userIdx) => (
+                                        <div
+                                          key={`${reaction.emoji}-${user.userName}-${userIdx}`}
+                                          className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1.5 flex items-center gap-1.5"
+                                        >
+                                          <span className="text-base">
+                                            {reaction.emoji}
+                                          </span>
+                                          <ImageWithFallback
+                                            src={user.userAvatar}
+                                            alt={user.userName}
+                                            className="w-6 h-6 rounded-full border border-white"
+                                          />
+                                        </div>
+                                      ),
                                     ),
-                                  ),
-                                )}
-                              </div>
-                            )}
+                                  )}
+                                </div>
+                              )}
                             {/* [수정: Pressed 상태의 캡슐 위치 및 스타일 통일] */}
                             {(post.textOverlay ||
                               post.userName) && (
                               <div
                                 className="absolute bottom-4 left-4 flex items-center gap-3 z-20 max-w-[90%]"
-                                onClick={(e) =>
-                                  e.stopPropagation()
-                                }
                               >
                                 {/* 1. 프로필 + 텍스트 캡슐 */}
                                 <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full pl-1 pr-5 py-3 gap-3 shadow-sm border border-white/20 shrink-0">
@@ -885,9 +867,6 @@ export function CommunityPage({
                               <div
                                 // [수정] right-4 -> right-0 변경. p-4가 있으므로 시각적으로는 16px 떨어짐.
                                 className="absolute bottom-20 right-0 flex flex-col gap-5 items-end max-w-[70%] max-h-[50vh] overflow-y-auto z-20 p-4 scrollbar-hide"
-                                onClick={(e) =>
-                                  e.stopPropagation()
-                                }
                               >
                                 {getAllComments(
                                   post.id,
@@ -913,7 +892,6 @@ export function CommunityPage({
                             )}
                           </div>
                         )}
-                        {/* ... (기존 코드와 동일) ... */}
                         {selectedPostForReaction !==
                           post.id && (
                           <>
@@ -1030,110 +1008,112 @@ export function CommunityPage({
       </div>
 
       {/* 이모지/댓글 입력창 (하단 고정) */}
-      <div className="fixed bottom-[100px] left-0 right-0 z-40 max-w-[500px] mx-auto pointer-events-none">
-        {/* [수정] h-[56px] -> h-[48px]로 변경하여 8px 줄임 */}
-        <div className="relative w-full h-[48px] pointer-events-auto px-4">
-          {/* [수정] px-1 추가하여 좌우 4px씩 여백 확보 (총 8px 감소 효과) */}
-          <div className="flex items-center gap-2 w-full max-w-[400px] mx-auto h-full px-2">
-            <button
-              className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors overflow-hidden relative"
-              onClick={() => {
-                setCurrentPostId(currentPostId);
-                setShowEmojiPicker(!showEmojiPicker);
-              }}
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {showEmojiPicker ? (
-                  <motion.div
-                    key="close-icon"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    // [수정] 배경 반투명 + 블러 처리
-                    className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5]/80 backdrop-blur-md text-gray-800 rounded-full"
-                  >
-                    <X size={20} />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="smile-icon"
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.2 }}
-                    // [수정] 배경 반투명 + 블러 처리, 둥근 배경 추가
-                    className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5]/80 backdrop-blur-md text-gray-500 hover:text-gray-800 rounded-full"
-                  >
-                    <Smile size={24} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </button>
-            <div className="flex-1 h-full relative flex items-center">
-              <AnimatePresence mode="wait" initial={false}>
-                {showEmojiPicker ? (
-                  <motion.div
-                    key="emoji-list"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute inset-0 flex items-center gap-2 overflow-x-auto no-scrollbar"
-                  >
-                    {emojis.map((emoji) => (
-                      <button
-                        key={emoji}
-                        onClick={() => {
-                          if (currentPostId) {
-                            handleEmojiReaction(emoji, currentPostId);
-                            confetti({
-                              particleCount: 100,
-                              spread: 70,
-                              origin: { y: 0.6 },
-                            });
+      {!isGridView && !isReactionView && (
+        <div className="fixed bottom-[100px] left-0 right-0 z-40 max-w-[500px] mx-auto pointer-events-none">
+          {/* [수정] h-[56px] -> h-[48px]로 변경하여 8px 줄임 */}
+          <div className="relative w-full h-[48px] pointer-events-auto px-4">
+            {/* [수정] px-1 추가하여 좌우 4px씩 여백 확보 (총 8px 감소 효과) */}
+            <div className="flex items-center gap-2 w-full max-w-[400px] mx-auto h-full px-2">
+              <button
+                className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors overflow-hidden relative"
+                onClick={() => {
+                  setCurrentPostId(currentPostId);
+                  setShowEmojiPicker(!showEmojiPicker);
+                }}
+              >
+                <AnimatePresence mode="wait" initial={false}>
+                  {showEmojiPicker ? (
+                    <motion.div
+                      key="close-icon"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      // [수정] 배경 반투명 + 블러 처리
+                      className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5]/80 backdrop-blur-md text-gray-800 rounded-full"
+                    >
+                      <X size={20} />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="smile-icon"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.2 }}
+                      // [수정] 배경 반투명 + 블러 처리, 둥근 배경 추가
+                      className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5]/80 backdrop-blur-md text-gray-500 hover:text-gray-800 rounded-full"
+                    >
+                      <Smile size={24} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </button>
+              <div className="flex-1 h-full relative flex items-center">
+                <AnimatePresence mode="wait" initial={false}>
+                  {showEmojiPicker ? (
+                    <motion.div
+                      key="emoji-list"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute inset-0 flex items-center gap-2 overflow-x-auto no-scrollbar"
+                    >
+                      {emojis.map((emoji) => (
+                        <button
+                          key={emoji}
+                          onClick={() => {
+                            if (currentPostId) {
+                              handleEmojiReaction(emoji, currentPostId);
+                              confetti({
+                                particleCount: 100,
+                                spread: 70,
+                                origin: { y: 0.6 },
+                              });
+                            }
+                          }}
+                          // [수정] 이모지 버튼 배경 반투명 + 블러 처리
+                          className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-2xl bg-[#F5F5F5]/80 backdrop-blur-md rounded-full transition-colors"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="comment-input"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.2 }}
+                      // [수정] 높이가 48px이므로 inset-y-2(8px)를 inset-y-1(4px)로 변경하여 입력창 높이 40px 확보
+                      // [수정] 배경 반투명 + 블러 처리
+                      className="absolute inset-y-1 inset-x-0 flex items-center bg-[#F5F5F5]/80 backdrop-blur-md rounded-full px-4"
+                    >
+                      <input
+                        type="text"
+                        placeholder="댓글을 작성해주세요"
+                        className="w-full bg-transparent outline-none text-[#1A1A1A] placeholder:text-gray-400"
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            if (currentPostId) {
+                              handleAddComment(currentPostId);
+                            }
                           }
                         }}
-                        // [수정] 이모지 버튼 배경 반투명 + 블러 처리
-                        className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-2xl bg-[#F5F5F5]/80 backdrop-blur-md rounded-full transition-colors"
-                      >
-                        {emoji}
-                      </button>
-                    ))}
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="comment-input"
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.2 }}
-                    // [수정] 높이가 48px이므로 inset-y-2(8px)를 inset-y-1(4px)로 변경하여 입력창 높이 40px 확보
-                    // [수정] 배경 반투명 + 블러 처리
-                    className="absolute inset-y-1 inset-x-0 flex items-center bg-[#F5F5F5]/80 backdrop-blur-md rounded-full px-4"
-                  >
-                    <input
-                      type="text"
-                      placeholder="댓글을 작성해주세요"
-                      className="w-full bg-transparent outline-none text-[#1A1A1A] placeholder:text-gray-400"
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          if (currentPostId) {
-                            handleAddComment(currentPostId);
-                          }
-                        }
-                      }}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <AnimatePresence>
         {showDeleteModal && (
@@ -1209,32 +1189,34 @@ export function CommunityPage({
       </AnimatePresence>
 
       {/* 커뮤니티 전용 하단 네비게이션 */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 max-w-[500px] mx-auto bg-white">
-        <div className="relative px-4 pt-2 pb-4">
-          <div className="flex items-center justify-around">
+      {!isGridView && !isReactionView && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 max-w-[500px] mx-auto bg-white">
+          <div className="relative px-4 pt-2 pb-4">
+            <div className="flex items-center justify-around">
+              <button
+                onClick={() => setIsGridView(true)}
+                className="flex flex-col items-center gap-1 text-gray-800"
+              >
+                <LayoutGrid size={24} />
+                <span className="text-xs font-semibold">
+                  모아보기
+                </span>
+              </button>
+              <div className="w-16" />
+              <button className="flex flex-col items-center gap-1 text-gray-400">
+                <Calendar size={24} />
+                <span className="text-xs">캘린더</span>
+              </button>
+            </div>
             <button
-              onClick={() => setIsGridView(true)}
-              className="flex flex-col items-center gap-1 text-gray-800"
+              className="absolute left-1/2 -translate-x-1/2 -top-[34px] w-14 h-14 bg-[#36D2C5] rounded-full flex items-center justify-center shadow-lg hover:bg-[#00C2B3] transition-colors"
+              onClick={onUploadClick}
             >
-              <LayoutGrid size={24} />
-              <span className="text-xs font-semibold">
-                모아보기
-              </span>
-            </button>
-            <div className="w-16" />
-            <button className="flex flex-col items-center gap-1 text-gray-400">
-              <Calendar size={24} />
-              <span className="text-xs">캘린더</span>
+              <Plus size={28} className="text-white" />
             </button>
           </div>
-          <button
-            className="absolute left-1/2 -translate-x-1/2 -top-[34px] w-14 h-14 bg-[#36D2C5] rounded-full flex items-center justify-center shadow-lg hover:bg-[#00C2B3] transition-colors"
-            onClick={onUploadClick}
-          >
-            <Plus size={28} className="text-white" />
-          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }

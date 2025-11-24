@@ -61,8 +61,8 @@ export function Header({
   // --- 'title' prop이 없으면 '홈페이지 헤더' ---
   return (
     <header className="fixed top-0 left-0 right-0 z-40 px-5 py-4 flex items-center justify-between gap-4 mx-auto h-16 max-w-[500px]">
-      {/* --- 1. 왼쪽: 로고 + 알림 말풍선 --- */}
-      <div className="flex items-center gap-4 flex-1 min-w-0">
+      {/* --- 왼쪽: 로고 --- */}
+      <div className="flex items-center flex-1 min-w-0">
         {/* 로고 (SVG) */}
         <div className="w-17 h-5 flex-shrink-0 flex items-center justify-center">
           <svg
@@ -102,25 +102,9 @@ export function Header({
             />
           </svg>
         </div>
-
-        {/* --- 말풍선 알림 --- */}
-        <button
-          className="relative bg-white rounded-lg px-4 py-2 transition-colors flex-1 min-w-0"
-          onClick={onNotificationClick}
-        >
-          <div
-            className="absolute top-1/2 -right-2 -translate-y-1/2 w-0 h-0
-                        border-t-[8px] border-t-transparent
-                        border-l-[8px] border-l-white
-                        border-b-[8px] border-b-transparent"
-          ></div>
-          <p className="text-sm text-gray-800 font-medium truncate text-left">
-            김동석님 매일건강의원 14:00 부터 예약 1건 있습니다
-          </p>
-        </button>
       </div>
 
-      {/* --- 2. 오른쪽: 기존 벨 아이콘 --- */}
+      {/* --- 오른쪽: 알림 아이콘 --- */}
       <button
         onClick={onNotificationClick}
         className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition-colors flex-shrink-0"

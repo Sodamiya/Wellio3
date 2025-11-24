@@ -17,12 +17,20 @@ interface ReviewWritePageProps {
     reviewText: string;
     userName: string;
     userAvatar: string;
+    visitType?: "첫방문" | "재방문";
   }) => void;
   hospitalName?: string;
   visitDate?: string;
   hospitalImage?: string;
   userName?: string;
   hospitalId?: number;
+  editingReview?: {
+    id: number;
+    rating: number;
+    keywords: string[];
+    reviewText: string;
+    visitType?: "첫방문" | "재방문";
+  } | null;
 }
 
 const KEYWORDS = [
@@ -45,13 +53,16 @@ export function ReviewWritePage({
   hospitalImage,
   userName = "사용자",
   hospitalId = 1,
+  editingReview,
 }: ReviewWritePageProps) {
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(editingReview?.rating || 0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [selectedKeywords, setSelectedKeywords] = useState<
     string[]
-  >([]);
-  const [reviewText, setReviewText] = useState("");
+  >(editingReview?.keywords || []);
+  const [reviewText, setReviewText] = useState(
+    editingReview?.reviewText || "",
+  );
 
   const handleKeywordClick = (keyword: string) => {
     if (selectedKeywords.includes(keyword)) {
@@ -88,6 +99,7 @@ export function ReviewWritePage({
         reviewText,
         userName,
         userAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop",
+        visitType: editingReview?.visitType,
       });
     } else {
       onBack();
