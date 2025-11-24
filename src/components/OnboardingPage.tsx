@@ -207,9 +207,9 @@ export function OnboardingPage({
         <div className="px-5 pt-5 pb-24">
           {/* [수정 2] Tailwind 대신 style로 RGBA 강제 적용 */}
           <div
-            className="relative rounded-2xl p-5 mb-5 backdrop-blur-sm transition-colors duration-300"
+            className="relative rounded-2xl p-5 mb-5 backdrop-blur-xs transition-colors duration-300"
             style={{
-              backgroundColor: "rgba(46, 202, 202, 0.5)",
+              backgroundColor: "rgba(46, 202, 202, 0.3)",
             }}
           >
             <h2 className="text-xl mb-2 font-bold">
@@ -230,7 +230,7 @@ export function OnboardingPage({
                 height: 0,
                 borderLeft: "10px solid transparent",
                 borderRight: "10px solid transparent",
-                borderTop: "10px solid rgba(46, 202, 202, 0.5)",
+                borderTop: "10px solid rgba(46, 202, 202, 0.3)",
               }}
             ></div>
           </div>

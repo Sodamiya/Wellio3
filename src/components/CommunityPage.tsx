@@ -746,7 +746,7 @@ export function CommunityPage({
               return (
                 <SwiperSlide key={post.id}>
                   <div className="h-full flex flex-col items-center justify-center px-4">
-                    <div className="relative w-[335px] max-w-[90vw] aspect-[335/447] mx-auto overflow-visible -translate-y-[80px]">
+                    <div className="relative w-full max-w-[460px] aspect-[335/447] mx-auto overflow-visible -translate-y-[80px]">
                       {post.userName ===
                         currentUser.userName && (
                         <div className="absolute inset-y-0 -right-2 w-32 flex items-center justify-center z-0">

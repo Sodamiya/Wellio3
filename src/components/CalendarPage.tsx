@@ -1,5 +1,11 @@
 import { ChevronLeft, ChevronDown } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+
+// 💡 Swiper 라이브러리 임포트
+import { Swiper, SwiperSlide } from "swiper/react";
+import SwiperCore from "swiper";
+import "swiper/css";
+
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 interface CalendarPageProps {
@@ -17,297 +23,241 @@ interface DayData {
   avatar?: string;
 }
 
-export function CalendarPage({ onBack }: CalendarPageProps) {
-  const currentYear = 2025;
-  const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
-  
-  // 11월 섹션 참조
-  const novemberRef = useRef<HTMLDivElement>(null);
+// 특정 년/월의 날짜 배열 생성 (동일)
+const generateMonthDays = (
+  year: number,
+  month: number,
+): DayData[] => {
+  const firstDay = new Date(year, month - 1, 1).getDay();
+  const lastDate = new Date(year, month, 0).getDate();
 
-  // 페이지 로드 시 11월로 스크롤
+  const days: DayData[] = [];
+  for (let i = 0; i < firstDay; i++) {
+    days.push({ date: 0 });
+  }
+  for (let i = 1; i <= lastDate; i++) {
+    days.push({ date: i });
+  }
+  return days;
+};
+
+// =========================================================================
+
+export function CalendarPage({ onBack }: CalendarPageProps) {
+  const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
+  const swiperRef = useRef<SwiperCore | null>(null); // Swiper 인스턴스 Ref
+
+  // 💡 이벤트 데이터 업데이트 (동일)
+  const specialEvents: { [key: string]: Partial<DayData> } = {
+    // === 10월 이벤트 ===
+    "2025-10-5": { image: "https://i.pravatar.cc/100?img=50" },
+    "2025-10-14": { tripStart: true },
+    "2025-10-15": { inTrip: true },
+    "2025-10-16": { tripEnd: true, inTrip: true },
+
+    // === 11월 이벤트 ===
+    "2025-11-1": { image: "https://i.pravatar.cc/100?img=3" },
+    "2025-11-2": { image: "https://i.pravatar.cc/100?img=33" },
+    "2025-11-3": { image: "https://i.pravatar.cc/100?img=12" },
+    "2025-11-4": { image: "https://i.pravatar.cc/100?img=59" },
+    "2025-11-7": { image: "https://i.pravatar.cc/100?img=20" },
+    "2025-11-10": { image: "https://i.pravatar.cc/100?img=15" },
+    "2025-11-13": { image: "https://i.pravatar.cc/100?img=53" },
+    "2025-11-16": { tripStart: true },
+    "2025-11-17": { inTrip: true },
+    "2025-11-18": {
+      inTrip: true,
+      image: "https://i.pravatar.cc/100?img=18",
+    },
+    "2025-11-19": { inTrip: true },
+    "2025-11-20": { inTrip: true },
+    "2025-11-21": { inTrip: true },
+    "2025-11-22": { tripEnd: true, inTrip: true },
+    "2025-11-23": {
+      tripStart: true,
+      inTrip: true,
+      image: "https://i.pravatar.cc/100?img=23",
+    },
+    "2025-11-24": { inTrip: true },
+    "2025-11-25": { tripEnd: true, inTrip: true },
+  };
+
+  // 표시 범위 (동일)
+  const calendarRange = useMemo(() => {
+    const range = [];
+    range.push({ year: 2025, month: 8 });
+    range.push({ year: 2025, month: 9 });
+    range.push({ year: 2025, month: 10 });
+    range.push({ year: 2025, month: 11, isCurrent: true }); // 인덱스 3
+    range.push({ year: 2025, month: 12 });
+    range.push({ year: 2026, month: 1 });
+    range.push({ year: 2026, month: 2 });
+    range.push({ year: 2026, month: 3 });
+    range.push({ year: 2026, month: 4 });
+    range.push({ year: 2026, month: 5 });
+    return range;
+  }, []);
+
+  // 💡 초기 진입 시 11월(인덱스 3)로 이동 (동일)
   useEffect(() => {
-    if (novemberRef.current) {
-      novemberRef.current.scrollIntoView({ behavior: "auto", block: "start" });
+    if (swiperRef.current) {
+      setTimeout(() => {
+        swiperRef.current?.slideTo(3, 0);
+      }, 100);
     }
   }, []);
 
-  // 각 월별 데이터 정의
-  const monthsData: { [key: number]: DayData[] } = {
-    // 1월 (수요일 시작 - 빈 칸 3개)
-    1: [
-      { date: 0 }, { date: 0 }, { date: 0 }, // 빈 칸
-      { date: 1 }, { date: 2 }, { date: 3 }, { date: 4 },
-      { date: 5 }, { date: 6 }, { date: 7 }, { date: 8 },
-      { date: 9 }, { date: 10 }, { date: 11 }, { date: 12 },
-      { date: 13 }, { date: 14 }, { date: 15 }, { date: 16 },
-      { date: 17 }, { date: 18 }, { date: 19 }, { date: 20 },
-      { date: 21 }, { date: 22 }, { date: 23 }, { date: 24 },
-      { date: 25 }, { date: 26 }, { date: 27 }, { date: 28 },
-      { date: 29 }, { date: 30 }, { date: 31 },
-    ],
-    
-    // 2월 (토요일 시작 - 빈 칸 6개)
-    2: [
-      { date: 0 }, { date: 0 }, { date: 0 }, { date: 0 }, { date: 0 }, { date: 0 },
-      { date: 1 }, { date: 2 }, { date: 3 }, { date: 4 }, { date: 5 },
-      { date: 6 }, { date: 7 }, { date: 8 }, { date: 9 }, { date: 10 },
-      { date: 11 }, { date: 12 }, { date: 13 }, { date: 14 }, { date: 15 },
-      { date: 16 }, { date: 17 }, { date: 18 }, { date: 19 }, { date: 20 },
-      { date: 21 }, { date: 22 }, { date: 23 }, { date: 24 }, { date: 25 },
-      { date: 26 }, { date: 27 }, { date: 28 },
-    ],
-    
-    // 3월 (토요일 시작 - 빈 칸 6개)
-    3: [
-      { date: 0 }, { date: 0 }, { date: 0 }, { date: 0 }, { date: 0 }, { date: 0 },
-      { date: 1 }, { date: 2 }, { date: 3 }, { date: 4 }, { date: 5 },
-      { date: 6 }, { date: 7 }, { date: 8 }, { date: 9 }, { date: 10 },
-      { date: 11 }, { date: 12 }, { date: 13 }, { date: 14 }, { date: 15 },
-      { date: 16 }, { date: 17 }, { date: 18 }, { date: 19 }, { date: 20 },
-      { date: 21 }, { date: 22 }, { date: 23 }, { date: 24 }, { date: 25 },
-      { date: 26 }, { date: 27 }, { date: 28 }, { date: 29 }, { date: 30 },
-      { date: 31 },
-    ],
-    
-    // 4월 (화요일 시작 - 빈 칸 2개)
-    4: [
-      { date: 0 }, { date: 0 },
-      { date: 1 }, { date: 2 }, { date: 3 }, { date: 4 }, { date: 5 },
-      { date: 6 }, { date: 7 }, { date: 8 }, { date: 9 }, { date: 10 },
-      { date: 11 }, { date: 12 }, { date: 13 }, { date: 14 }, { date: 15 },
-      { date: 16 }, { date: 17 }, { date: 18 }, { date: 19 }, { date: 20 },
-      { date: 21 }, { date: 22 }, { date: 23 }, { date: 24 }, { date: 25 },
-      { date: 26 }, { date: 27 }, { date: 28 }, { date: 29 }, { date: 30 },
-    ],
-    
-    // 5월 (목요일 시작 - 빈 칸 4개)
-    5: [
-      { date: 0 }, { date: 0 }, { date: 0 }, { date: 0 },
-      { date: 1 }, { date: 2 }, { date: 3 },
-      { date: 4 }, { date: 5 }, { date: 6 }, { date: 7 }, { date: 8 },
-      { date: 9 }, { date: 10 }, { date: 11 }, { date: 12 }, { date: 13 },
-      { date: 14 }, { date: 15 }, { date: 16 }, { date: 17 }, { date: 18 },
-      { date: 19 }, { date: 20 }, { date: 21 }, { date: 22 }, { date: 23 },
-      { date: 24 }, { date: 25 }, { date: 26 }, { date: 27 }, { date: 28 },
-      { date: 29 }, { date: 30 }, { date: 31 },
-    ],
-    
-    // 6월 (일요일 시작 - 빈 칸 0개)
-    6: [
-      { date: 1 }, { date: 2 }, { date: 3 }, { date: 4 }, { date: 5 },
-      { date: 6 }, { date: 7 }, { date: 8 }, { date: 9 }, { date: 10 },
-      { date: 11 }, { date: 12 }, { date: 13 }, { date: 14 }, { date: 15 },
-      { date: 16 }, { date: 17 }, { date: 18 }, { date: 19 }, { date: 20 },
-      { date: 21 }, { date: 22 }, { date: 23 }, { date: 24 }, { date: 25 },
-      { date: 26 }, { date: 27 }, { date: 28 }, { date: 29 }, { date: 30 },
-    ],
-    
-    // 7월 (화요일 시작 - 빈 칸 2개)
-    7: [
-      { date: 0 }, { date: 0 },
-      { date: 1 }, { date: 2 }, { date: 3 }, { date: 4 }, { date: 5 },
-      { date: 6 }, { date: 7 }, { date: 8 }, { date: 9 }, { date: 10 },
-      { date: 11 }, { date: 12 }, { date: 13 }, { date: 14 }, { date: 15 },
-      { date: 16 }, { date: 17 }, { date: 18 }, { date: 19 }, { date: 20 },
-      { date: 21 }, { date: 22 }, { date: 23 }, { date: 24 }, { date: 25 },
-      { date: 26 }, { date: 27 }, { date: 28 }, { date: 29 }, { date: 30 },
-      { date: 31 },
-    ],
-    
-    // 8월 (금요일 시작 - 빈 칸 5개)
-    8: [
-      { date: 0 }, { date: 0 }, { date: 0 }, { date: 0 }, { date: 0 },
-      { date: 1 }, { date: 2 },
-      { date: 3 }, { date: 4 }, { date: 5 }, { date: 6 }, { date: 7 },
-      { date: 8 }, { date: 9 }, { date: 10 }, { date: 11 }, { date: 12 },
-      { date: 13 }, { date: 14 }, { date: 15 }, { date: 16 }, { date: 17 },
-      { date: 18 }, { date: 19 }, { date: 20 }, { date: 21 }, { date: 22 },
-      { date: 23 }, { date: 24 }, { date: 25 }, { date: 26 }, { date: 27 },
-      { date: 28 }, { date: 29 }, { date: 30 }, { date: 31 },
-    ],
-    
-    // 9월 (월요일 시작 - 빈 칸 1개)
-    9: [
-      { date: 0 },
-      { date: 1 }, { date: 2 }, { date: 3 }, { date: 4 }, { date: 5 },
-      { date: 6 }, { date: 7 }, { date: 8 }, { date: 9 }, { date: 10 },
-      { date: 11 }, { date: 12 }, { date: 13 }, { date: 14 }, { date: 15 },
-      { date: 16 }, { date: 17 }, { date: 18 }, { date: 19 }, { date: 20 },
-      { date: 21 }, { date: 22 }, { date: 23 }, { date: 24 }, { date: 25 },
-      { date: 26 }, { date: 27 }, { date: 28 }, { date: 29 }, { date: 30 },
-    ],
-    
-    // 10월 (수요일 시작 - 빈 칸 3개)
-    10: [
-      { date: 0 }, { date: 0 }, { date: 0 },
-      { date: 1 }, { date: 2 }, { date: 3 }, { date: 4 },
-      { date: 5 }, { date: 6 }, { date: 7 }, { date: 8 }, { date: 9 },
-      { date: 10 }, { date: 11 }, { date: 12 }, { date: 13 }, { date: 14 },
-      { date: 15 }, { date: 16 }, { date: 17 }, { date: 18 }, { date: 19 },
-      { date: 20 }, { date: 21 }, { date: 22 }, { date: 23 }, { date: 24 },
-      { date: 25 }, { date: 26 }, { date: 27 }, { date: 28 }, { date: 29 },
-      { date: 30 }, { date: 31 },
-    ],
-    
-    // 11월 (토요일 시작 - 빈 칸 6개) - 원본 데이터 포함
-    11: [
-      { date: 0 }, { date: 0 }, { date: 0 }, { date: 0 }, { date: 0 }, { date: 0 },
-      { date: 1, image: "https://i.pravatar.cc/100?img=3" },
-      { date: 2, image: "https://i.pravatar.cc/100?img=33" },
-      { date: 3, image: "https://i.pravatar.cc/100?img=12" },
-      { date: 4, image: "https://i.pravatar.cc/100?img=59" },
-      { date: 5 },
-      { date: 6 },
-      { date: 7, image: "https://i.pravatar.cc/100?img=20" },
-      { date: 8 },
-      { date: 9 },
-      { date: 10, image: "https://i.pravatar.cc/100?img=15" },
-      { date: 11 },
-      { date: 12 },
-      { date: 13, image: "https://i.pravatar.cc/100?img=53" },
-      { date: 14 },
-      { date: 15 },
-      { date: 16, tripStart: true },
-      { date: 17, inTrip: true },
-      { date: 18, inTrip: true },
-      { date: 19, inTrip: true },
-      { date: 20, inTrip: true },
-      { date: 21, inTrip: true },
-      { date: 22, tripEnd: true, inTrip: true },
-      { date: 23, tripStart: true, inTrip: true },
-      { date: 24, inTrip: true },
-      { date: 25, tripEnd: true, inTrip: true },
-      { date: 26 },
-      { date: 27 },
-      { date: 28 },
-      { date: 29, image: "https://i.pravatar.cc/100?img=29", tripImage: true },
-      { date: 30 },
-    ],
-    
-    // 12월 (월요일 시작 - 빈 칸 1개)
-    12: [
-      { date: 0 },
-      { date: 1 }, { date: 2 }, { date: 3 }, { date: 4 }, { date: 5 },
-      { date: 6 }, { date: 7 }, { date: 8 }, { date: 9 }, { date: 10 },
-      { date: 11 }, { date: 12 }, { date: 13 }, { date: 14 }, { date: 15 },
-      { date: 16 }, { date: 17 }, { date: 18 }, { date: 19 }, { date: 20 },
-      { date: 21 }, { date: 22 }, { date: 23 }, { date: 24 }, { date: 25 },
-      { date: 26 }, { date: 27 }, { date: 28 }, { date: 29 }, { date: 30 },
-      { date: 31 },
-    ],
+  // 달력 일자 렌더링 함수 (수정)
+  const renderDay = (
+    day: DayData,
+    year: number,
+    month: number,
+    idx: number,
+  ) => {
+    const dateKey = `${year}-${month}-${day.date}`;
+    const eventData = specialEvents[dateKey];
+    const currentDay = eventData
+      ? { ...day, ...eventData }
+      : day;
+
+    // 💡 날짜가 없으면 (빈 칸) null 반환
+    if (currentDay.date === 0) {
+      return (
+        <div
+          key={`${year}-${month}-${idx}`}
+          className="relative h-12 flex justify-center items-center"
+        />
+      );
+    }
+
+    // 여행 일정이 있는 날짜인지 확인
+    const isInTripPeriod =
+      currentDay.tripStart ||
+      currentDay.tripEnd ||
+      currentDay.inTrip;
+
+    // 여행 일정 기간의 배경 클래스
+    const tripBgClass = `absolute top-0 bottom-0 left-0 right-0 bg-[#e0f8f8] z-0 ${
+      currentDay.tripStart && !currentDay.tripEnd
+        ? "rounded-l-full"
+        : currentDay.tripEnd && !currentDay.tripStart
+          ? "rounded-r-full"
+          : ""
+    }`;
+
+    return (
+      <div
+        key={`${year}-${month}-${idx}`}
+        className="relative h-12 flex justify-center items-center"
+      >
+        {/* 💡 여행 일정 배경이 있는 경우 먼저 렌더링 */}
+        {isInTripPeriod && <div className={tripBgClass} />}
+
+        {currentDay.image ? (
+          // 💡 이미지가 있는 경우 (아이콘 대신 숫자로 통일)
+          <div
+            className={`w-10 h-10 rounded-full relative overflow-hidden flex justify-center items-center text-white shadow-md ${
+              currentDay.tripStart ? "bg-[#2a8f8f]" : "" // 여행 시작일이면 진한 배경
+            }`}
+          >
+            {/* 이미지 배경 */}
+            <ImageWithFallback
+              src={currentDay.image}
+              alt=""
+              className="absolute w-full h-full object-cover z-0"
+            />
+            {/* 이미지 위에 어두운 오버레이 */}
+            <div className="absolute inset-0 bg-black opacity-30 z-0" />
+
+            {/* 💡 날짜 숫자를 중앙에 크게 표시 (기존의 일반 포스팅 스타일) */}
+            <span className="relative z-10 drop-shadow-md">
+              {currentDay.date}
+            </span>
+          </div>
+        ) : (
+          // 이미지가 없고 일반 텍스트 날짜만 있는 경우
+          <span className="relative z-10 text-gray-700">
+            {currentDay.date}
+          </span>
+        )}
+      </div>
+    );
   };
 
-  const renderDay = (day: DayData, idx: number) => (
-    <div
-      key={idx}
-      className="relative h-12 flex justify-center items-center"
-    >
-      {day.date === 0 ? null : day.image ? (
-        // 이미지가 있는 날짜
-        <div
-          className={`w-10 h-10 rounded-full relative overflow-hidden flex justify-center items-center text-white shadow-md ${
-            day.tripStart || day.tripImage ? "bg-[#2a8f8f]" : ""
-          }`}
-        >
-          {day.tripStart ? (
-            // 여행 시작일 (아이콘)
-            <>
-              <div className="absolute inset-0 bg-black opacity-10 z-0" />
-              <svg
-                className="relative z-10 w-5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
-              </svg>
-              <span className="absolute text-[10px] top-1.5 right-3 z-10">
-                {day.date}
-              </span>
-            </>
-          ) : (
-            // 일반 이미지 날짜
-            <>
-              <ImageWithFallback
-                src={day.image}
-                alt=""
-                className="absolute w-full h-full object-cover z-0"
-              />
-              <div className="absolute inset-0 bg-black opacity-30 z-0" />
-              <span className="relative z-10 drop-shadow-md">
-                {day.date}
-              </span>
-            </>
-          )}
-        </div>
-      ) : day.tripStart || day.tripEnd || day.inTrip ? (
-        // 여행 기간 표시
-        <>
-          <div
-            className={`absolute top-0 bottom-0 left-0 right-0 bg-[#e0f8f8] z-0 ${
-              day.tripStart && !day.tripEnd
-                ? "rounded-l-full"
-                : day.tripEnd && !day.tripStart
-                  ? "rounded-r-full"
-                  : ""
-            }`}
-          />
-          <span className="relative z-10 text-gray-700">{day.date}</span>
-        </>
-      ) : (
-        // 일반 날짜
-        <span className="text-gray-700">{day.date}</span>
-      )}
-    </div>
-  );
-
   return (
-    <div className="w-full max-w-[500px] mx-auto bg-white min-h-screen overflow-y-auto">
-      {/* 헤더 - sticky로 상단 고정 */}
-      <div className="sticky top-0 z-10 bg-white flex justify-between items-center p-5 border-b border-gray-100">
+    <div className="h-screen w-full max-w-[500px] mx-auto bg-white flex flex-col relative shadow-xl">
+      <style>{`
+        /* Swiper의 슬라이드가 내용물 크기를 갖도록 조정 */
+        .swiper-wrapper {
+          align-items: flex-start; /* 슬라이드가 상단부터 시작하도록 정렬 */
+        }
+        .swiper-slide {
+            height: auto !important; /* 내용물 크기에 맞게 높이 설정 */
+        }
+      `}</style>
+
+      {/* 헤더 (동일) */}
+      <div className="flex-none bg-white flex justify-between items-center p-5 z-20 border-b border-gray-100/50 backdrop-blur-sm bg-white/95 sticky top-0">
         <button onClick={onBack} className="w-6 h-6">
           <ChevronLeft size={24} className="text-gray-800" />
         </button>
         <div className="flex items-center gap-1">
-          <span className="text-lg">캘린더</span>
-          <ChevronDown size={16} className="text-gray-800" />
+          <span className="text-lg font-bold text-gray-800">
+            캘린더
+          </span>
+          <ChevronDown size={18} className="text-gray-800" />
         </div>
         <div className="w-6" />
       </div>
 
-      {/* 스크롤 가능한 월별 캘린더 영역 */}
-      <div className="pb-8">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((month) => (
-          <div 
-            key={month} 
-            className="py-8 px-4 bg-white"
-            ref={month === 11 ? novemberRef : null}
-          >
-            {/* 월 타이틀 */}
-            <div className="text-center text-lg mb-5">
-              {currentYear}년 {month}월
-            </div>
+      {/* 💡 Swiper 영역 */}
+      <div className="flex-1 overflow-hidden bg-gray-100">
+        <Swiper
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+          }}
+          direction={"vertical"}
+          slidesPerView={"auto"} // auto로 설정하여 다음 달이 보이도록 함
+          spaceBetween={40} // 월 간의 간격 40px 유지
+          mousewheel={true} // 휠 스크롤 지원
+          grabCursor={true} // 드래그 시 커서 변경
+          className="swiper-container h-full"
+        >
+          {calendarRange.map(({ year, month }) => {
+            const days = generateMonthDays(year, month);
 
-            {/* 요일 헤더 */}
-            <div className="grid grid-cols-7 text-center mb-3 px-2">
-              {weekDays.map((day, idx) => (
-                <div key={idx} className="text-xs text-gray-500 mb-3">
-                  {day}
+            return (
+              // h-auto로 설정하여 내용물 크기에 맞춥니다.
+              <SwiperSlide
+                key={`${year}-${month}`}
+                className="h-auto"
+              >
+                <div className="px-4 py-4 bg-white">
+                  <div className="text-center text-lg font-bold mb-6">
+                    {year}년 {month}월
+                  </div>
+
+                  <div className="grid grid-cols-7 text-center mb-2 px-1">
+                    {weekDays.map((day, idx) => (
+                      <div
+                        key={idx}
+                        className="text-sm text-gray-400 font-medium"
+                      >
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-y-4 text-center px-1">
+                    {days.map((day, idx) =>
+                      renderDay(day, year, month, idx),
+                    )}
+                  </div>
                 </div>
-              ))}
-            </div>
-
-            {/* 날짜 그리드 */}
-            <div className="grid grid-cols-7 gap-y-4 text-center px-2">
-              {monthsData[month].map((day, idx) => renderDay(day, idx))}
-            </div>
-          </div>
-        ))}
+              </SwiperSlide>
+            );
+          })}
+        </Swiper>
       </div>
     </div>
   );

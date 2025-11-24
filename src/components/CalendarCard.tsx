@@ -11,6 +11,28 @@ export function CalendarCard() {
 
   const daysOfWeek = ["월", "화", "수", "목", "금", "토", "일"];
 
+  // 날짜별 일정 데이터
+  const scheduleData: { [key: string]: { message: string; highlight: string } } = {
+    "25": { message: "김웰리님 오늘", highlight: "오후 9시", },
+    "26": { message: "김웰리님 내일", highlight: "오전 8시 30분", },
+    "27": { message: "김웰리님", highlight: "오후 2시", },
+    "28": { message: "김웰리님", highlight: "오후 7시 30분", },
+    "29": { message: "김웰리님", highlight: "오전 11시", },
+    "30": { message: "김웰리님 이번 주말", highlight: "오후 4시", },
+    "1": { message: "김웰리님 다음 달", highlight: "오전 9시", },
+  };
+
+  // 메시지 접미사 배리에이션
+  const messageSuffixes = [
+    "에 투여가 예정되어있습니다",
+    "에 병원 예약이 있습니다",
+    "에 복약 알림이 있습니다",
+    "에 건강검진 예약이 있습니다",
+    "에 약 복용 시간입니다",
+    "에 진료 예약이 있습니다",
+    "에 건강 상담 예약이 있습니다",
+  ];
+
   const getDaysInSelectedWeek = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -133,13 +155,28 @@ export function CalendarCard() {
 
       {/* 4. 하단 알림 텍스트 */}
       <div className="mt-4 pt-4 border-t border-gray-100 px-4 sm:px-6 md:px-8 pb-4">
-        <p className="text-sm text-gray-700">
-          김웰리님 오늘{" "}
-          <span className="text-blue-600 font-semibold">
-            오후 9시
-          </span>
-          에 투여가 예정되어있습니다
-        </p>
+        {(() => {
+          const schedule = scheduleData[selectedDay.toString()];
+          if (schedule) {
+            // 날짜를 기반으로 접미사 선택 (일관성 있게)
+            const suffixIndex = selectedDay % messageSuffixes.length;
+            return (
+              <p className="text-sm text-gray-700">
+                {schedule.message}{" "}
+                <span className="text-blue-600 font-semibold">
+                  {schedule.highlight}
+                </span>
+                {messageSuffixes[suffixIndex]}
+              </p>
+            );
+          } else {
+            return (
+              <p className="text-sm text-gray-500">
+                일정이 없습니다
+              </p>
+            );
+          }
+        })()}
       </div>
     </div>
   );
