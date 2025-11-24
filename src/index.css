@@ -872,6 +872,10 @@
     display: inline-flex;
   }
 
+  .aspect-\[335\/447\] {
+    aspect-ratio: 335 / 447;
+  }
+
   .aspect-square {
     aspect-ratio: 1;
   }
@@ -1047,10 +1051,6 @@
     max-height: 50vh;
   }
 
-  .max-h-\[600px\] {
-    max-height: 600px;
-  }
-
   .min-h-\[110px\] {
     min-height: 110px;
   }
@@ -1167,6 +1167,10 @@
     width: 263px;
   }
 
+  .w-\[335px\] {
+    width: 335px;
+  }
+
   .w-full {
     width: 100%;
   }
@@ -1185,6 +1189,10 @@
 
   .max-w-\[90\%\] {
     max-width: 90%;
+  }
+
+  .max-w-\[90vw\] {
+    max-width: 90vw;
   }
 
   .max-w-\[300px\] {

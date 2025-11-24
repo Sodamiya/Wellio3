@@ -71,12 +71,6 @@ const familyMembers = [
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
   },
   {
-    id: "guest",
-    name: "게스트",
-    avatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80",
-  },
-  {
     id: "mom",
     name: "엄마",
     avatar:
@@ -752,7 +746,7 @@ export function CommunityPage({
               return (
                 <SwiperSlide key={post.id}>
                   <div className="h-full flex flex-col items-center justify-center px-4">
-                    <div className="relative h-[85%] max-h-[600px] w-full max-w-[400px] mx-auto overflow-visible -translate-y-[80px]">
+                    <div className="relative w-[335px] max-w-[90vw] aspect-[335/447] mx-auto overflow-visible -translate-y-[80px]">
                       {post.userName ===
                         currentUser.userName && (
                         <div className="absolute inset-y-0 -right-2 w-32 flex items-center justify-center z-0">
