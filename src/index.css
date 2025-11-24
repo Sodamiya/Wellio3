@@ -1030,8 +1030,8 @@
     height: 250px;
   }
 
-  .h-\[calc\(100vh-246px\)\] {
-    height: calc(100vh - 246px);
+  .h-\[calc\(100vh-110px\)\] {
+    height: calc(100vh - 110px);
   }
 
   .h-auto {
@@ -1272,6 +1272,11 @@
 
   .-translate-y-8 {
     --tw-translate-y: calc(var(--spacing) * -8);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
+
+  .-translate-y-\[80px\] {
+    --tw-translate-y: calc(80px * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);
   }
 

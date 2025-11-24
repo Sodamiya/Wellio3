@@ -734,7 +734,7 @@ export function CommunityPage({
         ) : (
           <Swiper
             direction={"vertical"}
-            className="w-full h-[calc(100vh-246px)]"
+            className="w-full h-[calc(100vh-110px)]"
             allowTouchMove={dragStartX === null}
             onSliderMove={() => {
               setIsScrolling(true);
@@ -762,7 +762,7 @@ export function CommunityPage({
               return (
                 <SwiperSlide key={post.id}>
                   <div className="h-full flex flex-col items-center justify-center px-4">
-                    <div className="relative h-[85%] max-h-[600px] w-full max-w-[400px] overflow-visible">
+                    <div className="relative h-[85%] max-h-[600px] w-full max-w-[400px] mx-auto overflow-visible -translate-y-[80px]">
                       {post.userName ===
                         currentUser.userName && (
                         <div className="absolute inset-y-0 -right-2 w-32 flex items-center justify-center z-0">
@@ -1030,8 +1030,8 @@ export function CommunityPage({
       </div>
 
       {/* 이모지/댓글 입력창 (하단 고정) */}
-      <div className="fixed bottom-[100px] left-0 right-0 z-40 max-w-[500px] mx-auto px-4 bg-transparent pointer-events-none">
-        <div className="relative flex items-center gap-2 w-full h-[56px] pointer-events-auto">
+      <div className="fixed bottom-[100px] left-0 right-0 z-40 max-w-[500px] mx-auto pointer-events-none">
+        <div className="relative flex items-center gap-2 w-full h-[56px] pointer-events-auto px-4">
           <button
             className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors overflow-hidden relative"
             onClick={() => {
