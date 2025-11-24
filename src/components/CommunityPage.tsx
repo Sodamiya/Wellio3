@@ -758,7 +758,12 @@ export function CommunityPage({
                       )}
                       <motion.div
                         className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg touch-none"
-                        drag={!isScrolling && post.userName === currentUser.userName ? "x" : false}
+                        drag={
+                          !isScrolling &&
+                          post.userName === currentUser.userName
+                            ? "x"
+                            : false
+                        }
                         dragConstraints={{
                           left: -200,
                           right: 0,
@@ -806,39 +811,35 @@ export function CommunityPage({
                               post.id,
                               post.reactions,
                             ).length > 0 && (
-                                <div
-                                  className="absolute top-4 right-4 flex flex-wrap gap-2 justify-end max-w-[60%] z-20"
-                                >
-                                  {getAllReactions(
-                                    post.id,
-                                    post.reactions,
-                                  ).flatMap((reaction) =>
-                                    reaction.users.map(
-                                      (user, userIdx) => (
-                                        <div
-                                          key={`${reaction.emoji}-${user.userName}-${userIdx}`}
-                                          className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1.5 flex items-center gap-1.5"
-                                        >
-                                          <span className="text-base">
-                                            {reaction.emoji}
-                                          </span>
-                                          <ImageWithFallback
-                                            src={user.userAvatar}
-                                            alt={user.userName}
-                                            className="w-6 h-6 rounded-full border border-white"
-                                          />
-                                        </div>
-                                      ),
+                              <div className="absolute top-4 right-4 flex flex-wrap gap-2 justify-end max-w-[60%] z-20">
+                                {getAllReactions(
+                                  post.id,
+                                  post.reactions,
+                                ).flatMap((reaction) =>
+                                  reaction.users.map(
+                                    (user, userIdx) => (
+                                      <div
+                                        key={`${reaction.emoji}-${user.userName}-${userIdx}`}
+                                        className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1.5 flex items-center gap-1.5"
+                                      >
+                                        <span className="text-base">
+                                          {reaction.emoji}
+                                        </span>
+                                        <ImageWithFallback
+                                          src={user.userAvatar}
+                                          alt={user.userName}
+                                          className="w-6 h-6 rounded-full border border-white"
+                                        />
+                                      </div>
                                     ),
-                                  )}
-                                </div>
-                              )}
+                                  ),
+                                )}
+                              </div>
+                            )}
                             {/* [수정: Pressed 상태의 캡슐 위치 및 스타일 통일] */}
                             {(post.textOverlay ||
                               post.userName) && (
-                              <div
-                                className="absolute bottom-4 left-4 flex items-center gap-3 z-20 max-w-[90%]"
-                              >
+                              <div className="absolute bottom-4 left-4 flex items-center gap-3 z-20 max-w-[90%]">
                                 {/* 1. 프로필 + 텍스트 캡슐 */}
                                 <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full pl-1 pr-5 py-3 gap-3 shadow-sm border border-white/20 shrink-0">
                                   <ImageWithFallback
@@ -1059,7 +1060,10 @@ export function CommunityPage({
                           key={emoji}
                           onClick={() => {
                             if (currentPostId) {
-                              handleEmojiReaction(emoji, currentPostId);
+                              handleEmojiReaction(
+                                emoji,
+                                currentPostId,
+                              );
                               confetti({
                                 particleCount: 100,
                                 spread: 70,
@@ -1090,9 +1094,14 @@ export function CommunityPage({
                         placeholder="댓글을 작성해주세요"
                         className="w-full bg-transparent outline-none text-[#1A1A1A] placeholder:text-gray-400"
                         value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
+                        onChange={(e) =>
+                          setNewComment(e.target.value)
+                        }
                         onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
+                          if (
+                            e.key === "Enter" &&
+                            !e.shiftKey
+                          ) {
                             e.preventDefault();
                             if (currentPostId) {
                               handleAddComment(currentPostId);
@@ -1185,7 +1194,7 @@ export function CommunityPage({
       {/* 커뮤니티 전용 하단 네비게이션 */}
       {!isGridView && !isReactionView && (
         <div className="fixed bottom-0 left-0 right-0 z-50 max-w-[500px] mx-auto bg-white">
-          <div className="relative px-4 pt-2 pb-4">
+          <div className="relative px-4 pt-2 pb-4 shadow-[0_-2px_5px_0_rgba(0,0,0,0.10)] rounded-t-[16px]">
             <div className="flex items-center justify-around">
               <button
                 onClick={() => setIsGridView(true)}
@@ -1197,13 +1206,16 @@ export function CommunityPage({
                 </span>
               </button>
               <div className="w-16" />
-              <button className="flex flex-col items-center gap-1 text-gray-400">
+              <button
+                className="flex flex-col items-center gap-1 text-gray-400"
+                onClick={() => onPageChange?.("calendar")}
+              >
                 <Calendar size={24} />
                 <span className="text-xs">캘린더</span>
               </button>
             </div>
             <button
-              className="absolute left-1/2 -translate-x-1/2 -top-[34px] w-14 h-14 bg-[#36D2C5] rounded-full flex items-center justify-center shadow-lg hover:bg-[#00C2B3] transition-colors"
+              className="absolute left-1/2 -translate-x-1/2 -top-[24px] w-14 h-14 bg-[#36D2C5] rounded-full flex items-center justify-center shadow-lg hover:bg-[#00C2B3] transition-colors"
               onClick={onUploadClick}
             >
               <Plus size={28} className="text-white" />

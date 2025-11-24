@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Calendar, ChevronDown, Building2, Pill, Edit } from "lucide-react";
+import { ChevronLeft, Calendar, ChevronDown, Building2, Pill, Edit } from "lucide-react";
 import { useState } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Button } from "./ui/button"; // Button 컴포넌트를 사용하기 위해 추가
@@ -146,7 +146,7 @@ export function MedicalHistoryPage({ onBack, onWriteReview, reviewedHospitals = 
             onClick={onBack}
             className="w-6 h-6 flex items-center justify-center"
           >
-            <ArrowLeft size={24} className="text-[#1A1A1A]" />
+            <ChevronLeft size={24} className="text-[#1A1A1A]" />
           </button>
           <span className="text-lg font-bold text-[#1A1A1A]">
             진료내역

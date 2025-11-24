@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
 interface SocialLoginPageProps {
   onBack: () => void;
@@ -19,7 +19,7 @@ export function SocialLoginPage({
           onClick={onBack}
           className="text-[#555] hover:text-[#333] transition-colors"
         >
-          <ArrowLeft size={24} />
+          <ChevronLeft size={24} className="text-[#1A1A1A]" />
         </button>
       </div>
 

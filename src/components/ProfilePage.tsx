@@ -1,6 +1,5 @@
 import { Header } from "./Header";
 import { BottomNav } from "./BottomNav";
-import { useRef } from "react";
 
 interface ProfilePageProps {
   userName: string;
@@ -13,7 +12,6 @@ interface ProfilePageProps {
   onMyReviewsClick: () => void;
   onFavoriteHospitalsClick: () => void;
   myReviewsCount?: number;
-  onUpdateAvatar?: (file: File) => void;
 }
 
 export function ProfilePage({
@@ -25,23 +23,7 @@ export function ProfilePage({
   onMyReviewsClick,
   onFavoriteHospitalsClick,
   myReviewsCount = 0,
-  onUpdateAvatar,
 }: ProfilePageProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && onUpdateAvatar) {
-      onUpdateAvatar(file);
-    }
-  };
-
-  const triggerFileInput = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
   return (
     <div className="flex flex-col min-h-screen">
       {/* Profile Header */}
@@ -69,11 +51,8 @@ export function ProfilePage({
                   className="w-full h-full object-cover"
                 />
               </div>
-              {/* 수정 버튼 */}
-              <button
-                onClick={triggerFileInput}
-                className="absolute bottom-0 right-0 bg-white rounded-full p-2 border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors"
-              >
+              {/* 수정 버튼 - 기능 없이 장식용 */}
+              <div className="absolute bottom-0 right-0 bg-white rounded-full p-2 border border-gray-200 shadow-sm">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-4 w-4 text-gray-600"
@@ -88,14 +67,7 @@ export function ProfilePage({
                     d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
                   />
                 </svg>
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                className="hidden"
-              />
+              </div>
             </div>
 
             {/* 2. 텍스트 영역 (디자인 수정됨) */}
@@ -288,7 +260,10 @@ export function ProfilePage({
             <h3 className="text-lg font-bold text-gray-900">건강 내역</h3>
           </div>
           <ul className="mt-4">
-            <li className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between last:border-b-0">
+            <li
+              className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between last:border-b-0 cursor-pointer hover:bg-gray-50 transition-colors"
+              onClick={() => onPageChange("medical-history")}
+            >
               <span className="text-gray-700">진료 이력</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"

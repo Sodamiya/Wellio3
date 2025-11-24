@@ -1,4 +1,4 @@
-import { ArrowLeft, Search } from "lucide-react";
+import { ChevronLeft, Search } from "lucide-react";
 import { useState } from "react";
 import { HospitalCard } from "./HospitalCard"; // 수정된 HospitalCard 임포트
 
@@ -124,7 +124,7 @@ export function HospitalSearchPage({
         {/* Title Bar */}
         <div className="flex items-center justify-between pb-2">
           <button onClick={onBack} className="w-10 p-2 -ml-2">
-            <ArrowLeft size={24} className="text-[#1A1A1A]" />
+            <ChevronLeft size={24} className="text-[#1A1A1A]" />
           </button>
           <h1 className="text-xl font-bold text-[#1A1A1A] text-center flex-1">
             병원 찾기

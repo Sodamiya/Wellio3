@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Star, ThumbsUp, Bot, ChevronDown } from "lucide-react";
+import { ArrowLeft, Star, ThumbsUp, Bot, ChevronDown, ChevronLeft } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { useEffect, useState } from "react";
 
@@ -84,7 +84,7 @@ export function HospitalReviewsPage({
           onClick={onBack}
           className="w-10 h-10 flex items-center justify-start -ml-2"
         >
-          <ArrowLeft size={24} className="text-[#1A1A1A]" />
+          <ChevronLeft size={24} className="text-[#1A1A1A]" />
         </button>
         <h1 className="text-lg font-bold text-[#1A1A1A] absolute left-1/2 -translate-x-1/2">
           {hospitalName}

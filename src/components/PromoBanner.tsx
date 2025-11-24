@@ -105,7 +105,7 @@ export function PromoBanner() {
       </div>
 
       {/* 인디케이터 점 */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20 hidden">
         {banners.map((_, index) => (
           <button
             key={index}

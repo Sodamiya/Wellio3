@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 // --- [타입 정의] ---
@@ -220,15 +220,10 @@ export function NotificationPage({
       {/* 헤더 */}
       <div className="bg-white border-b border-gray-200 px-4 py-4 flex items-center sticky top-0 z-40">
         <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onBack();
-          }}
+          onClick={onBack}
           className="text-[#555] hover:text-[#333] transition-colors mr-5 relative z-50 cursor-pointer p-2 -m-2"
         >
-          <ArrowLeft size={24} />
+          <ChevronLeft size={24} className="text-[#1A1A1A]" />
         </button>
         <h1 className="flex-1 text-center text-lg -ml-10 font-bold text-gray-800">
           알림

@@ -23,14 +23,21 @@ export function Header({
   showSettingsButton = false,
   onNotificationClick,
 }: HeaderProps) {
+  // 👇 브라우저의 뒤로가기 핸들러 (onBack이 없을 때 기본 동작)
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    }
+  };
+
   // --- 'title' prop이 있으면 '서브 페이지 헤더' (내 정보) ---
   if (title) {
     return (
-      <header className="fixed top-0 left-0 right-0 z-40 px-5 py-4 flex items-center justify-between mx-auto h-16 max-w-[500px]">
+      <header className="fixed top-0 left-0 right-0 z-40 px-5 py-4 flex items-center justify-between mx-auto h-16 max-w-[500px] bg-white/80 backdrop-blur-xs">
         {/* 왼쪽: 뒤로가기 + 타이틀 */}
         <div className="flex items-center">
           {showBackButton && (
-            <button onClick={onBack} className="mr-2 p-1">
+            <button onClick={handleBack} className="mr-2 p-1">
               <ChevronLeft
                 size={24}
                 className="text-gray-700"

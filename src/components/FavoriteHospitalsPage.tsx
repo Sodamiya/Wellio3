@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { HospitalCard } from "./HospitalCard";
 
 interface FavoriteHospitalsPageProps {
@@ -10,7 +10,12 @@ interface FavoriteHospitalsPageProps {
   getHospitalReviewCount?: (hospitalId: number) => number;
 }
 
-export function FavoriteHospitalsPage({ onBack, favoriteHospitals, onToggleFavorite, getHospitalReviewCount }: FavoriteHospitalsPageProps) {
+export function FavoriteHospitalsPage({
+  onBack,
+  favoriteHospitals,
+  onToggleFavorite,
+  getHospitalReviewCount,
+}: FavoriteHospitalsPageProps) {
   return (
     <div className="relative bg-[#F7F7F7] flex flex-col max-w-[500px] mx-auto min-h-screen">
       {/* Header */}
@@ -19,7 +24,7 @@ export function FavoriteHospitalsPage({ onBack, favoriteHospitals, onToggleFavor
           onClick={onBack}
           className="w-6 h-6 flex items-center justify-center"
         >
-          <ArrowLeft size={24} className="text-[#1A1A1A]" />
+          <ChevronLeft size={24} className="text-[#1A1A1A]" />
         </button>
         <span className="text-lg font-bold text-[#1A1A1A]">
           찜한 병원
@@ -30,8 +35,12 @@ export function FavoriteHospitalsPage({ onBack, favoriteHospitals, onToggleFavor
       <div className="pb-20">
         {favoriteHospitals.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="text-gray-500">찜한 병원이 없습니다</p>
-            <p className="text-sm text-gray-400 mt-2">병원 검색에서 하트를 눌러 저장해보세요</p>
+            <p className="text-gray-500">
+              찜한 병원이 없습니다
+            </p>
+            <p className="text-sm text-gray-400 mt-2">
+              병원 검색에서 하트를 눌러 저장해보세요
+            </p>
           </div>
         ) : (
           favoriteHospitals.map((hospital) => (
@@ -44,7 +53,11 @@ export function FavoriteHospitalsPage({ onBack, favoriteHospitals, onToggleFavor
               onClick={() => {
                 // 병원 상세 페이지로 이동하는 로직 추가 가능
               }}
-              reviewCount={getHospitalReviewCount ? getHospitalReviewCount(hospital.id) : 0}
+              reviewCount={
+                getHospitalReviewCount
+                  ? getHospitalReviewCount(hospital.id)
+                  : 0
+              }
             />
           ))
         )}

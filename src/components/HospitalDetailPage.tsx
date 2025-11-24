@@ -13,6 +13,7 @@ import {
   Bot,
   ChevronDown,
   TrendingUp,
+  ChevronLeft,
 } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { DoctorCard } from "./DoctorCard";
@@ -281,7 +282,7 @@ export function HospitalDetailPage({
           onClick={onBack}
           className="w-6 h-6 flex items-center justify-center mr-4"
         >
-          <ArrowLeft size={24} className="text-[#1A1A1A]" />
+          <ChevronLeft size={24} className="text-[#1A1A1A]" />
         </button>
         <h1 className="text-lg font-semibold text-[#1A1A1A]">
           {hospital.name}

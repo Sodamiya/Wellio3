@@ -15,9 +15,10 @@ import { NotificationPage } from "./components/NotificationPage"; // 👈 Notifi
 import { OnboardingPage } from "./components/OnboardingPage"; // 👈 OnboardingPage import
 import { ReviewWritePage } from "./components/ReviewWritePage"; // 👈 ReviewWritePage import
 import { HospitalReviewsPage } from "./components/HospitalReviewsPage"; // 👈 HospitalReviewsPage import
+import { CalendarPage } from "./components/CalendarPage"; // 👈 CalendarPage import
 import { Toaster } from "sonner@2.0.3"; // 👈 Toaster import
 
-type Page = "home" | "community" | "hospital" | "profile" | "hospital-detail" | "upload" | "medical-history" | "my-reviews" | "favorite-hospitals" | "notifications" | "write-review" | "hospital-reviews";
+type Page = "home" | "community" | "hospital" | "profile" | "hospital-detail" | "upload" | "medical-history" | "my-reviews" | "favorite-hospitals" | "notifications" | "write-review" | "hospital-reviews" | "calendar";
 
 // 병원 타입 정의
 interface Hospital {
@@ -97,11 +98,37 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("home");
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
   
+  // 👇 네비게이션 히스토리 추가
+  const [navigationHistory, setNavigationHistory] = useState<Page[]>(["home"]);
+  
   // 수정할 리뷰 저장
   const [editingReview, setEditingReview] = useState<Review | null>(null);
   
   // 알림 페이지에서 돌아갈 페이지 추적
   const [previousPage, setPreviousPage] = useState<Page>("home");
+  
+  // 👇 네비게이션 함수 추가
+  const navigateTo = (page: Page) => {
+    // 현재 페이지와 같은 페이지로 이동하려고 하면 무시
+    if (currentPage === page) return;
+    
+    setNavigationHistory(prev => [...prev, page]);
+    setCurrentPage(page);
+  };
+  
+  const navigateBack = () => {
+    if (navigationHistory.length > 1) {
+      const newHistory = [...navigationHistory];
+      newHistory.pop(); // 현재 페이지 제거
+      const previousPage = newHistory[newHistory.length - 1] || "home";
+      setNavigationHistory(newHistory);
+      setCurrentPage(previousPage);
+    } else {
+      // 히스토리가 없으면 홈으로
+      setNavigationHistory(["home"]);
+      setCurrentPage("home");
+    }
+  };
   
   // 찜한 병원 목록 관리
   const [favoriteHospitals, setFavoriteHospitals] = useState<Hospital[]>([
@@ -1008,7 +1035,7 @@ export default function App() {
 
   const handleHospitalClick = (hospital: Hospital) => {
     setSelectedHospital(hospital);
-    setCurrentPage("hospital-detail");
+    navigateTo("hospital-detail");
   };
 
   const handleUpload = (newPost: Omit<Post, "id" | "userName" | "userAvatar">) => {
@@ -1019,7 +1046,7 @@ export default function App() {
       userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
     };
     setPosts([post, ...posts]); // 맨 앞에 추가
-    setCurrentPage("community"); // 커뮤니티로 이동
+    navigateTo("community"); // 커뮤니티로 이동
   };
 
   // 찜한 병원 토글 함수
@@ -1118,7 +1145,7 @@ export default function App() {
               if (page === "notifications") {
                 setPreviousPage("home");
               }
-              setCurrentPage(page as Page);
+              navigateTo(page as Page);
             }}
             onHospitalClick={handleHospitalClick}
             getHospitalReviewCount={getHospitalReviewCount}
@@ -1126,7 +1153,7 @@ export default function App() {
         )}
         {currentPage === "hospital" && (
           <HospitalSearchPage
-            onBack={() => setCurrentPage("home")}
+            onBack={navigateBack}
             onHospitalClick={handleHospitalClick}
             favoriteHospitals={favoriteHospitals}
             onToggleFavorite={toggleFavorite}
@@ -1136,8 +1163,8 @@ export default function App() {
         {currentPage === "hospital-detail" && selectedHospital && (
           <HospitalDetailPage
             hospital={selectedHospital}
-            onBack={() => setCurrentPage("hospital")}
-            onReviewsClick={() => setCurrentPage("hospital-reviews")}
+            onBack={navigateBack}
+            onReviewsClick={() => navigateTo("hospital-reviews")}
             reviewCount={getHospitalReviewCount(selectedHospital.id)}
             averageRating={getHospitalAverageRating(selectedHospital.id)}
             keywordStats={getHospitalKeywordStats(selectedHospital.id)}
@@ -1179,11 +1206,11 @@ export default function App() {
         )}
         {currentPage === "community" && (
           <CommunityPage
-            onBack={() => setCurrentPage("home")}
-            onUploadClick={() => setCurrentPage("upload")}
+            onBack={navigateBack}
+            onUploadClick={() => navigateTo("upload")}
             onNotificationClick={() => {
               setPreviousPage("community");
-              setCurrentPage("notifications");
+              navigateTo("notifications");
             }}
             onDeletePost={handleDeletePost}
             posts={posts}
@@ -1191,7 +1218,7 @@ export default function App() {
             currentUserAvatar={userAvatar}
             // 👇 아래 두 줄 추가
             currentPage="community"
-            onPageChange={(page) => setCurrentPage(page as Page)}
+            onPageChange={(page) => navigateTo(page as Page)}
           />
         )}
         {/* 👇 3. '준비중' 텍스트 대신 ProfilePage 컴포넌트로 교체 */}
@@ -1200,25 +1227,24 @@ export default function App() {
             userName={userName}
             userAvatar={userAvatar} // 👈 프로필 이미지 전달
             currentPage={currentPage}
-            onPageChange={setCurrentPage}
-            onBack={() => setCurrentPage("home")} // '뒤로가기' 누르면 홈으로
-            onMyReviewsClick={() => setCurrentPage("my-reviews")}
-            onFavoriteHospitalsClick={() => setCurrentPage("favorite-hospitals")}
+            onPageChange={(page) => navigateTo(page as Page)}
+            onBack={navigateBack} // '뒤로가기' 누르면 이전 페이지로
+            onMyReviewsClick={() => navigateTo("my-reviews")}
+            onFavoriteHospitalsClick={() => navigateTo("favorite-hospitals")}
             myReviewsCount={myReviews.length} // 👈 리뷰 개수 전달
-            onUpdateAvatar={handleUpdateAvatar} // 👈 프로필 이미지 업데이트 함수 전달
           />
         )}
         {/* 👇 4. '업로드' 페이지 추가 */}
         {currentPage === "upload" && (
           <UploadPage
-            onBack={() => setCurrentPage("community")}
+            onBack={navigateBack}
             onUpload={handleUpload}
           />
         )}
         {/* 👇 5. '의료기록' 페이지 추가 */}
         {currentPage === "medical-history" && (
           <MedicalHistoryPage
-            onBack={() => setCurrentPage("home")}
+            onBack={navigateBack}
             onWriteReview={(record) => {
               // 선택한 진료 기록 저장
               setSelectedMedicalRecord({
@@ -1228,10 +1254,10 @@ export default function App() {
                 visitTime: record.visitTime,
               });
               // 리뷰 작성 페이지로 이동
-              setCurrentPage("write-review");
+              navigateTo("write-review");
             }}
             reviewedHospitals={reviewedHospitals}
-            onViewReviews={() => setCurrentPage("my-reviews")}
+            onViewReviews={() => navigateTo("my-reviews")}
             records={medicalRecords}
             onUpdateMemo={handleUpdateMemo}
           />
@@ -1239,7 +1265,7 @@ export default function App() {
         {/* 👇 6. '내 리뷰' 페이지 추가 */}
         {currentPage === "my-reviews" && (
           <MyReviewsPage
-            onBack={() => setCurrentPage("home")}
+            onBack={navigateBack}
             reviews={myReviews}
             onDeleteReview={handleDeleteReview}
             onEditReview={(review) => {
@@ -1251,14 +1277,14 @@ export default function App() {
                 visitDate: review.visitDate,
                 visitTime: "",
               });
-              setCurrentPage("write-review");
+              navigateTo("write-review");
             }}
           />
         )}
         {/* 👇 7. '즐겨찾는 병원' 페이지 추가 */}
         {currentPage === "favorite-hospitals" && (
           <FavoriteHospitalsPage
-            onBack={() => setCurrentPage("home")}
+            onBack={navigateBack}
             favoriteHospitals={favoriteHospitals}
             onToggleFavorite={toggleFavorite}
             getHospitalReviewCount={getHospitalReviewCount}
@@ -1267,19 +1293,16 @@ export default function App() {
         {/* 👇 8. '알림' 페이지 추가 */}
         {currentPage === "notifications" && (
           <NotificationPage
-            onBack={() => {
-              console.log("NotificationPage onBack clicked");
-              setCurrentPage(previousPage);
-            }}
+            onBack={navigateBack}
           />
         )}
         {/* 👇 9. '리뷰 작성' 페이지 추가 */}
         {currentPage === "write-review" && selectedMedicalRecord && (
           <ReviewWritePage
             onBack={() => {
-              // 뒤로가기 시 진료내역으로 이동
-              setEditingReview(null); // 수정 모드 해제
-              setCurrentPage("medical-history");
+              // 뒤로가기 시 수정 모드 해제하고 이전 페이지로
+              setEditingReview(null);
+              navigateBack();
             }}
             onComplete={(reviewData: Omit<Review, "id" | "createdAt">) => {
               if (editingReview) {
@@ -1311,7 +1334,7 @@ export default function App() {
                 setReviewedHospitals([...reviewedHospitals, reviewData.hospitalId]);
               }
               // 나의후기 페이지로 이동
-              setCurrentPage("my-reviews");
+              navigateTo("my-reviews");
             }}
             userName={userName}
             hospitalName={selectedMedicalRecord.hospitalName}
@@ -1323,7 +1346,7 @@ export default function App() {
         {/* 👇 10. '병원 리뷰' 페이지 추가 */}
         {currentPage === "hospital-reviews" && selectedHospital && (
           <HospitalReviewsPage
-            onBack={() => setCurrentPage("hospital-detail")}
+            onBack={navigateBack}
             hospitalName={selectedHospital.name}
             keywordStats={getHospitalKeywordStats(selectedHospital.id)}
             onToggleLike={handleToggleLike}
@@ -1332,40 +1355,20 @@ export default function App() {
               // 샘플 리뷰 먼저
               ...sampleReviews
                 .filter(review => review.hospitalId === selectedHospital.id)
-                .map(review => ({
-                  id: review.id,
-                  author: review.userName,
-                  date: review.visitDate,
-                  rating: review.rating,
-                  tags: review.keywords,
-                  content: review.reviewText,
-                  likes: review.likes || 0,
-                  liked: (review.likedBy || []).includes(userName), // 사용자가 좋아요를 눌렀는지 확인
-                  visitType: review.visitType || "첫방문",
-                })),
-              // 사용자가 작성한 리뷰 추가 (최대 5개)
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+              // 내 리뷰 나중에
               ...myReviews
                 .filter(review => review.hospitalId === selectedHospital.id)
-                .map(review => ({
-                  id: review.id,
-                  author: review.userName,
-                  date: new Date(review.createdAt).toLocaleDateString('ko-KR', { 
-                    year: 'numeric', 
-                    month: '2-digit', 
-                    day: '2-digit' 
-                  }).replace(/\. /g, '.').replace(/\.$/, ''),
-                  rating: review.rating,
-                  tags: review.keywords,
-                  content: review.reviewText,
-                  likes: review.likes || 0,
-                  liked: (review.likedBy || []).includes(userName), // 사용자가 좋아요를 눌렀는지 확인
-                  visitType: review.visitType || "첫방문",
-                }))
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             ]}
           />
         )}
+        {/* 👇 11. '캘린더' 페이지 추가 */}
+        {currentPage === "calendar" && (
+          <CalendarPage onBack={navigateBack} />
+        )}
       </div>
-      {/* 👇 Toaster 추가 - 화면 ��단에 토스트 메시지 표시 */}
+      {/* 👇 Toaster 추가 - 화면 하단에 토스트 메시지 표시 */}
       <Toaster position="bottom-center" />
     </div>
   );

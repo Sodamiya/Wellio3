@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Star } from "lucide-react";
+import { ChevronLeft, Star } from "lucide-react";
 import { useState } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { toast } from "sonner@2.0.3";
@@ -122,7 +122,7 @@ export function ReviewWritePage({
           }}
           className="w-6 h-6 flex items-center justify-center"
         >
-          <ArrowLeft size={24} className="text-[#1A1A1A]" />
+          <ChevronLeft size={24} className="text-[#1A1A1A]" />
         </button>
         <span className="text-lg text-[#1A1A1A] flex-1 text-center mr-6">
           리뷰 작성

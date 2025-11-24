@@ -9,6 +9,7 @@ import {
   Pencil,
   X,
   Check,
+  ChevronLeft,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -166,7 +167,7 @@ export function MyReviewsPage({
           onClick={onBack}
           className="w-6 h-6 flex items-center justify-center"
         >
-          <ArrowLeft size={24} className="text-[#1A1A1A]" />
+          <ChevronLeft size={24} className="text-[#1A1A1A]" />
         </button>
         <span className="text-lg font-bold text-[#1A1A1A]">
           나의 후기
