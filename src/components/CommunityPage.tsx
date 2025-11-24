@@ -64,10 +64,30 @@ interface CommunityPageProps {
 // 가족 구성원 목데이터
 const familyMembers = [
   { id: "all", name: "전체보기", avatar: "" },
-  { id: "admin", name: "관리자", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80" },
-  { id: "guest", name: "게스트", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80" },
-  { id: "mom", name: "엄마", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80" },
-  { id: "dad", name: "아빠", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80" },
+  {
+    id: "admin",
+    name: "관리자",
+    avatar:
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
+  },
+  {
+    id: "guest",
+    name: "게스트",
+    avatar:
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80",
+  },
+  {
+    id: "mom",
+    name: "엄마",
+    avatar:
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80",
+  },
+  {
+    id: "dad",
+    name: "아빠",
+    avatar:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80",
+  },
 ];
 
 export function CommunityPage({
@@ -83,12 +103,13 @@ export function CommunityPage({
 }: CommunityPageProps) {
   const [selectedGroup, setSelectedGroup] =
     useState("우리가족");
-  const [selectedFamilyMember, setSelectedFamilyMember] = 
+  const [selectedFamilyMember, setSelectedFamilyMember] =
     useState<string | null>(null);
-  const [showFamilyDropdown, setShowFamilyDropdown] = useState(false);
+  const [showFamilyDropdown, setShowFamilyDropdown] =
+    useState(false);
   const [isGridView, setIsGridView] = useState(false);
   const [isReactionView, setIsReactionView] = useState(false);
-  
+
   const [reactionFilter, setReactionFilter] = useState("ALL");
 
   const [selectedPostForReaction, setSelectedPostForReaction] =
@@ -104,9 +125,13 @@ export function CommunityPage({
   } | null>(null);
 
   // 이미지 확대 보기(라이트박스) 상태
-  const [expandedPostId, setExpandedPostId] = useState<number | null>(null);
+  const [expandedPostId, setExpandedPostId] = useState<
+    number | null
+  >(null);
   // [추가] 애니메이션이 끝날 때까지 z-index를 유지하기 위한 상태
-  const [lastExpandedId, setLastExpandedId] = useState<number | null>(null);
+  const [lastExpandedId, setLastExpandedId] = useState<
+    number | null
+  >(null);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -297,9 +322,11 @@ export function CommunityPage({
     return myReactedPosts.filter((post) => {
       const myReactionsInPost = addedReactions[post.id] || [];
       return myReactionsInPost.some(
-        (reaction) => 
-          reaction.emoji === reactionFilter && 
-          reaction.users.some(u => u.userName === currentUser.userName)
+        (reaction) =>
+          reaction.emoji === reactionFilter &&
+          reaction.users.some(
+            (u) => u.userName === currentUser.userName,
+          ),
       );
     });
   };
@@ -346,7 +373,9 @@ export function CommunityPage({
     );
   });
 
-  const expandedPost = posts.find((p) => p.id === expandedPostId);
+  const expandedPost = posts.find(
+    (p) => p.id === expandedPostId,
+  );
 
   return (
     <div className="relative bg-white flex flex-col max-w-[500px] mx-auto min-h-screen pb-40">
@@ -402,18 +431,19 @@ export function CommunityPage({
               onClick={() => setIsGridView(false)}
               className="absolute left-0 w-6 h-6 flex items-center justify-center"
             >
-              <ArrowLeft
-                size={24}
-                className="text-[#1A1A1A]"
-              />
+              <ArrowLeft size={24} className="text-[#1A1A1A]" />
             </button>
-            <button 
+            <button
               className="flex items-center gap-1"
-              onClick={() => setShowFamilyDropdown(!showFamilyDropdown)}
+              onClick={() =>
+                setShowFamilyDropdown(!showFamilyDropdown)
+              }
             >
               <span className="text-lg font-bold text-[#1A1A1A]">
-                {selectedFamilyMember 
-                  ? familyMembers.find(m => m.name === selectedFamilyMember)?.name || "모아보기"
+                {selectedFamilyMember
+                  ? familyMembers.find(
+                      (m) => m.name === selectedFamilyMember,
+                    )?.name || "모아보기"
                   : "모아보기"}
               </span>
               <ChevronDown
@@ -438,18 +468,19 @@ export function CommunityPage({
               onClick={onBack}
               className="absolute left-0 w-6 h-6 flex items-center justify-center"
             >
-              <ArrowLeft
-                size={24}
-                className="text-[#1A1A1A]"
-              />
+              <ArrowLeft size={24} className="text-[#1A1A1A]" />
             </button>
-            <button 
+            <button
               className="flex items-center gap-1"
-              onClick={() => setShowFamilyDropdown(!showFamilyDropdown)}
+              onClick={() =>
+                setShowFamilyDropdown(!showFamilyDropdown)
+              }
             >
               <span className="text-lg font-bold text-[#1A1A1A]">
-                {selectedFamilyMember 
-                  ? familyMembers.find(m => m.name === selectedFamilyMember)?.name || "우리가족"
+                {selectedFamilyMember
+                  ? familyMembers.find(
+                      (m) => m.name === selectedFamilyMember,
+                    )?.name || "우리가족"
                   : "우리가족"}
               </span>
               <ChevronDown
@@ -509,7 +540,8 @@ export function CommunityPage({
                       setShowFamilyDropdown(false);
                     }}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                      (member.id === "all" && !selectedFamilyMember) ||
+                      (member.id === "all" &&
+                        !selectedFamilyMember) ||
                       member.name === selectedFamilyMember
                         ? "bg-[#36D2C5]/10"
                         : "hover:bg-gray-50"
@@ -523,13 +555,17 @@ export function CommunityPage({
                       />
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#36D2C5] to-[#00C2B3] flex items-center justify-center">
-                        <LayoutGrid size={20} className="text-white" />
+                        <LayoutGrid
+                          size={20}
+                          className="text-white"
+                        />
                       </div>
                     )}
                     <span className="text-[#1A1A1A] font-medium">
                       {member.name}
                     </span>
-                    {((member.id === "all" && !selectedFamilyMember) ||
+                    {((member.id === "all" &&
+                      !selectedFamilyMember) ||
                       member.name === selectedFamilyMember) && (
                       <div className="ml-auto w-5 h-5 rounded-full bg-[#36D2C5] flex items-center justify-center">
                         <svg
@@ -573,7 +609,7 @@ export function CommunityPage({
               >
                 ALL
               </button>
-              
+
               {/* 이모지 버튼들 */}
               {emojis.map((emoji) => (
                 <button
@@ -598,8 +634,8 @@ export function CommunityPage({
                     className="text-gray-300 mb-4"
                   />
                   <p className="text-gray-500">
-                    {reactionFilter === "ALL" 
-                      ? "아직 리액션한 게시물이 없습니다" 
+                    {reactionFilter === "ALL"
+                      ? "아직 리액션한 게시물이 없습니다"
                       : `${reactionFilter} 반응을 남긴 게시물이 없습니다`}
                   </p>
                   <p className="text-gray-400 text-sm mt-2">
@@ -614,7 +650,13 @@ export function CommunityPage({
                       layoutId={`post-${post.id}`}
                       className="aspect-square relative overflow-hidden rounded-sm cursor-pointer hover:opacity-80 transition-opacity"
                       // [추가] z-index 유지 (확대 또는 축소 중일 때)
-                      style={{ zIndex: expandedPostId === post.id || lastExpandedId === post.id ? 50 : 0 }}
+                      style={{
+                        zIndex:
+                          expandedPostId === post.id ||
+                          lastExpandedId === post.id
+                            ? 50
+                            : 0,
+                      }}
                       onLayoutAnimationComplete={() => {
                         // 애니메이션 완료 시 lastExpandedId 초기화
                         if (lastExpandedId === post.id) {
@@ -648,7 +690,13 @@ export function CommunityPage({
                   layoutId={`post-${post.id}`}
                   className="aspect-square relative overflow-hidden rounded-sm cursor-pointer hover:opacity-80 transition-opacity group"
                   // [추가] z-index 유지 (확대 또는 축소 중일 때)
-                  style={{ zIndex: expandedPostId === post.id || lastExpandedId === post.id ? 50 : 0 }}
+                  style={{
+                    zIndex:
+                      expandedPostId === post.id ||
+                      lastExpandedId === post.id
+                        ? 50
+                        : 0,
+                  }}
                   onLayoutAnimationComplete={() => {
                     // 애니메이션 완료 시 lastExpandedId 초기화
                     if (lastExpandedId === post.id) {
@@ -694,8 +742,12 @@ export function CommunityPage({
                 clearTimeout(scrollTimerRef.current);
               }
             }}
-            onSlideChangeTransitionStart={() => setIsScrolling(true)}
-            onSlideChangeTransitionEnd={() => setIsScrolling(false)}
+            onSlideChangeTransitionStart={() =>
+              setIsScrolling(true)
+            }
+            onSlideChangeTransitionEnd={() =>
+              setIsScrolling(false)
+            }
             onTouchEnd={() => {
               if (scrollTimerRef.current) {
                 clearTimeout(scrollTimerRef.current);
@@ -711,22 +763,35 @@ export function CommunityPage({
                 <SwiperSlide key={post.id}>
                   <div className="h-full flex flex-col items-center px-4 py-4">
                     <div className="relative h-[85%] w-full overflow-visible">
-                      {post.userName === currentUser.userName && (
+                      {post.userName ===
+                        currentUser.userName && (
                         <div className="absolute inset-y-0 -right-2 w-32 flex items-center justify-center z-0">
-                          <Trash2 size={32} className="text-red-400" />
+                          <Trash2
+                            size={32}
+                            className="text-gray-400"
+                          />
                         </div>
                       )}
                       <motion.div
                         className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg touch-none"
                         drag={!isScrolling ? "x" : false}
-                        dragConstraints={{ left: -200, right: 0 }}
+                        dragConstraints={{
+                          left: -200,
+                          right: 0,
+                        }}
                         dragElastic={0.1}
                         dragMomentum={false}
                         dragSnapToOrigin={!isDeleting}
                         animate={{ x: isDeleting ? -200 : 0 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 30,
+                        }}
                         whileDrag={{ scale: 0.98 }}
-                        onDragStart={(event, info) => setDragStartX(info.point.x)}
+                        onDragStart={(event, info) =>
+                          setDragStartX(info.point.x)
+                        }
                         onDragEnd={(event, info) => {
                           if (info.offset.x < -120) {
                             setPostToDelete(post.id);
@@ -735,7 +800,8 @@ export function CommunityPage({
                           setDragStartX(null);
                         }}
                         onClick={(e) => {
-                          if (!dragStartX) setSelectedPostForReaction(post.id);
+                          if (!dragStartX)
+                            setSelectedPostForReaction(post.id);
                         }}
                       >
                         {/* ... (기존 코드와 동일) ... */}
@@ -745,7 +811,8 @@ export function CommunityPage({
                           className="w-full h-full object-cover bg-gray-100 pointer-events-none"
                         />
                         {/* ... (기존 코드와 동일) ... */}
-                        {selectedPostForReaction === post.id && (
+                        {selectedPostForReaction ===
+                          post.id && (
                           <div
                             className="absolute inset-0 bg-black/70 z-10 flex flex-col cursor-pointer"
                             onClick={(e) => {
@@ -753,41 +820,85 @@ export function CommunityPage({
                               setSelectedPostForReaction(null);
                             }}
                           >
-                            {getAllReactions(post.id, post.reactions).length > 0 && (
+                            {getAllReactions(
+                              post.id,
+                              post.reactions,
+                            ).length > 0 && (
                               <div
                                 className="absolute top-4 right-4 flex flex-wrap gap-2 justify-end max-w-[60%] z-20"
-                                onClick={(e) => e.stopPropagation()}
+                                onClick={(e) =>
+                                  e.stopPropagation()
+                                }
                               >
-                                {getAllReactions(post.id, post.reactions).flatMap((reaction) =>
-                                  reaction.users.map((user, userIdx) => (
-                                    <div key={`${reaction.emoji}-${user.userName}-${userIdx}`} className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1.5 flex items-center gap-1.5">
-                                      <span className="text-base">{reaction.emoji}</span>
-                                      <ImageWithFallback src={user.userAvatar} alt={user.userName} className="w-6 h-6 rounded-full border border-white" />
-                                    </div>
-                                  ))
+                                {getAllReactions(
+                                  post.id,
+                                  post.reactions,
+                                ).flatMap((reaction) =>
+                                  reaction.users.map(
+                                    (user, userIdx) => (
+                                      <div
+                                        key={`${reaction.emoji}-${user.userName}-${userIdx}`}
+                                        className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1.5 flex items-center gap-1.5"
+                                      >
+                                        <span className="text-base">
+                                          {reaction.emoji}
+                                        </span>
+                                        <ImageWithFallback
+                                          src={user.userAvatar}
+                                          alt={user.userName}
+                                          className="w-6 h-6 rounded-full border border-white"
+                                        />
+                                      </div>
+                                    ),
+                                  ),
                                 )}
                               </div>
                             )}
                             {post.textOverlay && (
                               <div
                                 className="absolute bottom-4 left-4 max-w-[70%] z-20"
-                                onClick={(e) => e.stopPropagation()}
+                                onClick={(e) =>
+                                  e.stopPropagation()
+                                }
                               >
                                 <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm">
-                                  <ImageWithFallback src={post.userAvatar} alt={post.userName} className="w-7 h-7 rounded-full object-cover" />
-                                  <p className="text-sm text-gray-900 whitespace-nowrap">{post.textOverlay}</p>
+                                  <ImageWithFallback
+                                    src={post.userAvatar}
+                                    alt={post.userName}
+                                    className="w-7 h-7 rounded-full object-cover"
+                                  />
+                                  <p className="text-sm text-gray-900 whitespace-nowrap">
+                                    {post.textOverlay}
+                                  </p>
                                 </div>
                               </div>
                             )}
-                            {getAllComments(post.id, post.comments).length > 0 && (
+                            {getAllComments(
+                              post.id,
+                              post.comments,
+                            ).length > 0 && (
                               <div
                                 className="absolute bottom-20 right-4 flex flex-col gap-2 items-end max-w-[70%] max-h-[50vh] overflow-y-auto z-20"
-                                onClick={(e) => e.stopPropagation()}
+                                onClick={(e) =>
+                                  e.stopPropagation()
+                                }
                               >
-                                {getAllComments(post.id, post.comments).map((comment, idx) => (
-                                  <div key={`comment-${post.id}-${idx}-${comment.userName}-${comment.timestamp}`} className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm">
-                                    <p className="text-sm text-gray-900 whitespace-nowrap">{comment.text}</p>
-                                    <ImageWithFallback src={comment.userAvatar} alt={comment.userName} className="w-7 h-7 rounded-full object-cover" />
+                                {getAllComments(
+                                  post.id,
+                                  post.comments,
+                                ).map((comment, idx) => (
+                                  <div
+                                    key={`comment-${post.id}-${idx}-${comment.userName}-${comment.timestamp}`}
+                                    className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3.5 py-1 gap-2 shadow-sm"
+                                  >
+                                    <p className="text-sm text-gray-900 whitespace-nowrap">
+                                      {comment.text}
+                                    </p>
+                                    <ImageWithFallback
+                                      src={comment.userAvatar}
+                                      alt={comment.userName}
+                                      className="w-7 h-7 rounded-full object-cover"
+                                    />
                                   </div>
                                 ))}
                               </div>
@@ -795,25 +906,96 @@ export function CommunityPage({
                           </div>
                         )}
                         {/* ... (기존 코드와 동일) ... */}
-                        {selectedPostForReaction !== post.id && (
+                        {selectedPostForReaction !==
+                          post.id && (
                           <>
                             <div className="absolute top-4 left-4 flex flex-col gap-2">
-                              {post.location && <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full"><MapPin size={16} className="text-white"/><span className="text-white text-sm">{post.location}</span></div>}
-                              {post.weather && <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full"><Cloud size={16} className="text-white"/><span className="text-white text-sm">{post.weather}</span></div>}
-                              {post.time && <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full"><Clock size={16} className="text-white"/><span className="text-white text-sm">{post.time}</span></div>}
-                              {post.health && <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full"><Heart size={16} className="text-white"/><span className="text-white text-sm">{post.health}</span></div>}
+                              {post.location && (
+                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                  <MapPin
+                                    size={16}
+                                    className="text-white"
+                                  />
+                                  <span className="text-white text-sm">
+                                    {post.location}
+                                  </span>
+                                </div>
+                              )}
+                              {post.weather && (
+                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                  <Cloud
+                                    size={16}
+                                    className="text-white"
+                                  />
+                                  <span className="text-white text-sm">
+                                    {post.weather}
+                                  </span>
+                                </div>
+                              )}
+                              {post.time && (
+                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                  <Clock
+                                    size={16}
+                                    className="text-white"
+                                  />
+                                  <span className="text-white text-sm">
+                                    {post.time}
+                                  </span>
+                                </div>
+                              )}
+                              {post.health && (
+                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                  <Heart
+                                    size={16}
+                                    className="text-white"
+                                  />
+                                  <span className="text-white text-sm">
+                                    {post.health}
+                                  </span>
+                                </div>
+                              )}
                             </div>
-                            {post.badge && !post.location && !post.weather && !post.time && !post.health && (
-                              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1 text-sm font-medium"><span>{post.badge}</span></div>
-                            )}
+                            {post.badge &&
+                              !post.location &&
+                              !post.weather &&
+                              !post.time &&
+                              !post.health && (
+                                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1 text-sm font-medium">
+                                  <span>{post.badge}</span>
+                                </div>
+                              )}
                             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
                               <div className="flex items-center gap-2">
-                                <ImageWithFallback src={post.userName === currentUserName ? currentUserAvatar : post.userAvatar} alt={post.userName} className="w-8 h-8 rounded-full border-2 border-white" />
-                                {post.textOverlay && <span className="text-white font-semibold text-sm line-clamp-1">{post.textOverlay}</span>}
+                                <ImageWithFallback
+                                  src={
+                                    post.userName ===
+                                    currentUserName
+                                      ? currentUserAvatar
+                                      : post.userAvatar
+                                  }
+                                  alt={post.userName}
+                                  className="w-8 h-8 rounded-full border-2 border-white"
+                                />
+                                {post.textOverlay && (
+                                  <span className="text-white font-semibold text-sm line-clamp-1">
+                                    {post.textOverlay}
+                                  </span>
+                                )}
                               </div>
                               <div className="bg-gray-100 rounded-full px-2.5 py-1 text-xs font-bold text-gray-800 flex items-center justify-center relative">
-                                +{getAllComments(post.id, post.comments).length}
-                                {getAllComments(post.id, post.comments).length > 0 && <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>}
+                                +
+                                {
+                                  getAllComments(
+                                    post.id,
+                                    post.comments,
+                                  ).length
+                                }
+                                {getAllComments(
+                                  post.id,
+                                  post.comments,
+                                ).length > 0 && (
+                                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                                )}
                               </div>
                             </div>
                           </>
@@ -824,27 +1006,104 @@ export function CommunityPage({
                     <div className="relative flex items-center gap-2 w-full mt-4 h-[56px]">
                       <button
                         className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors overflow-hidden relative"
-                        onClick={() => { setCurrentPostId(post.id); setShowEmojiPicker(!showEmojiPicker); }}
+                        onClick={() => {
+                          setCurrentPostId(post.id);
+                          setShowEmojiPicker(!showEmojiPicker);
+                        }}
                       >
-                        <AnimatePresence mode="wait" initial={false}>
-                          {showEmojiPicker && currentPostId === post.id ? (
-                            <motion.div key="close-icon" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5] text-gray-800 rounded-full"><X size={20} /></motion.div>
+                        <AnimatePresence
+                          mode="wait"
+                          initial={false}
+                        >
+                          {showEmojiPicker &&
+                          currentPostId === post.id ? (
+                            <motion.div
+                              key="close-icon"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5] text-gray-800 rounded-full"
+                            >
+                              <X size={20} />
+                            </motion.div>
                           ) : (
-                            <motion.div key="smile-icon" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ duration: 0.2 }} className="absolute inset-0 flex items-center justify-center text-gray-500 hover:text-gray-800"><Smile size={24} /></motion.div>
+                            <motion.div
+                              key="smile-icon"
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 10 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute inset-0 flex items-center justify-center text-gray-500 hover:text-gray-800"
+                            >
+                              <Smile size={24} />
+                            </motion.div>
                           )}
                         </AnimatePresence>
                       </button>
                       <div className="flex-1 h-full relative flex items-center">
-                        <AnimatePresence mode="wait" initial={false}>
-                          {showEmojiPicker && currentPostId === post.id ? (
-                            <motion.div key="emoji-list" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className="absolute inset-0 flex items-center gap-2 overflow-x-auto no-scrollbar">
+                        <AnimatePresence
+                          mode="wait"
+                          initial={false}
+                        >
+                          {showEmojiPicker &&
+                          currentPostId === post.id ? (
+                            <motion.div
+                              key="emoji-list"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute inset-0 flex items-center gap-2 overflow-x-auto no-scrollbar"
+                            >
                               {emojis.map((emoji) => (
-                                <button key={emoji} onClick={() => { setCurrentPostId(post.id); handleEmojiReaction(emoji, post.id); confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, }); }} className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-2xl bg-[#F5F5F5] rounded-full transition-colors">{emoji}</button>
+                                <button
+                                  key={emoji}
+                                  onClick={() => {
+                                    setCurrentPostId(post.id);
+                                    handleEmojiReaction(
+                                      emoji,
+                                      post.id,
+                                    );
+                                    confetti({
+                                      particleCount: 100,
+                                      spread: 70,
+                                      origin: { y: 0.6 },
+                                    });
+                                  }}
+                                  className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-2xl bg-[#F5F5F5] rounded-full transition-colors"
+                                >
+                                  {emoji}
+                                </button>
                               ))}
                             </motion.div>
                           ) : (
-                            <motion.div key="comment-input" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ duration: 0.2 }} className="absolute inset-y-2 inset-x-0 flex items-center bg-[#F5F5F5] rounded-full px-4">
-                              <input type="text" placeholder="댓글을 작성해주세요" className="w-full bg-transparent outline-none text-[#1A1A1A] placeholder:text-gray-400" value={newComment} onChange={(e) => setNewComment(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleAddComment(post.id); } }} />
+                            <motion.div
+                              key="comment-input"
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 10 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute inset-y-2 inset-x-0 flex items-center bg-[#F5F5F5] rounded-full px-4"
+                            >
+                              <input
+                                type="text"
+                                placeholder="댓글을 작성해주세요"
+                                className="w-full bg-transparent outline-none text-[#1A1A1A] placeholder:text-gray-400"
+                                value={newComment}
+                                onChange={(e) =>
+                                  setNewComment(e.target.value)
+                                }
+                                onKeyDown={(e) => {
+                                  if (
+                                    e.key === "Enter" &&
+                                    !e.shiftKey
+                                  ) {
+                                    e.preventDefault();
+                                    handleAddComment(post.id);
+                                  }
+                                }}
+                              />
                             </motion.div>
                           )}
                         </AnimatePresence>
@@ -887,26 +1146,55 @@ export function CommunityPage({
           </div>
         </div>
       )}
-      
+
       <div className="fixed bottom-0 left-0 right-0 z-50">
         <BottomNav
           currentPage={currentPage || "community"}
-          onPageChange={(page) => onPageChange && onPageChange(page)}
+          onPageChange={(page) =>
+            onPageChange && onPageChange(page)
+          }
         />
       </div>
 
       <AnimatePresence>
         {showDeleteModal && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 z-50" onClick={handleCancelDelete} />
-            <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[320px] bg-white rounded-2xl shadow-2xl z-50 overflow-hidden">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-50"
+              onClick={handleCancelDelete}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[320px] bg-white rounded-2xl shadow-2xl z-50 overflow-hidden"
+            >
               <div className="p-6 text-center">
-                <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"><Trash2 size={28} className="text-red-500" /></div>
-                <h3 className="text-lg mb-2">글을 삭제하시겠습니까?</h3>
-                <p className="text-sm text-gray-500 mb-6">삭제한 글은 복구할 수 없습니다.</p>
+                <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Trash2 size={28} className="text-red-500" />
+                </div>
+                <h3 className="text-lg mb-2">
+                  글을 삭제하시겠습니까?
+                </h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  삭제한 글은 복구할 수 없습니다.
+                </p>
                 <div className="flex gap-3">
-                  <button onClick={handleCancelDelete} className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">취소</button>
-                  <button onClick={handleConfirmDelete} className="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors">삭제</button>
+                  <button
+                    onClick={handleCancelDelete}
+                    className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleConfirmDelete}
+                    className="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors"
+                  >
+                    삭제
+                  </button>
                 </div>
               </div>
             </motion.div>
