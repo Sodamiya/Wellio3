@@ -715,7 +715,7 @@ export function CommunityPage({
                       <ImageWithFallback
                         src={post.userAvatar}
                         alt={post.userName}
-                        className="w-6 h-6 rounded-full border border-white"
+                        className="w-6 h-6 rounded-full border border-white object-cover"
                       />
                       <span className="text-white text-xs font-medium">
                         {post.userName}
@@ -854,23 +854,24 @@ export function CommunityPage({
                                 )}
                               </div>
                             )}
-                            {post.textOverlay && (
+                            {/* [수정: Pressed 상태의 캡슐 위치 및 스타일 통일] */}
+                            {(post.textOverlay || post.userName) && (
                               <div
-                                className="absolute bottom-4 left-4 max-w-[70%] z-20"
+                                className="absolute bottom-4 left-4 flex items-center gap-3 z-20 max-w-[90%]"
                                 onClick={(e) =>
                                   e.stopPropagation()
                                 }
                               >
-                                {/* [수정] 캡슐 컨테이너: pl-1로 왼쪽 여백 줄이고, py-2로 높이 설정 */}
-                                <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full pl-1 pr-5 py-3 gap-3 shadow-sm border border-white/20">
+                                {/* 1. 프로필 + 텍스트 캡슐 */}
+                                <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full pl-1 pr-5 py-3 gap-3 shadow-sm border border-white/20 shrink-0">
                                   <ImageWithFallback
                                     src={post.userAvatar}
                                     alt={post.userName}
-                                    // [수정] 이미지: w-11 h-11 (44px), -my-4(높이무시), -ml-2(왼쪽돌출)
+                                    // 이미지: w-12 h-12 (48px), -my-4, -ml-2
                                     className="w-12 h-12 rounded-full object-cover border-2 border-white -my-4 -ml-2 shadow-sm"
                                   />
-                                  <p className="text-[15px] text-gray-900 whitespace-nowrap font-medium leading-none">
-                                    {post.textOverlay}
+                                  <p className="text-[15px] text-gray-900 whitespace-nowrap font-bold leading-none">
+                                    {post.textOverlay || post.userName}
                                   </p>
                                 </div>
                               </div>
@@ -969,8 +970,15 @@ export function CommunityPage({
                                   <span>{post.badge}</span>
                                 </div>
                               )}
-                            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2">
+                            
+                            {/* === [수정된 부분: 하단 프로필 캡슐 및 댓글 카운트 (Outside State)] === */}
+                            {/* Pressed State와 완전히 동일한 크기/패딩/위치를 사용하여 
+                                전환 시 '점프' 현상을 방지함.
+                            */}
+                            <div className="absolute bottom-4 left-4 flex items-center gap-3 z-10 max-w-[90%]">
+                              {/* 1. 프로필 + 텍스트 캡슐 */}
+                              {/* pl-1 pr-5 py-3 gap-3 사용 (Pressed State와 동일) */}
+                              <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full pl-1 pr-5 py-3 gap-3 shadow-sm border border-white/20 shrink-0">
                                 <ImageWithFallback
                                   src={
                                     post.userName ===
@@ -979,16 +987,17 @@ export function CommunityPage({
                                       : post.userAvatar
                                   }
                                   alt={post.userName}
-                                  // [수정] w-8 h-8 -> w-10 h-10 으로 확대
-                                  className="w-12 h-12 rounded-full border-2 border-white"
+                                  // 이미지: w-12 h-12, -my-4, -ml-2 (Pressed State와 동일)
+                                  className="w-12 h-12 rounded-full object-cover border-2 border-white -my-4 -ml-2 shadow-sm"
                                 />
-                                {post.textOverlay && (
-                                  <span className="text-white font-semibold text-sm line-clamp-1">
-                                    {post.textOverlay}
-                                  </span>
-                                )}
+                                {/* 폰트: text-[15px] font-bold (Pressed State와 동일) */}
+                                <span className="text-[15px] text-gray-900 font-bold leading-none">
+                                  {post.textOverlay || post.userName}
+                                </span>
                               </div>
-                              <div className="bg-gray-100 rounded-full px-2.5 py-1 text-xs font-bold text-gray-800 flex items-center justify-center relative">
+
+                              {/* 2. 댓글 카운트 말풍선 */}
+                              <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-3 text-xs font-bold text-gray-800 flex items-center justify-center shadow-sm border border-white/20 shrink-0 relative">
                                 +
                                 {
                                   getAllComments(
@@ -1000,10 +1009,12 @@ export function CommunityPage({
                                   post.id,
                                   post.comments,
                                 ).length > 0 && (
-                                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
                                 )}
                               </div>
                             </div>
+                            {/* ================================================= */}
+
                           </>
                         )}
                       </motion.div>
