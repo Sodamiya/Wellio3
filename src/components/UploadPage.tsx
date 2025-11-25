@@ -128,8 +128,25 @@ export function UploadPage({
     useState("Normal");
   const [previousFilter, setPreviousFilter] = useState("Normal"); // 필터 취소를 위한 이전 필터 저장
 
+  // 모바일 감지 state
+  const [isMobile, setIsMobile] = useState(false);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // AI 추천 캡션 데이터
+  const aiCaptions = [
+    { text: "오랫동안 ❤️", color: "bg-[#FFF8F8] text-[#F96D6D] border-[#F96D6D]/30" },
+    { text: "오운완 💪", color: "bg-[#FFF9ED] text-[#FFC107] border-[#FFC107]/30" },
+    { text: "우리 가족 건강의 발걸음 👣", color: "bg-[#E5F9F8] text-[#36D2C5] border-[#36D2C5]/30" },
+    { text: "오늘은 맑음 ☀️", color: "bg-blue-50 text-blue-600 border-blue-600/30" },
+    { text: "갓 수확한 채소 🥬", color: "bg-purple-50 text-purple-600 border-purple-600/30" },
+  ];
+
+  // 추천 캡션 클릭 핸들러
+  const handleCaptionClick = (caption: string) => {
+    setTextInput(caption);
+  };
 
   // [수정] 무한 루프를 안정적으로 돌리기 위해 데이터를 3배로 불림
   const loopFilters = useMemo(() => {
@@ -144,6 +161,21 @@ export function UploadPage({
   useEffect(() => {
     // 권한 팝업 없이 바로 시작 (카메라는 선택적)
     setPermissionsGranted(true);
+  }, []);
+
+  // 모바일 감지 useEffect
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // 초기 체크
+    checkMobile();
+    
+    // 리사이즈 이벤트 리스너
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // 카메라 스트림 시작
@@ -585,20 +617,45 @@ export function UploadPage({
                   {/* 하단 텍스트 오버레이 - 입력창으로 변경 */}
                   <div className="absolute bottom-20 left-4 right-4">
                     {showTextInput ? (
-                      <input
-                        ref={textInputRef}
-                        type="text"
-                        value={textInput}
-                        onChange={(e) => setTextInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            setShowTextInput(false);
-                            textInputRef.current?.blur();
-                          }
-                        }}
-                        placeholder="텍스트를 입력하세요"
-                        className="w-full text-black text-lg bg-white/80 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-md outline-none focus:ring-2 focus:ring-[#36D2C5] placeholder:text-gray-500/70"
-                      />
+                      <>
+                        <input
+                          ref={textInputRef}
+                          type="text"
+                          value={textInput}
+                          onChange={(e) => setTextInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              setShowTextInput(false);
+                              textInputRef.current?.blur();
+                            }
+                          }}
+                          placeholder="텍스트를 입력하세요"
+                          className="w-full text-black text-lg bg-white/80 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-md outline-none focus:ring-2 focus:ring-[#36D2C5] placeholder:text-gray-500/70"
+                        />
+                        {/* 모바일에서만 AI 추천 캡션 표시 */}
+                        {isMobile && (
+                          <div className="mt-3 bg-gray-50/90 backdrop-blur-sm p-3 border border-gray-200/80 rounded-xl">
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-center">
+                                <h3 className="text-sm font-bold text-gray-800">
+                                  AI 추천 캡션
+                                </h3>
+                              </div>
+                              <div className="flex overflow-x-auto space-x-2 pb-1 scrollbar-hide">
+                                {aiCaptions.map((caption, idx) => (
+                                  <button
+                                    key={idx}
+                                    onClick={() => handleCaptionClick(caption.text)}
+                                    className={`flex-shrink-0 flex items-center ${caption.color} border rounded-full px-3 py-1.5 text-xs font-medium hover:opacity-80 transition-opacity`}
+                                  >
+                                    {caption.text}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
                     ) : textInput ? (
                       <div className="w-full text-black text-lg bg-white/60 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-md">
                         {textInput}
@@ -654,12 +711,20 @@ export function UploadPage({
               </button>
             </>
           ) : isDetailEditMode ? (
-            <button
-              onClick={handleCloseDetailEdit}
-              className="absolute left-4 p-1"
-            >
-              <X size={24} className="text-[#1A1A1A]" />
-            </button>
+            <>
+              <button
+                onClick={handleCloseDetailEdit}
+                className="absolute left-4 p-1"
+              >
+                <X size={24} className="text-[#1A1A1A]" />
+              </button>
+              <button
+                onClick={handleCapture}
+                className="absolute right-4 px-4 py-2 text-[#36D2C5] font-semibold"
+              >
+                완료
+              </button>
+            </>
           ) : (
             <button
               onClick={onBack}
@@ -752,68 +817,94 @@ export function UploadPage({
           ) : isDetailEditMode ? (
             /* 세부조정 모드: 5개 동그란 아이콘 버튼(위) + 업로드 버튼(아래 중앙) */
             <div className="flex flex-col items-center gap-3 max-w-md mx-auto px-4">
-              {/* 5개 세부조정 아이콘 버튼 */}
-              <div className="flex items-center justify-center gap-4">
-                <button
-                  onClick={handleTextInput}
-                  className="flex flex-col items-center gap-2"
-                >
-                  <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#E7F3FF] text-[#2F80ED] transition-colors hover:bg-[#D0E7FF]">
-                    <Type size={24} />
+              {/* 텍스트 입력 모드가 활성화되고 데스크톱인 경우: AI 추천 캡션만 표시 */}
+              {/* 그 외: 5개 세부조정 버튼 표시 */}
+              {showTextInput && !isMobile ? (
+                /* 데스크톱 + 텍스트 입력 모드 - AI 추천 캡션만 */
+                <div className="w-full bg-gray-50 p-4 border border-gray-200 rounded-xl">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center">
+                      <h3 className="text-base font-bold text-gray-800">
+                        AI 추천 캡션
+                      </h3>
+                    </div>
+                    <div className="flex overflow-x-auto space-x-2 pb-1.5 scrollbar-hide">
+                      {aiCaptions.map((caption, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleCaptionClick(caption.text)}
+                          className={`flex-shrink-0 flex items-center ${caption.color} border rounded-full px-4 py-2 text-sm font-medium hover:opacity-80 transition-opacity`}
+                        >
+                          {caption.text}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <span className="text-xs text-gray-600">
-                    텍스트
-                  </span>
-                </button>
+                </div>
+              ) : (
+                /* 5개 세부조정 아이콘 버튼 (모바일이거나 텍스트 입력 모드가 아닐 때) */
+                <div className="flex items-center justify-center gap-4">
+                  <button
+                    onClick={handleTextInput}
+                    className="flex flex-col items-center gap-2"
+                  >
+                    <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#E7F3FF] text-[#2F80ED] transition-colors hover:bg-[#D0E7FF]">
+                      <Type size={24} />
+                    </div>
+                    <span className="text-xs text-gray-600">
+                      텍스트
+                    </span>
+                  </button>
 
-                <button
-                  onClick={handleLocationInput}
-                  className="flex flex-col items-center gap-2"
-                >
-                  <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#FFF4E5] text-[#FF9800] transition-colors hover:bg-[#FFE8CC]">
-                    <MapPin size={24} />
-                  </div>
-                  <span className="text-xs text-gray-600">
-                    위치
-                  </span>
-                </button>
+                  <button
+                    onClick={handleLocationInput}
+                    className="flex flex-col items-center gap-2"
+                  >
+                    <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#FFF4E5] text-[#FF9800] transition-colors hover:bg-[#FFE8CC]">
+                      <MapPin size={24} />
+                    </div>
+                    <span className="text-xs text-gray-600">
+                      위치
+                    </span>
+                  </button>
 
-                <button
-                  onClick={handleWeatherInput}
-                  className="flex flex-col items-center gap-2"
-                >
-                  <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#E8F8F7] text-[#36D2C5] transition-colors hover:bg-[#D0F0ED]">
-                    <Cloud size={24} />
-                  </div>
-                  <span className="text-xs text-gray-600">
-                    날씨
-                  </span>
-                </button>
+                  <button
+                    onClick={handleWeatherInput}
+                    className="flex flex-col items-center gap-2"
+                  >
+                    <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#E8F8F7] text-[#36D2C5] transition-colors hover:bg-[#D0F0ED]">
+                      <Cloud size={24} />
+                    </div>
+                    <span className="text-xs text-gray-600">
+                      날씨
+                    </span>
+                  </button>
 
-                <button
-                  onClick={handleTimeInput}
-                  className="flex flex-col items-center gap-2"
-                >
-                  <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#F3E5F5] text-[#9C27B0] transition-colors hover:bg-[#E1BEE7]">
-                    <Clock size={24} />
-                  </div>
-                  <span className="text-xs text-gray-600">
-                    시간
-                  </span>
-                </button>
+                  <button
+                    onClick={handleTimeInput}
+                    className="flex flex-col items-center gap-2"
+                  >
+                    <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#F3E5F5] text-[#9C27B0] transition-colors hover:bg-[#E1BEE7]">
+                      <Clock size={24} />
+                    </div>
+                    <span className="text-xs text-gray-600">
+                      시간
+                    </span>
+                  </button>
 
-                <button
-                  onClick={handleHealthInput}
-                  className="flex flex-col items-center gap-2"
-                >
-                  <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#FFEBEE] text-[#F44336] transition-colors hover:bg-[#FFCDD2]">
-                    <Heart size={24} />
-                  </div>
-                  <span className="text-xs text-gray-600">
-                    건강
-                  </span>
-                </button>
-              </div>
+                  <button
+                    onClick={handleHealthInput}
+                    className="flex flex-col items-center gap-2"
+                  >
+                    <div className="w-14 h-14 flex items-center justify-center rounded-full bg-[#FFEBEE] text-[#F44336] transition-colors hover:bg-[#FFCDD2]">
+                      <Heart size={24} />
+                    </div>
+                    <span className="text-xs text-gray-600">
+                      건강
+                    </span>
+                  </button>
+                </div>
+              )}
 
               {/* 업로드 버튼 (중앙) */}
               <button
