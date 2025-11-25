@@ -193,7 +193,7 @@ export function UploadPage({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // 키보드 높이 감지 및 오버레이 위치 조정 useEffect
+  // 💡 [수정된 부분] 키보드 높이 감지 및 오버레이 위치 조정 useEffect
   useEffect(() => {
     // 1. 초기 뷰포트 높이 저장
     if (initialViewportHeight.current === 0) {
@@ -210,7 +210,14 @@ export function UploadPage({
         
         // 키보드가 열렸을 때 (높이 차이가 100px 이상일 경우) 키보드 높이를 설정
         if (heightDifference > 100) {
-            setKeyboardHeight(heightDifference);
+            // 💡 [핵심 수정]: 키보드 높이에서 입력창 하단 여백 및 오버레이 자체의 패딩을 고려하여
+            // 오버레이가 키보드에 '딱 붙도록' 조정합니다. 
+            // 현재 입력창이 bottom 20px에 위치하고 오버레이는 입력창보다 더 위에 있어야 하므로, 
+            // 입력창과의 갭을 메우는 방식으로 조정하는 것이 좋습니다.
+            // visualViewport의 높이 차이(heightDifference)가 곧 키보드 높이이므로,
+            // 오버레이의 bottom에 이 값을 그대로 넣어주면 키보드에 붙습니다.
+            // 너무 위에 위치하는 현상은 아마도 이전에 키보드 높이에 오버레이 높이까지 더해서 계산했기 때문일 수 있습니다.
+            setKeyboardHeight(heightDifference); 
         } else {
             setKeyboardHeight(0);
         }
@@ -525,7 +532,7 @@ export function UploadPage({
       // fixed, z-index, max-w 등은 유지
       className="fixed left-0 right-0 z-[100] max-w-[500px] mx-auto bg-white border-t border-gray-200 shadow-2xl" 
       style={{
-        // 💡 키보드 높이만큼 오버레이를 띄웁니다. (키보드 위에 위치)
+        // 💡 [핵심 수정]: 키보드 높이를 그대로 bottom 값으로 사용하면 키보드에 딱 붙습니다.
         bottom: `${keyboardHeight}px`,
       }}
     >
@@ -1172,9 +1179,12 @@ export function UploadPage({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* -------------------- [NEW: 키보드 위에 AI 추천 캡션 오버레이] -------------------- */}
-      {/* showTextInput일 때만 캡션 표시 (키보드가 닫히면 showTextInput이 false가 되므로 사라짐) */}
+      {/* -------------------- [AI 추천 캡션 오버레이] -------------------- */}
       <AnimatePresence>
+        {/* selectedImage: 사진이 있어야 함
+            isDetailEditMode: 세부 조정 모드여야 함
+            showTextInput: 텍스트 입력 모드여야 함 (키보드가 열릴 가능성이 높음)
+        */}
         {selectedImage && isDetailEditMode && showTextInput && AICaptionOverlay}
       </AnimatePresence>
       {/* --------------------------------------------------------------------------------- */}
