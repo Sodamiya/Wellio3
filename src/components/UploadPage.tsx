@@ -14,12 +14,12 @@ import {
   Cloud,
   Clock,
   Heart,
-  Check,
   Footprints,
   Flame,
   TrendingUp,
 } from "lucide-react";
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+// ui 폴더 경로는 프로젝트 구조에 맞게 유지
 import { Button } from "./ui/button";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import {
@@ -145,15 +145,18 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
   // 추천 캡션 클릭 핸들러
   const handleCaptionClick = useCallback(
     (caption: string) => (e: React.MouseEvent<HTMLButtonElement>) => {
+      // 1. onMouseDown 이벤트에서 기본 동작을 막아 키보드가 닫히는 것을 방지
       if (e) {
         e.preventDefault();
       }
 
+      // 2. 텍스트에 캡션 추가
       const newText = textInput.trim()
         ? `${textInput.trim()} ${caption}`
         : caption;
       setTextInput(newText);
 
+      // 3. 텍스트 업데이트 후, 포커스를 input으로 유지
       if (textInputRef.current) {
         textInputRef.current.focus();
       }
@@ -165,10 +168,12 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
     return [...ORIGINAL_FILTERS, ...ORIGINAL_FILTERS, ...ORIGINAL_FILTERS];
   }, []);
 
+  // 초기 권한 부여
   useEffect(() => {
     setPermissionsGranted(true);
   }, []);
 
+  // 모바일 감지
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -178,27 +183,51 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // 키보드 높이 감지
+  // 💡 [수정됨] 키보드 높이 감지 및 "이중 밀림 현상" 방지 로직
   useEffect(() => {
+    // 초기 뷰포트 높이 저장
     if (initialViewportHeight.current === 0) {
       initialViewportHeight.current = window.innerHeight;
     }
 
     const handleResize = () => {
-      const currentHeight = window.visualViewport?.height || window.innerHeight;
-      const initialHeight = initialViewportHeight.current;
-      const heightDifference = initialHeight - currentHeight;
+      // visualViewport 지원 여부 확인
+      if (!window.visualViewport) return;
 
-      if (heightDifference > 100) {
-        setKeyboardHeight(heightDifference);
+      const currentVisualHeight = window.visualViewport.height;
+      const currentInnerHeight = window.innerHeight;
+      const initialHeight = initialViewportHeight.current;
+
+      // 키보드가 올라왔는지 판단 (높이 차이가 100px 이상)
+      // visualViewport는 키보드가 올라오면 무조건 줄어듭니다.
+      const isKeyboardDetected = initialHeight - currentVisualHeight > 100;
+
+      if (isKeyboardDetected) {
+        // [핵심] window.innerHeight도 같이 줄어들었는지 확인 (안드로이드/최신 iOS)
+        // 만약 전체 창 크기(innerHeight)도 줄었다면, 브라우저가 이미 UI를 밀어 올린 상태입니다.
+        // 이 경우 우리가 bottom 값을 추가로 주면 "이중"으로 올라가서 공중에 뜹니다.
+        const isLayoutResized = initialHeight - currentInnerHeight > 100;
+
+        if (isLayoutResized) {
+          // 브라우저가 레이아웃을 줄였으므로, 우리는 추가 여백을 줄 필요가 없습니다.
+          setKeyboardHeight(0);
+        } else {
+          // 브라우저가 레이아웃을 줄이지 않고 덮어버리는 경우 (일부 iOS 구버전 등)
+          // 우리가 직접 키보드 높이만큼 올려줘야 합니다.
+          setKeyboardHeight(initialHeight - currentVisualHeight);
+        }
       } else {
+        // 키보드가 내려갔을 때
         setKeyboardHeight(0);
       }
     };
 
     window.visualViewport?.addEventListener("resize", handleResize);
+    window.visualViewport?.addEventListener("scroll", handleResize);
+
     return () => {
       window.visualViewport?.removeEventListener("resize", handleResize);
+      window.visualViewport?.removeEventListener("scroll", handleResize);
     };
   }, []);
 
@@ -244,16 +273,19 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
       } catch (error: any) {
         console.error("카메라 접근 실패:", error);
         if (error.name === "NotFoundError") {
-          setCameraError("카메라를 찾을 수 없습니다.");
+          setCameraError(
+            "카메라를 찾을 수 없습니다. 갤러리에서 사진을 업로드해주세요."
+          );
         } else if (error.name === "NotAllowedError") {
           setCameraError("카메라 접근 권한이 거부되었습니다.");
         } else {
-          setCameraError("카메라를 시작할 수 없습니다.");
+          setCameraError("카메라를 시작할 수 없습니다. 갤러리를 이용해주세요.");
         }
       }
     };
 
     startCamera();
+
     return () => {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
@@ -261,6 +293,7 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
     };
   }, [permissionsGranted, isFrontCamera]);
 
+  // 권한 및 캡처 관련 핸들러들
   const handleCameraPermissionAllow = () => {
     setShowCameraPermission(false);
     setShowGalleryPermission(true);
@@ -284,6 +317,7 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
         return;
       }
 
+      console.log("사진 업로드:", selectedImage);
       const filterStyle =
         ORIGINAL_FILTERS.find((f) => f.name === selectedFilter)?.filter ||
         "none";
@@ -330,6 +364,7 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
       return;
     }
 
+    // 촬영 모드
     if (hasCameraDevice && videoRef.current && stream) {
       const canvas = document.createElement("canvas");
       canvas.width = videoRef.current.videoWidth;
@@ -438,7 +473,8 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
       // 흰색 배경, 상단 둥근 모서리, 그림자 추가
       className="fixed left-0 right-0 z-[100] max-w-[500px] mx-auto bg-white rounded-t-[20px] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] overflow-hidden"
       style={{
-        bottom: `${keyboardHeight}px`, // 키보드 높이에 맞춰 붙음
+        // keyboardHeight가 0일 때는 안전하게 0px로 붙임
+        bottom: `${keyboardHeight}px`,
       }}
     >
       {/* 타이틀 영역 */}
@@ -574,8 +610,8 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                   )}
 
                   {/* [수정] 입력창 위치 조정 
-                      키보드가 올라오고(showTextInput), AI 캡션 패널이 뜨면
-                      입력창을 패널 위로 밀어올립니다.
+                      키보드 감지 로직에 따라 keyboardHeight가 0일 수도 있고 값일 수도 있습니다.
+                      이에 맞춰 입력창을 AI 캡션 패널(약 130px) 위로 올립니다.
                   */}
                   <div
                     className="absolute left-4 right-4 transition-all duration-300 ease-out"
@@ -583,8 +619,8 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                       bottom:
                         showTextInput && isDetailEditMode
                           ? keyboardHeight > 0
-                            ? keyboardHeight + 140 // AI 캡션 높이(약 120px) + 여백
-                            : 80
+                            ? keyboardHeight + 140 // 키보드 높이(수동) + AI 패널 높이
+                            : 140 // 키보드 높이(자동) = 0이므로 AI 패널 높이만큼만 올림 (브라우저가 이미 올려줌)
                           : 80, // 기본 위치
                     }}
                   >
@@ -703,7 +739,8 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                   threshold={10}
                   speed={400}
                   onRealIndexChange={(swiper) => {
-                    const realIndex = swiper.realIndex % ORIGINAL_FILTERS.length;
+                    const realIndex =
+                      swiper.realIndex % ORIGINAL_FILTERS.length;
                     setSelectedFilter(ORIGINAL_FILTERS[realIndex].name);
                   }}
                 >
@@ -802,7 +839,9 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
             <div className="flex items-center justify-between max-w-md mx-auto px-6">
               <button
                 onClick={
-                  isUploadMode ? handleEdit : () => fileInputRef.current?.click()
+                  isUploadMode
+                    ? handleEdit
+                    : () => fileInputRef.current?.click()
                 }
                 className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200"
               >
@@ -949,7 +988,9 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                       </span>
                     </button>
                     <button
-                      onClick={() => handleHealthRecordSelect("챌린지: 건강 식단")}
+                      onClick={() =>
+                        handleHealthRecordSelect("챌린지: 건강 식단")
+                      }
                       className="flex items-center gap-2 bg-[#555555] text-white px-4 py-2.5 rounded-full whitespace-nowrap"
                     >
                       <span className="text-lg">🥗</span>
