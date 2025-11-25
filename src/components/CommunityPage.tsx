@@ -745,8 +745,8 @@ export function CommunityPage({
               const isDeleting = postToDelete === post.id;
               return (
                 <SwiperSlide key={post.id}>
-                  <div className="h-full flex flex-col items-center justify-center px-4">
-                    <div className="relative w-full max-w-[460px] aspect-[335/447] mx-auto overflow-visible -translate-y-[80px]">
+                  <div className="h-full flex flex-col items-center justify-center px-4 py-4">
+                    <div className="relative max-h-[calc(100%-112px)] aspect-[335/447] mx-auto overflow-visible top-[-56px]">
                       {post.userName ===
                         currentUser.userName && (
                         <div className="absolute inset-y-0 -right-2 w-32 flex items-center justify-center z-0">
