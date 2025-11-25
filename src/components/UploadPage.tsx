@@ -17,6 +17,7 @@ import {
   Footprints,
   Flame,
   TrendingUp,
+  Check, // [추가] 완료 버튼용 아이콘
 } from "lucide-react";
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 // ui 폴더 경로는 프로젝트 구조에 맞게 유지
@@ -183,7 +184,7 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // 💡 [수정됨] 키보드 높이 감지 및 "이중 밀림 현상" 방지 로직
+  // 키보드 높이 감지 및 "이중 밀림 현상" 방지 로직
   useEffect(() => {
     // 초기 뷰포트 높이 저장
     if (initialViewportHeight.current === 0) {
@@ -199,13 +200,10 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
       const initialHeight = initialViewportHeight.current;
 
       // 키보드가 올라왔는지 판단 (높이 차이가 100px 이상)
-      // visualViewport는 키보드가 올라오면 무조건 줄어듭니다.
       const isKeyboardDetected = initialHeight - currentVisualHeight > 100;
 
       if (isKeyboardDetected) {
-        // [핵심] window.innerHeight도 같이 줄어들었는지 확인 (안드로이드/최신 iOS)
-        // 만약 전체 창 크기(innerHeight)도 줄었다면, 브라우저가 이미 UI를 밀어 올린 상태입니다.
-        // 이 경우 우리가 bottom 값을 추가로 주면 "이중"으로 올라가서 공중에 뜹니다.
+        // window.innerHeight도 같이 줄어들었는지 확인 (안드로이드/최신 iOS)
         const isLayoutResized = initialHeight - currentInnerHeight > 100;
 
         if (isLayoutResized) {
@@ -213,7 +211,6 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
           setKeyboardHeight(0);
         } else {
           // 브라우저가 레이아웃을 줄이지 않고 덮어버리는 경우 (일부 iOS 구버전 등)
-          // 우리가 직접 키보드 높이만큼 올려줘야 합니다.
           setKeyboardHeight(initialHeight - currentVisualHeight);
         }
       } else {
@@ -461,44 +458,53 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
   };
 
   // --------------------------------------------------------------------------
-  // [수정] 플로팅 AI 추천 캡션 오버레이 (사진처럼 흰색 배경 패널 적용)
+  // [수정됨] AI 캡션 툴바 (키패드 바로 위 부착형)
   // --------------------------------------------------------------------------
-  const AICaptionOverlay = (
+  const TOOLBAR_HEIGHT = 60; // 툴바 높이 고정
+
+  const AICaptionToolbar = (
     <motion.div
-      key="ai-caption-overlay-floating"
+      key="ai-caption-toolbar"
       initial={{ y: "100%" }}
       animate={{ y: 0 }}
       exit={{ y: "100%" }}
       transition={{ type: "spring", damping: 25, stiffness: 200 }}
-      // 흰색 배경, 상단 둥근 모서리, 그림자 추가
-      className="fixed left-0 right-0 z-[100] max-w-[500px] mx-auto bg-white rounded-t-[20px] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] overflow-hidden"
+      className="fixed left-0 right-0 z-[100] bg-white border-t border-gray-100 flex items-center shadow-[0_-2px_10px_rgba(0,0,0,0.05)]"
       style={{
-        // keyboardHeight가 0일 때는 안전하게 0px로 붙임
+        height: `${TOOLBAR_HEIGHT}px`,
+        // 키보드 높이만큼 바닥에서 띄움 (키보드와 딱 붙음)
         bottom: `${keyboardHeight}px`,
       }}
     >
-      {/* 타이틀 영역 */}
-      <div className="px-5 pt-5 pb-3">
-        <h3 className="text-[16px] font-bold text-[#1A1A1A]">AI 추천 캡션</h3>
-      </div>
-
-      {/* 캡션 버튼 스크롤 영역 */}
-      <div className="flex overflow-x-auto px-5 pb-5 space-x-2.5 scrollbar-hide w-full">
+      {/* 1. 좌측: 가로 스크롤 가능한 AI 캡션들 */}
+      <div className="flex-1 overflow-x-auto flex items-center px-4 space-x-2 scrollbar-hide h-full">
         {aiCaptions.map((caption, index) => (
           <button
             key={index}
             onMouseDown={handleCaptionClick(caption.text)}
-            className={`flex-shrink-0 px-3.5 py-2 text-[14px] font-medium border rounded-full transition-all active:scale-95 whitespace-nowrap ${caption.color}`}
+            className={`flex-shrink-0 px-3 py-1.5 text-[13px] font-medium border rounded-full transition-transform active:scale-95 whitespace-nowrap ${caption.color}`}
           >
             {caption.text}
           </button>
         ))}
-        {/* 오른쪽 여백용 더미 */}
+        {/* 스크롤 여백 */}
         <div className="w-2 flex-shrink-0" />
+      </div>
+
+      {/* 2. 우측: 완료(키보드 내리기) 버튼 */}
+      <div className="flex-shrink-0 pl-2 pr-4 h-full flex items-center border-l border-gray-100 bg-white/95 backdrop-blur-sm">
+        <button
+          onClick={() => {
+            setShowTextInput(false);
+            textInputRef.current?.blur();
+          }}
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-900 text-white hover:bg-gray-700 transition-colors"
+        >
+          <Check size={16} strokeWidth={3} />
+        </button>
       </div>
     </motion.div>
   );
-  // --------------------------------------------------------------------------
 
   return (
     <>
@@ -610,8 +616,8 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                   )}
 
                   {/* [수정] 입력창 위치 조정 
-                      키보드 감지 로직에 따라 keyboardHeight가 0일 수도 있고 값일 수도 있습니다.
-                      이에 맞춰 입력창을 AI 캡션 패널(약 130px) 위로 올립니다.
+                      키보드가 올라오거나, 리사이즈로 인해 keyboardHeight가 0이어도
+                      툴바(AICaptionToolbar)가 존재하므로 그 위로 올려줍니다.
                   */}
                   <div
                     className="absolute left-4 right-4 transition-all duration-300 ease-out"
@@ -619,8 +625,8 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
                       bottom:
                         showTextInput && isDetailEditMode
                           ? keyboardHeight > 0
-                            ? keyboardHeight + 140 // 키보드 높이(수동) + AI 패널 높이
-                            : 140 // 키보드 높이(자동) = 0이므로 AI 패널 높이만큼만 올림 (브라우저가 이미 올려줌)
+                            ? keyboardHeight + TOOLBAR_HEIGHT + 20 // 키보드O: 키보드 + 툴바 + 여백
+                            : TOOLBAR_HEIGHT + 20 // 키보드X(리사이즈): 툴바 + 여백
                           : 80, // 기본 위치
                     }}
                   >
@@ -1020,9 +1026,9 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* AI 추천 캡션 오버레이 (조건부 렌더링) */}
+      {/* AI 추천 캡션 툴바 (조건부 렌더링) - 위치: AnimatePresence 내부 */}
       <AnimatePresence>
-        {selectedImage && isDetailEditMode && showTextInput && AICaptionOverlay}
+        {selectedImage && isDetailEditMode && showTextInput && AICaptionToolbar}
       </AnimatePresence>
     </>
   );
