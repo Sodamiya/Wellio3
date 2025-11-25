@@ -168,7 +168,19 @@ export function CommunityPage({
     }>;
   }>({});
 
-  const emojis = ["❤️", "👍", "😊", "🎉", "🔥", "👏"];
+  const emojis = ["❤️", "😊", "👍", "👏"];
+
+  // 이모지 애니메이션 상태
+  const [floatingEmojis, setFloatingEmojis] = useState<
+    Array<{
+      id: number;
+      emoji: string;
+      x: number;
+      size: number;
+      wobble: number;
+      delay: number;
+    }>
+  >([]);
 
   const handleAddComment = (postId: number) => {
     if (!newComment.trim()) return;
@@ -192,6 +204,9 @@ export function CommunityPage({
     }));
 
     setNewComment("");
+    
+    // 댓글 작성 후 해당 게시물의 세부 화면으로 이동
+    setSelectedPostForReaction(postId);
   };
 
   const handleEmojiReaction = (
@@ -297,32 +312,86 @@ export function CommunityPage({
 
   const getFilteredReactionPosts = () => {
     const myReactedPosts = posts.filter((post) => {
+      // 1. 내가 작성한 댓글 확인
       const hasMyComment = addedComments[post.id]?.some(
         (comment) => comment.userName === currentUser.userName,
       );
-      const hasMyReaction = addedReactions[post.id]?.some(
+      
+      // 2. 내가 새로 추가한 리액션 확인 (addedReactions)
+      const hasMyAddedReaction = addedReactions[post.id]?.some(
         (reaction) =>
           reaction.users.some(
             (user) => user.userName === currentUser.userName,
           ),
       );
-      return hasMyComment || hasMyReaction;
+      
+      // 3. 목 데이터의 원래 리액션 확인 (post.reactions)
+      const hasMyOriginalReaction = post.reactions?.some(
+        (reaction) =>
+          reaction.users.some(
+            (user) => user.userName === currentUser.userName,
+          ),
+      );
+      
+      const hasMyReaction = hasMyComment || hasMyAddedReaction || hasMyOriginalReaction;
+      
+      // 4. 특정 인물이 선택된 경우 교집합 필터링
+      if (selectedFamilyMember) {
+        return hasMyReaction && post.userName === selectedFamilyMember;
+      }
+      
+      return hasMyReaction;
     });
 
     if (reactionFilter === "ALL") {
       return myReactedPosts;
     }
 
+    // 특정 이모지로 필터링
     return myReactedPosts.filter((post) => {
-      const myReactionsInPost = addedReactions[post.id] || [];
-      return myReactionsInPost.some(
+      // 새로 추가한 리액션에서 해당 이모지 확인
+      const hasAddedReaction = addedReactions[post.id]?.some(
         (reaction) =>
           reaction.emoji === reactionFilter &&
           reaction.users.some(
             (u) => u.userName === currentUser.userName,
           ),
       );
+      
+      // 원래 있던 리액션에서 해당 이모지 확인
+      const hasOriginalReaction = post.reactions?.some(
+        (reaction) =>
+          reaction.emoji === reactionFilter &&
+          reaction.users.some(
+            (u) => u.userName === currentUser.userName,
+          ),
+      );
+      
+      return hasAddedReaction || hasOriginalReaction;
     });
+  };
+
+  // 내가 사용한 리액션 이모지 목록 추출
+  const getMyUsedEmojis = () => {
+    const usedEmojis = new Set<string>();
+    
+    posts.forEach((post) => {
+      // 원래 있던 리액션에서 내가 남긴 이모지 찾기
+      post.reactions?.forEach((reaction) => {
+        if (reaction.users.some((u) => u.userName === currentUser.userName)) {
+          usedEmojis.add(reaction.emoji);
+        }
+      });
+      
+      // 새로 추가한 리액션에서 내가 남긴 이모지 찾기
+      addedReactions[post.id]?.forEach((reaction) => {
+        if (reaction.users.some((u) => u.userName === currentUser.userName)) {
+          usedEmojis.add(reaction.emoji);
+        }
+      });
+    });
+    
+    return Array.from(usedEmojis);
   };
 
   const handleConfirmDelete = () => {
@@ -607,8 +676,8 @@ export function CommunityPage({
                 ALL
               </button>
 
-              {/* 이모지 버튼들 */}
-              {emojis.map((emoji) => (
+              {/* 이모지 버튼들 - 실제 사용한 이모지만 표시 */}
+              {getMyUsedEmojis().map((emoji) => (
                 <button
                   key={emoji}
                   onClick={() => setReactionFilter(emoji)}
@@ -746,7 +815,7 @@ export function CommunityPage({
               return (
                 <SwiperSlide key={post.id}>
                   <div className="h-full flex flex-col items-center justify-center px-4 py-4">
-                    <div className="relative max-h-[calc(100%-112px)] aspect-[335/447] mx-auto overflow-visible top-[-56px]">
+                    <div className="relative max-h-[calc(90%-112px)] aspect-[335/447] mx-auto overflow-visible top-[-72px]">
                       {post.userName ===
                         currentUser.userName && (
                         <div className="absolute inset-y-0 -right-2 w-32 flex items-center justify-center z-0">
@@ -890,7 +959,7 @@ export function CommunityPage({
                         {selectedPostForReaction !==
                           post.id && (
                           <>
-                            <div className="absolute top-4 left-4 flex flex-col gap-2">
+                            <div className="absolute top-4 left-4 flex flex-row flex-wrap gap-2 max-w-[calc(100%-2rem)]">
                               {post.location && (
                                 <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
                                   <MapPin
@@ -993,6 +1062,200 @@ export function CommunityPage({
                           </>
                         )}
                       </motion.div>
+
+                      {/* 댓글 입력창 - 이미지 카드 바로 아래 16px 간격 */}
+                      <div className="absolute left-0 right-0 top-[calc(100%+16px)] z-40 pointer-events-none">
+                        <div className="relative w-full h-[48px] pointer-events-auto px-1">
+                          <div className="flex items-center gap-2 w-full mx-auto h-full">
+                            <button
+                              className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors overflow-hidden relative"
+                              onClick={() => {
+                                setCurrentPostId(post.id);
+                                setShowEmojiPicker(
+                                  !showEmojiPicker,
+                                );
+                              }}
+                            >
+                              <AnimatePresence
+                                mode="wait"
+                                initial={false}
+                              >
+                                {showEmojiPicker &&
+                                currentPostId === post.id ? (
+                                  <motion.div
+                                    key="close-icon"
+                                    initial={{
+                                      opacity: 0,
+                                      y: 10,
+                                    }}
+                                    animate={{
+                                      opacity: 1,
+                                      y: 0,
+                                    }}
+                                    exit={{
+                                      opacity: 0,
+                                      y: -10,
+                                    }}
+                                    transition={{
+                                      duration: 0.2,
+                                    }}
+                                    className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5]/80 backdrop-blur-md text-gray-800 rounded-full"
+                                  >
+                                    <X size={20} />
+                                  </motion.div>
+                                ) : (
+                                  <motion.div
+                                    key="smile-icon"
+                                    initial={{
+                                      opacity: 0,
+                                      y: -10,
+                                    }}
+                                    animate={{
+                                      opacity: 1,
+                                      y: 0,
+                                    }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    transition={{
+                                      duration: 0.2,
+                                    }}
+                                    className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5]/80 backdrop-blur-md text-gray-500 hover:text-gray-800 rounded-full"
+                                  >
+                                    <Smile size={24} />
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </button>
+                            <div className="flex-1 h-full relative flex items-center">
+                              <AnimatePresence
+                                mode="wait"
+                                initial={false}
+                              >
+                                {showEmojiPicker &&
+                                currentPostId === post.id ? (
+                                  <motion.div
+                                    key="emoji-list"
+                                    initial={{
+                                      opacity: 0,
+                                      y: 10,
+                                    }}
+                                    animate={{
+                                      opacity: 1,
+                                      y: 0,
+                                    }}
+                                    exit={{
+                                      opacity: 0,
+                                      y: -10,
+                                    }}
+                                    transition={{
+                                      duration: 0.2,
+                                    }}
+                                    className="absolute inset-0 flex items-center gap-2 overflow-x-auto no-scrollbar"
+                                  >
+                                    {emojis.map((emoji) => (
+                                      <button
+                                        key={emoji}
+                                        onClick={() => {
+                                          handleEmojiReaction(
+                                            emoji,
+                                            post.id,
+                                          );
+                                          confetti({
+                                            particleCount: 100,
+                                            spread: 70,
+                                            origin: { y: 0.6 },
+                                          });
+                                          
+                                          // 이모지 떠오르는 애니메이션 생성
+                                          const count = Math.floor(Math.random() * 9) + 4; // 15~23개로 증가
+                                          const newEmojis = Array.from({ length: count }, (_, i) => ({
+                                            id: Date.now() + i,
+                                            emoji: emoji,
+                                            x: (Math.random() - 0.5) * 480, // -240px ~ 240px (피드 영역 전체)
+                                            size: Math.random() * 90 + 30, // 30~120px (다양한 크기)
+                                            wobble: (Math.random() - 0.5) * 60, // -30px ~ 30px 좌우 흔들림
+                                            delay: Math.random() * 2, // 0~0.5초 딜레이
+                                          }));
+                                          setFloatingEmojis((prev) => [...prev, ...newEmojis]);
+                                          
+                                          // 5초 후 제거
+                                          setTimeout(() => {
+                                            setFloatingEmojis((prev) => 
+                                              prev.filter((e) => !newEmojis.some((ne) => ne.id === e.id))
+                                            );
+                                          }, 5000);
+                                        }}
+                                        className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-2xl bg-[#F5F5F5]/80 backdrop-blur-md rounded-full transition-colors"
+                                      >
+                                        {emoji}
+                                      </button>
+                                    ))}
+                                  </motion.div>
+                                ) : (
+                                  <motion.div
+                                    key="comment-input"
+                                    initial={{
+                                      opacity: 0,
+                                      y: -10,
+                                    }}
+                                    animate={{
+                                      opacity: 1,
+                                      y: 0,
+                                    }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    transition={{
+                                      duration: 0.2,
+                                    }}
+                                    className="absolute inset-y-1 inset-x-0 flex items-center bg-[#F5F5F5]/80 backdrop-blur-md rounded-full px-4"
+                                  >
+                                    <input
+                                      type="text"
+                                      placeholder="댓글을 작성해주세요"
+                                      className="w-full bg-transparent outline-none text-[#1A1A1A] placeholder:text-gray-400"
+                                      value={
+                                        currentPostId ===
+                                        post.id
+                                          ? newComment
+                                          : ""
+                                      }
+                                      onChange={(e) => {
+                                        if (
+                                          currentPostId ===
+                                          post.id
+                                        ) {
+                                          setNewComment(
+                                            e.target.value,
+                                          );
+                                        }
+                                      }}
+                                      onFocus={() =>
+                                        setCurrentPostId(
+                                          post.id,
+                                        )
+                                      }
+                                      onKeyDown={(e) => {
+                                        if (
+                                          e.key === "Enter" &&
+                                          !e.shiftKey
+                                        ) {
+                                          e.preventDefault();
+                                          if (
+                                            currentPostId ===
+                                            post.id
+                                          ) {
+                                            handleAddComment(
+                                              post.id,
+                                            );
+                                          }
+                                        }
+                                      }}
+                                    />
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </SwiperSlide>
@@ -1001,122 +1264,6 @@ export function CommunityPage({
           </Swiper>
         )}
       </div>
-
-      {/* 이모지/댓글 입력창 (하단 고정) */}
-      {!isGridView && !isReactionView && (
-        <div className="fixed bottom-[100px] left-0 right-0 z-40 max-w-[500px] mx-auto pointer-events-none">
-          {/* [수정] h-[56px] -> h-[48px]로 변경하여 8px 줄임 */}
-          <div className="relative w-full h-[48px] pointer-events-auto px-4">
-            {/* [수정] px-1 추가하여 좌우 4px씩 여백 확보 (총 8px 감소 효과) */}
-            <div className="flex items-center gap-2 w-full max-w-[400px] mx-auto h-full px-2">
-              <button
-                className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors overflow-hidden relative"
-                onClick={() => {
-                  setCurrentPostId(currentPostId);
-                  setShowEmojiPicker(!showEmojiPicker);
-                }}
-              >
-                <AnimatePresence mode="wait" initial={false}>
-                  {showEmojiPicker ? (
-                    <motion.div
-                      key="close-icon"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                      // [수정] 배경 반투명 + 블러 처리
-                      className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5]/80 backdrop-blur-md text-gray-800 rounded-full"
-                    >
-                      <X size={20} />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="smile-icon"
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      transition={{ duration: 0.2 }}
-                      // [수정] 배경 반투명 + 블러 처리, 둥근 배경 추가
-                      className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5]/80 backdrop-blur-md text-gray-500 hover:text-gray-800 rounded-full"
-                    >
-                      <Smile size={24} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </button>
-              <div className="flex-1 h-full relative flex items-center">
-                <AnimatePresence mode="wait" initial={false}>
-                  {showEmojiPicker ? (
-                    <motion.div
-                      key="emoji-list"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute inset-0 flex items-center gap-2 overflow-x-auto no-scrollbar"
-                    >
-                      {emojis.map((emoji) => (
-                        <button
-                          key={emoji}
-                          onClick={() => {
-                            if (currentPostId) {
-                              handleEmojiReaction(
-                                emoji,
-                                currentPostId,
-                              );
-                              confetti({
-                                particleCount: 100,
-                                spread: 70,
-                                origin: { y: 0.6 },
-                              });
-                            }
-                          }}
-                          // [수정] 이모지 버튼 배경 반투명 + 블러 처리
-                          className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-2xl bg-[#F5F5F5]/80 backdrop-blur-md rounded-full transition-colors"
-                        >
-                          {emoji}
-                        </button>
-                      ))}
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="comment-input"
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      transition={{ duration: 0.2 }}
-                      // [수정] 높이가 48px이므로 inset-y-2(8px)를 inset-y-1(4px)로 변경하여 입력창 높이 40px 확보
-                      // [수정] 배경 반투명 + 블러 처리
-                      className="absolute inset-y-1 inset-x-0 flex items-center bg-[#F5F5F5]/80 backdrop-blur-md rounded-full px-4"
-                    >
-                      <input
-                        type="text"
-                        placeholder="댓글을 작성해주세요"
-                        className="w-full bg-transparent outline-none text-[#1A1A1A] placeholder:text-gray-400"
-                        value={newComment}
-                        onChange={(e) =>
-                          setNewComment(e.target.value)
-                        }
-                        onKeyDown={(e) => {
-                          if (
-                            e.key === "Enter" &&
-                            !e.shiftKey
-                          ) {
-                            e.preventDefault();
-                            if (currentPostId) {
-                              handleAddComment(currentPostId);
-                            }
-                          }
-                        }}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <AnimatePresence>
         {showDeleteModal && (
@@ -1194,7 +1341,7 @@ export function CommunityPage({
       {/* 커뮤니티 전용 하단 네비게이션 */}
       {!isGridView && !isReactionView && (
         <div className="fixed bottom-0 left-0 right-0 z-50 max-w-[500px] mx-auto bg-white">
-          <div className="relative px-4 pt-2 pb-4 shadow-[0_-2px_5px_0_rgba(0,0,0,0.10)] rounded-t-[16px]">
+          <div className="relative px-4 pt-2 pb-4 shadow-[0_-2px_5px_0_rgba(0,0,0,0.10)] rounded-t-[16px] h-[80px]">
             <div className="flex items-center justify-around">
               <button
                 onClick={() => setIsGridView(true)}
@@ -1223,6 +1370,43 @@ export function CommunityPage({
           </div>
         </div>
       )}
+
+      {/* 이모지 떠오르는 애니메이션 */}
+      <AnimatePresence>
+        {floatingEmojis.map((item) => (
+          <motion.div
+            key={item.id}
+            initial={{ 
+              y: 0,
+              x: item.x,
+              opacity: 0,
+              scale: 0.3,
+              rotate: 0
+            }}
+            animate={{ 
+              y: -window.innerHeight - 100,
+              x: [item.x, item.x + item.wobble, item.x - item.wobble / 2, item.x + item.wobble / 3, item.x],
+              opacity: [0, 1, 1, 0.8, 0],
+              scale: [0.3, 1, 1.05, 1, 0.9],
+              rotate: [0, 10, -10, 5, 0]
+            }}
+            transition={{ 
+              duration: 5,
+              delay: item.delay,
+              ease: "easeOut",
+              times: [0, 0.1, 0.5, 0.8, 1]
+            }}
+            className="fixed pointer-events-none z-[100]"
+            style={{
+              fontSize: `${item.size}px`,
+              left: "50%",
+              bottom: 80,
+            }}
+          >
+            {item.emoji}
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 }

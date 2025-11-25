@@ -138,9 +138,9 @@ export function MedicalHistoryPage({ onBack, onWriteReview, reviewedHospitals = 
   const displayRecords = records || mockRecords;
 
   return (
-    <div className="relative bg-white flex flex-col max-w-[500px] mx-auto min-h-screen">
+    <div className="relative bg-[#f7f7f7] flex flex-col max-w-[500px] mx-auto min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-30 px-4 py-4 flex items-center justify-between border-b border-gray-100 w-full bg-white">
+      <header className="sticky top-0 z-30 px-5 py-4 flex items-center justify-between border-b border-gray-100 w-full bg-[#f7f7f7]">
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
@@ -155,7 +155,7 @@ export function MedicalHistoryPage({ onBack, onWriteReview, reviewedHospitals = 
       </header>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-gray-200 bg-white">
         <button
           onClick={() => setActiveTab("treatment")}
           className={`flex-1 py-4 text-center transition-colors ${
@@ -179,7 +179,7 @@ export function MedicalHistoryPage({ onBack, onWriteReview, reviewedHospitals = 
       </div>
 
       {/* Filter Tags */}
-      <div className="px-4 py-4 flex gap-2 overflow-x-auto">
+      <div className="px-5 pt-5 pb-3 flex gap-2 overflow-x-auto bg-[#f7f7f7]">
         {filters.map((filter) => (
           <button
             key={filter.id}
@@ -214,10 +214,10 @@ export function MedicalHistoryPage({ onBack, onWriteReview, reviewedHospitals = 
 
       {/* Content */}
       {/* 배경색을 흰색이 아닌 #F7F7F7로 변경 */}
-      <div className="px-4 pb-20 bg-[#F7F7F7] flex-1">
+      <div className="px-5 pb-20 bg-[#F7F7F7] flex-1">
         {activeTab === "treatment" ? (
           // 진료내역 (이전 수정 내용 유지)
-          <div className="space-y-4 pt-4">
+          <div className="space-y-3 pt-5">
             {displayRecords.map((record) => (
               <div
                 key={record.id}
@@ -305,7 +305,7 @@ export function MedicalHistoryPage({ onBack, onWriteReview, reviewedHospitals = 
           </div>
         ) : (
           // 의료내역 - 새로운 시안 디자인 적용
-          <div className="space-y-4 pt-4">
+          <div className="space-y-3 pt-5">
             {mockMedicalVisits.map((visit) => (
               <div
                 key={visit.id}

@@ -118,9 +118,9 @@ export function HospitalSearchPage({
   });
 
   return (
-    <div className="bg-white flex flex-col">
+    <div className="bg-[#f7f7f7] flex flex-col min-h-screen">
       {/* Header: sticky, z-10, bg-white, border-b 유지 */}
-      <header className="sticky top-0 z-10 bg-white px-4 sm:px-6 md:px-8 pt-4 pb-2 space-y-4">
+      <header className="sticky top-0 z-10 bg-[#f7f7f7] px-5 pt-4 pb-2 space-y-4">
         {/* Title Bar */}
         <div className="flex items-center justify-between pb-2">
           <button onClick={onBack} className="w-10 p-2 -ml-2">
@@ -154,7 +154,7 @@ export function HospitalSearchPage({
         </div>
 
         {/* ⭐️ [수정] Filter Tags: 'scrollbar-hide' 클래스 제거. 플러그인이 없을 경우 오류 방지. */}
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex gap-2 overflow-x-auto pb-3">
           {filters.map((filter) => (
             <button
               key={filter}
@@ -172,8 +172,8 @@ export function HospitalSearchPage({
       </header>
 
       {/* Hospital List: 내부 스크롤 방지 유지 */}
-      <div className="overflow-y-hidden">
-        <div className="grid grid-cols-1">
+      <div className="overflow-y-hidden px-5 pt-5 pb-20 space-y-3">
+        <div className="grid grid-cols-1 gap-3">
           {filteredHospitals.map((hospital) => (
             <HospitalCard
               key={hospital.id}

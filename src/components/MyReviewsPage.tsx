@@ -162,7 +162,7 @@ export function MyReviewsPage({
 
   return (
     <div className="relative bg-[#F7F7F7] flex flex-col max-w-[500px] mx-auto min-h-screen">
-      <header className="sticky top-0 z-30 px-4 py-4 flex items-center gap-4 border-b border-gray-100 w-full bg-white">
+      <header className="sticky top-0 z-30 px-5 py-4 flex items-center gap-4 border-b border-gray-100 w-full bg-[#f7f7f7]">
         <button
           onClick={onBack}
           className="w-6 h-6 flex items-center justify-center"
@@ -174,14 +174,14 @@ export function MyReviewsPage({
         </span>
       </header>
 
-      <div className="px-4 py-4 pb-20">
+      <div className="px-5 pt-5 pb-20 space-y-3">
         <AnimatePresence>
           {displayReviews.map((review) => {
             const isExpanded = expandedReviewId === review.id;
             const isEditing = editingReviewId === review.id;
 
             return (
-              <div key={review.id} className="relative mb-3">
+              <div key={review.id} className="relative">
                 {/* 휴지통 배경 */}
                 <div className="absolute inset-0 flex items-center justify-end pr-6 rounded-xl z-0">
                   <Trash2 size={32} className="text-gray-400" />

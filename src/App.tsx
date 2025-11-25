@@ -691,18 +691,18 @@ export default function App() {
       userAvatar:
         "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
       caption: "챌린지 첫 시작!",
-      userName: "관리자", // 👈 현재 로그인된 사용자와 일치시킴
+      userName: "관리자",
       textOverlay: "오늘부터 시작하는 건강한 습관!",
       comments: [
         {
-          userName: "박활력",
-          userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80",
+          userName: "엄마",
+          userAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80",
           text: "멋져요! 저도 함께할게요 💪",
           timestamp: "5분 전"
         },
         {
-          userName: "이평화",
-          userAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
+          userName: "아빠",
+          userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80",
           text: "화이팅하세요!",
           timestamp: "2분 전"
         }
@@ -712,12 +712,12 @@ export default function App() {
           emoji: "❤️",
           users: [
             {
-              userName: "박활력",
-              userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80"
+              userName: "엄마",
+              userAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80"
             },
             {
-              userName: "이평화",
-              userAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80"
+              userName: "아빠",
+              userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80"
             }
           ]
         },
@@ -725,8 +725,8 @@ export default function App() {
           emoji: "👍",
           users: [
             {
-              userName: "정활동",
-              userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80"
+              userName: "관리자",
+              userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
             }
           ]
         }
@@ -740,29 +740,29 @@ export default function App() {
       userAvatar:
         "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
       caption: "오늘도 달렸어요!",
-      userName: "관리자", // 👈 첫 번째 게시글을 내 게시글로 변경
+      userName: "관리자",
       location: "한강공원",
       time: "오전 6:30",
       weather: "맑음 18°C",
       comments: [
         {
-          userName: "김건강",
-          userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
-          text: "역시 박활력님! 👏",
+          userName: "엄마",
+          userAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80",
+          text: "역시 대단해요! 👏",
           timestamp: "10분 전"
         }
       ],
       reactions: [
         {
-          emoji: "🔥",
+          emoji: "👏",
           users: [
             {
-              userName: "김건강",
-              userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
+              userName: "엄마",
+              userAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80"
             },
             {
-              userName: "이평화",
-              userAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80"
+              userName: "아빠",
+              userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80"
             }
           ]
         }
@@ -774,51 +774,41 @@ export default function App() {
         "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80",
       badge: "🧘‍♀️ 매일 요가",
       userAvatar:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80",
       caption: "마음 챙기기",
-      userName: "이평화",
+      userName: "엄마",
       textOverlay: "하루를 평화롭게 시작하는 아침 요가",
       health: "혈압 120/80",
       comments: [
         {
-          userName: "김건강",
+          userName: "관리자",
           userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
           text: "평화로운 하루 되세요 🙏",
           timestamp: "1시간 전"
         },
         {
-          userName: "박활력",
-          userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80",
+          userName: "아빠",
+          userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80",
           text: "너무 좋아 보여요!",
           timestamp: "30분 전"
-        },
-        {
-          userName: "정활동",
-          userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80",
-          text: "저도 요가 시작해볼까요?",
-          timestamp: "15분 전"
         }
       ],
       reactions: [
         {
-          emoji: "🧘‍♀️",
+          emoji: "😊",
           users: [
             {
-              userName: "박활력",
-              userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80"
+              userName: "관리자",
+              userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
             }
           ]
         },
         {
-          emoji: "💚",
+          emoji: "❤️",
           users: [
             {
-              userName: "김건강",
-              userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
-            },
-            {
-              userName: "정활동",
-              userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80"
+              userName: "아빠",
+              userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80"
             }
           ]
         }
@@ -851,7 +841,7 @@ export default function App() {
       ],
       reactions: [
         {
-          emoji: "🥗",
+          emoji: "👍",
           users: [
             {
               userName: "관리자",
@@ -860,15 +850,6 @@ export default function App() {
             {
               userName: "아빠",
               userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80"
-            }
-          ]
-        },
-        {
-          emoji: "❤️",
-          users: [
-            {
-              userName: "박활력",
-              userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80"
             }
           ]
         }
@@ -888,23 +869,23 @@ export default function App() {
       health: "걸음수 8,432보",
       comments: [
         {
-          userName: "이평화",
-          userAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
+          userName: "아빠",
+          userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80",
           text: "좋은 날씨네요! 🌤️",
           timestamp: "25분 전"
         }
       ],
       reactions: [
         {
-          emoji: "👟",
+          emoji: "😊",
           users: [
             {
               userName: "관리자",
               userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
             },
             {
-              userName: "이평화",
-              userAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80"
+              userName: "아빠",
+              userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80"
             }
           ]
         }
@@ -935,17 +916,11 @@ export default function App() {
           userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
           text: "대단하세요!",
           timestamp: "45분 전"
-        },
-        {
-          userName: "박활력",
-          userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80",
-          text: "5km라니 멋져요! 🏃‍♂️",
-          timestamp: "30분 전"
         }
       ],
       reactions: [
         {
-          emoji: "🔥",
+          emoji: "👏",
           users: [
             {
               userName: "관리자",
@@ -954,19 +929,15 @@ export default function App() {
             {
               userName: "엄마",
               userAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80"
-            },
-            {
-              userName: "박활력",
-              userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80"
             }
           ]
         },
         {
-          emoji: "💪",
+          emoji: "❤️",
           users: [
             {
-              userName: "정활동",
-              userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80"
+              userName: "아빠",
+              userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80"
             }
           ]
         }
@@ -1008,19 +979,6 @@ export default function App() {
             {
               userName: "관리자",
               userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
-            },
-            {
-              userName: "이평화",
-              userAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80"
-            }
-          ]
-        },
-        {
-          emoji: "❤️",
-          users: [
-            {
-              userName: "박활력",
-              userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80"
             }
           ]
         }

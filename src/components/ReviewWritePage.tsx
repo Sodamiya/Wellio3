@@ -112,7 +112,7 @@ export function ReviewWritePage({
   return (
     <div className="relative bg-[#F7F7F7] flex flex-col max-w-[500px] mx-auto min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-30 px-4 py-4 flex items-center gap-4 border-b border-gray-100 w-full bg-white">
+      <header className="sticky top-0 z-30 px-5 py-4 flex items-center gap-4 border-b border-gray-100 w-full bg-[#f7f7f7]">
         <button
           type="button"
           onClick={(e) => {
@@ -130,9 +130,9 @@ export function ReviewWritePage({
       </header>
 
       {/* Content */}
-      <div className="pb-32 px-4">
+      <div className="pb-32 px-5 pt-5 space-y-3">
         {/* 병원 정보 카드 */}
-        <div className="flex items-center bg-white p-4 my-4 rounded-xl shadow-sm">
+        <div className="flex items-center bg-white p-4 rounded-xl shadow-sm">
           <div className="w-[60px] h-[60px] rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 mr-4">
             <ImageWithFallback
               src={

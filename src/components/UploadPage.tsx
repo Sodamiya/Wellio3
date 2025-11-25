@@ -119,12 +119,14 @@ export function UploadPage({
   const [healthInput, setHealthInput] = useState("");
   const [showTextInput, setShowTextInput] = useState(false);
   const [showHealthModal, setShowHealthModal] = useState(false);
+  const [showNoImageAlert, setShowNoImageAlert] = useState(false);
   const textInputRef = useRef<HTMLInputElement>(null);
 
   // 필터 모드 state
   const [isFilterMode, setIsFilterMode] = useState(false);
   const [selectedFilter, setSelectedFilter] =
     useState("Normal");
+  const [previousFilter, setPreviousFilter] = useState("Normal"); // 필터 취소를 위한 이전 필터 저장
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -246,6 +248,12 @@ export function UploadPage({
   // 사진 촬영 또는 편집 모드 전환
   const handleCapture = () => {
     if (isUploadMode) {
+      // 이미지가 없으면 경고 팝업 표시
+      if (!selectedImage) {
+        setShowNoImageAlert(true);
+        return;
+      }
+
       // 업로드 모드일 때 - 필터가 적용된 이미지 생성 후 업로드
       console.log("사진 업로드:", selectedImage);
 
@@ -339,17 +347,8 @@ export function UploadPage({
         }, "image/jpeg");
       }
     } else {
-      // 카메라가 없는 경우: 임의의 이미지 사용
-      const randomImageUrl = `https://source.unsplash.com/800x600/?medical,health,hospital&${Date.now()}`;
-
-      setSelectedImage(randomImageUrl);
-      setIsUploadMode(true);
-
-      // 카메라 스트림 정리 (혹시 있다면)
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-        setStream(null);
-      }
+      // 카메라가 없는 경우: 갤러리 열기 유도
+      toast.error("카메라를 사용할 수 없습니다. 갤러리에서 사진을 선택해주세요.");
     }
   };
 
@@ -390,9 +389,15 @@ export function UploadPage({
 
   // 세부조정 버튼 핸들러들
   const handleTextInput = () => {
-    setShowTextInput(true);
-    // focus를 위해 약간의 지연
-    setTimeout(() => textInputRef.current?.focus(), 100);
+    // 텍스트 입력 모드 토글
+    if (showTextInput) {
+      // 현재 입력 중이면 입력 완료
+      setShowTextInput(false);
+    } else {
+      // 입력 모드 활성화 및 포커스
+      setShowTextInput(true);
+      setTimeout(() => textInputRef.current?.focus(), 100);
+    }
   };
 
   const handleLocationInput = () => {
@@ -427,6 +432,7 @@ export function UploadPage({
   const handleFilter = () => {
     // 필터 선택 화면으로 전환
     setIsFilterMode(true);
+    setPreviousFilter(selectedFilter); // 현재 필터 저장
   };
 
   return (
@@ -528,7 +534,7 @@ export function UploadPage({
                     weatherInput ||
                     timeInput ||
                     healthInput) && (
-                    <div className="absolute top-4 left-4 flex flex-col gap-2">
+                    <div className="absolute top-4 left-4 flex flex-row flex-wrap gap-2 max-w-[calc(100%-2rem)]">
                       {locationInput && (
                         <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
                           <MapPin
@@ -576,14 +582,29 @@ export function UploadPage({
                     </div>
                   )}
 
-                  {/* 하단 텍스트 오버레이 */}
-                  {textInput && (
-                    <div className="absolute bottom-20 left-4 right-4">
-                      <p className="text-black text-lg bg-white/60 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-md">
+                  {/* 하단 텍스트 오버레이 - 입력창으로 변경 */}
+                  <div className="absolute bottom-20 left-4 right-4">
+                    {showTextInput ? (
+                      <input
+                        ref={textInputRef}
+                        type="text"
+                        value={textInput}
+                        onChange={(e) => setTextInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            setShowTextInput(false);
+                            textInputRef.current?.blur();
+                          }
+                        }}
+                        placeholder="텍스트를 입력하세요"
+                        className="w-full text-black text-lg bg-white/80 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-md outline-none focus:ring-2 focus:ring-[#36D2C5] placeholder:text-gray-500/70"
+                      />
+                    ) : textInput ? (
+                      <div className="w-full text-black text-lg bg-white/60 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-md">
                         {textInput}
-                      </p>
-                    </div>
-                  )}
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
               )}
 
@@ -613,13 +634,25 @@ export function UploadPage({
         {/* 상단 Header (fixed) */}
         <header className="fixed top-0 left-0 right-0 z-40 px-4 py-4 flex items-center justify-center w-full bg-white max-w-[500px] mx-auto min-h-[110px]">
           {isFilterMode ? (
-            /* 필터 모드일 때: 완료 버튼 */
-            <button
-              onClick={() => setIsFilterMode(false)}
-              className="absolute left-4 px-4 py-2 text-[#36D2C5]"
-            >
-              완료
-            </button>
+            /* 필터 모드일 때: 뒤로가기(취소) + 완료 버튼 */
+            <>
+              <button
+                onClick={() => {
+                  // 이전 필터로 복원
+                  setSelectedFilter(previousFilter);
+                  setIsFilterMode(false);
+                }}
+                className="absolute left-4 p-1"
+              >
+                <ArrowLeft size={24} className="text-[#1A1A1A]" />
+              </button>
+              <button
+                onClick={() => setIsFilterMode(false)}
+                className="absolute right-4 px-4 py-2 text-[#36D2C5] font-semibold"
+              >
+                완료
+              </button>
+            </>
           ) : isDetailEditMode ? (
             <button
               onClick={handleCloseDetailEdit}
@@ -841,49 +874,6 @@ export function UploadPage({
         </div>
       </div>
 
-      {/* 텍스트 입력 모달 (하단에서 슬라이드 업) */}
-      {showTextInput && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
-          {/* 배경 오버레이 */}
-          <div
-            className="absolute inset-0 bg-black/30"
-            onClick={() => setShowTextInput(false)}
-          />
-
-          {/* 입력 창 */}
-          <div className="relative w-full max-w-[500px] bg-white rounded-t-2xl p-6 shadow-2xl animate-slide-up">
-            <div className="flex items-center gap-3 mb-4">
-              <Type size={24} className="text-[#2F80ED]" />
-              <h3 className="text-lg">텍스트 입력</h3>
-            </div>
-
-            <input
-              ref={textInputRef}
-              type="text"
-              value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
-              placeholder="사진에 추가할 텍스트를 입력하세요"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#36D2C5] mb-4"
-            />
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowTextInput(false)}
-                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                취소
-              </button>
-              <button
-                onClick={() => setShowTextInput(false)}
-                className="flex-1 px-4 py-3 bg-[#36D2C5] text-white rounded-lg hover:bg-[#00C2B3] transition-colors"
-              >
-                완료
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* 건강기록 선택 모달 - 하단 슬라이드 업 */}
       <AnimatePresence>
         {showHealthModal && (
@@ -1042,6 +1032,25 @@ export function UploadPage({
           </div>
         )}
       </AnimatePresence>
+
+      {/* 이미지가 선택되지 않았을 때 알림 모달 */}
+      <AlertDialog open={showNoImageAlert}>
+        <AlertDialogContent className="max-w-[340px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              이미지 선택 필요
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              사진을 선택하거나 촬영한 후 업로드할 수 있습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowNoImageAlert(false)}>
+              닫기
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

@@ -19,7 +19,7 @@ export function FavoriteHospitalsPage({
   return (
     <div className="relative bg-[#F7F7F7] flex flex-col max-w-[500px] mx-auto min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-30 px-4 py-4 flex items-center gap-4 border-b border-gray-100 w-full bg-white">
+      <header className="sticky top-0 z-30 px-5 py-4 flex items-center gap-4 border-b border-gray-100 w-full bg-[#f7f7f7]">
         <button
           onClick={onBack}
           className="w-6 h-6 flex items-center justify-center"
@@ -32,7 +32,7 @@ export function FavoriteHospitalsPage({
       </header>
 
       {/* Content */}
-      <div className="pb-20">
+      <div className="px-5 pt-5 pb-20 space-y-3">
         {favoriteHospitals.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <p className="text-gray-500">
@@ -43,23 +43,25 @@ export function FavoriteHospitalsPage({
             </p>
           </div>
         ) : (
-          favoriteHospitals.map((hospital) => (
-            <HospitalCard
-              key={hospital.id}
-              hospital={hospital}
-              isFavorite={true}
-              onToggleFavorite={onToggleFavorite}
-              isInFavoritePage={true} // 찜한 병원 페이지임을 표시
-              onClick={() => {
-                // 병원 상세 페이지로 이동하는 로직 추가 가능
-              }}
-              reviewCount={
-                getHospitalReviewCount
-                  ? getHospitalReviewCount(hospital.id)
-                  : 0
-              }
-            />
-          ))
+          <div className="space-y-3">
+            {favoriteHospitals.map((hospital) => (
+              <HospitalCard
+                key={hospital.id}
+                hospital={hospital}
+                isFavorite={true}
+                onToggleFavorite={onToggleFavorite}
+                isInFavoritePage={true} // 찜한 병원 페이지임을 표시
+                onClick={() => {
+                  // 병원 상세 페이지로 이동하는 로직 추가 가능
+                }}
+                reviewCount={
+                  getHospitalReviewCount
+                    ? getHospitalReviewCount(hospital.id)
+                    : 0
+                }
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>
