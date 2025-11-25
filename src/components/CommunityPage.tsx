@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  ArrowLeft,
+  ChevronLeft,
   ChevronDown,
   Search,
   Bell,
@@ -482,8 +482,14 @@ export function CommunityPage({
       <header className="sticky top-0 z-30 px-4 flex flex-col justify-center w-full bg-white min-h-[110px]">
         {isSearchActive ? (
           <div className="flex items-center gap-3">
+            <button
+              onClick={onBack}
+              className="w-6 h-6 flex items-center justify-center flex-shrink-0"
+            >
+              <ChevronLeft size={24} className="text-[#1A1A1A]" />
+            </button>
             <div
-              className={`flex-1 bg-gray-100 rounded-lg px-4 py-3 flex items-center gap-2 transition-all border-2 ${
+              className={`bg-gray-100 rounded-lg px-4 py-2 flex items-center gap-2 transition-all border-2 flex-1 ${
                 isSearchFocused
                   ? "border-[#36D9D9]"
                   : "border-transparent"
@@ -502,7 +508,7 @@ export function CommunityPage({
               />
             </div>
             <button
-              className="text-[#1A1A1A] text-sm font-medium"
+              className="text-[#1A1A1A] text-sm font-medium flex-shrink-0"
               onClick={() => {
                 setIsSearchActive(false);
                 setSearchQuery("");
@@ -518,7 +524,7 @@ export function CommunityPage({
               onClick={() => setIsReactionView(false)}
               className="absolute left-0 w-6 h-6 flex items-center justify-center"
             >
-              <ArrowLeft size={24} className="text-[#1A1A1A]" />
+              <ChevronLeft size={24} className="text-[#1A1A1A]" />
             </button>
             <span className="text-lg font-bold text-[#1A1A1A]">
               리액션 모아보기
@@ -530,7 +536,7 @@ export function CommunityPage({
               onClick={() => setIsGridView(false)}
               className="absolute left-0 w-6 h-6 flex items-center justify-center"
             >
-              <ArrowLeft size={24} className="text-[#1A1A1A]" />
+              <ChevronLeft size={24} className="text-[#1A1A1A]" />
             </button>
             <button
               className="flex items-center gap-1"
@@ -563,7 +569,7 @@ export function CommunityPage({
               onClick={onBack}
               className="absolute left-0 w-6 h-6 flex items-center justify-center"
             >
-              <ArrowLeft size={24} className="text-[#1A1A1A]" />
+              <ChevronLeft size={24} className="text-[#1A1A1A]" />
             </button>
             <button
               className="flex items-center gap-1"
