@@ -182,6 +182,35 @@ export function CommunityPage({
     }>
   >([]);
 
+  // === [NEW] 애니메이션 실행 로직 분리 ===
+  const triggerReactionAnimation = (emoji: string) => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+    
+    // 이모지 떠오르는 애니메이션 생성
+    const count = Math.floor(Math.random() * 9) + 4; // 4~12개 (기존 로직과 동일)
+    const newEmojis = Array.from({ length: count }, (_, i) => ({
+      id: Date.now() + i,
+      emoji: emoji,
+      x: (Math.random() - 0.5) * 480, // -240px ~ 240px (피드 영역 전체)
+      size: Math.random() * 90 + 30, // 30~120px (다양한 크기)
+      wobble: (Math.random() - 0.5) * 60, // -30px ~ 30px 좌우 흔들림
+      delay: Math.random() * 2, // 0~2초 딜레이
+    }));
+    setFloatingEmojis((prev) => [...prev, ...newEmojis]);
+    
+    // 5초 후 제거
+    setTimeout(() => {
+      setFloatingEmojis((prev) => 
+        prev.filter((e) => !newEmojis.some((ne) => ne.id === e.id))
+      );
+    }, 5000);
+  };
+  // ======================================
+
   const handleAddComment = (postId: number) => {
     if (!newComment.trim()) return;
 
@@ -676,8 +705,8 @@ export function CommunityPage({
                 ALL
               </button>
 
-              {/* 이모지 버튼들 - 실제 사용한 이모지만 표시 */}
-              {getMyUsedEmojis().map((emoji) => (
+              {/* 이모지 버튼들 - 4개 이모지 항상 표시 */}
+              {emojis.map((emoji) => (
                 <button
                   key={emoji}
                   onClick={() => setReactionFilter(emoji)}
@@ -876,6 +905,7 @@ export function CommunityPage({
                               setSelectedPostForReaction(null);
                             }}
                           >
+                            {/* === [수정된 부분: 리액션 묶음 표시 - 배경 투명] === */}
                             {getAllReactions(
                               post.id,
                               post.reactions,
@@ -884,27 +914,59 @@ export function CommunityPage({
                                 {getAllReactions(
                                   post.id,
                                   post.reactions,
-                                ).flatMap((reaction) =>
-                                  reaction.users.map(
-                                    (user, userIdx) => (
-                                      <div
-                                        key={`${reaction.emoji}-${user.userName}-${userIdx}`}
-                                        className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1.5 flex items-center gap-1.5"
-                                      >
-                                        <span className="text-base">
-                                          {reaction.emoji}
-                                        </span>
-                                        <ImageWithFallback
-                                          src={user.userAvatar}
-                                          alt={user.userName}
-                                          className="w-6 h-6 rounded-full border border-white"
-                                        />
-                                      </div>
-                                    ),
-                                  ),
-                                )}
+                                ).map((reaction) => (
+                                  <div
+                                    key={reaction.emoji}
+                                    // 배경 투명
+                                    className="rounded-full pl-2 pr-3 py-1.5 flex items-center gap-2"
+                                    // === [NEW] 클릭 시 애니메이션 재실행 ===
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // 오버레이 닫힘 방지
+                                      triggerReactionAnimation(reaction.emoji); // 애니메이션 실행
+                                    }}
+                                    // ======================================
+                                  >
+                                    <span className="text-base">
+                                      {reaction.emoji}
+                                    </span>
+                                    
+                                    {/* 사용자 프로필 겹쳐서 표시 */}
+                                    <div className="flex -space-x-2.5">
+                                      {/* 최대 3명의 사용자만 표시 (겹치는 효과를 위해) */}
+                                      {reaction.users
+                                        .slice(0, 3) 
+                                        .map((user, userIdx) => (
+                                          <ImageWithFallback
+                                            key={`${reaction.emoji}-${user.userName}-${userIdx}`}
+                                            src={user.userAvatar}
+                                            alt={user.userName}
+                                            // 프로필 이미지 스타일: 크기, 겹침 효과를 위한 -space-x-2.5 와 대비되는 왼쪽 마진 0
+                                            className={`w-7 h-7 rounded-full object-cover border-2 border-white transition-all duration-300 ${
+                                              userIdx === 0 ? "ml-0" : ""
+                                            }`}
+                                            style={{
+                                              // 겹치는 정도를 조정
+                                              zIndex: reaction.users.length - userIdx,
+                                            }}
+                                          />
+                                        ))}
+
+                                      {/* 3명 초과 시 카운트 표시 */}
+                                      {reaction.users.length > 3 && (
+                                        <div
+                                          className="w-7 h-7 rounded-full bg-gray-500/80 backdrop-blur-sm flex items-center justify-center text-white text-xs font-semibold border-2 border-white relative"
+                                          style={{ zIndex: 0 }}
+                                        >
+                                          +{reaction.users.length - 3}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             )}
+                            {/* ================================================= */}
+                            
                             {/* [수정: Pressed 상태의 캡슐 위치 및 스타일 통일] */}
                             {(post.textOverlay ||
                               post.userName) && (
@@ -1159,30 +1221,9 @@ export function CommunityPage({
                                             emoji,
                                             post.id,
                                           );
-                                          confetti({
-                                            particleCount: 100,
-                                            spread: 70,
-                                            origin: { y: 0.6 },
-                                          });
-                                          
-                                          // 이모지 떠오르는 애니메이션 생성
-                                          const count = Math.floor(Math.random() * 9) + 4; // 15~23개로 증가
-                                          const newEmojis = Array.from({ length: count }, (_, i) => ({
-                                            id: Date.now() + i,
-                                            emoji: emoji,
-                                            x: (Math.random() - 0.5) * 480, // -240px ~ 240px (피드 영역 전체)
-                                            size: Math.random() * 90 + 30, // 30~120px (다양한 크기)
-                                            wobble: (Math.random() - 0.5) * 60, // -30px ~ 30px 좌우 흔들림
-                                            delay: Math.random() * 2, // 0~0.5초 딜레이
-                                          }));
-                                          setFloatingEmojis((prev) => [...prev, ...newEmojis]);
-                                          
-                                          // 5초 후 제거
-                                          setTimeout(() => {
-                                            setFloatingEmojis((prev) => 
-                                              prev.filter((e) => !newEmojis.some((ne) => ne.id === e.id))
-                                            );
-                                          }, 5000);
+                                          // === [NEW] 분리된 애니메이션 함수 호출 ===
+                                          triggerReactionAnimation(emoji);
+                                          // ======================================
                                         }}
                                         className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-2xl bg-[#F5F5F5]/80 backdrop-blur-md rounded-full transition-colors"
                                       >
