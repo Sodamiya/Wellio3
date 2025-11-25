@@ -186,7 +186,7 @@ export default function App() {
   ]);
   
   // 리뷰 작성한 병원 ID 목록 관리
-  const [reviewedHospitals, setReviewedHospitals] = useState<number[]>([]);
+  const [reviewedHospitals, setReviewedHospitals] = useState<number[]>([2]); // id: 2 (박승희 - 바른정형외과의원) 리뷰 작성 완료 예시
   
   // 진료내역 데이터 관리
   const [medicalRecords, setMedicalRecords] = useState([
@@ -199,7 +199,8 @@ export default function App() {
       visitDate: "2025.08.11",
       visitTime: "14:00",
       doctor: "이준호",
-      memo: "아빠 감기몸살로 내원, 3일 뒤 재진"
+      memo: "아빠 감기몸살로 내원, 3일 뒤 재진",
+      isMyAppointment: true, // 내 예약 (리뷰 미작성)
     },
     {
       id: 2,
@@ -210,7 +211,8 @@ export default function App() {
       visitDate: "2025.08.05",
       visitTime: "10:25",
       doctor: "김슬기",
-      memo: "엄마 2일마다 물리치료"
+      memo: "엄마 2일마다 물리치료",
+      isMyAppointment: true, // 내 예약 (리뷰 작성 완료 - reviewedHospitals에 id:2 포함됨)
     },
     {
       id: 3,
@@ -221,7 +223,8 @@ export default function App() {
       visitDate: "2024.11.05",
       visitTime: "16:00",
       doctor: "박민준 교수",
-      memo: "정기 검진 완료, 특이사항 없음"
+      memo: "정기 검진 완료, 특이사항 없음",
+      isMyAppointment: false, // 가족 예약 (메모/버튼 숨김)
     },
   ]);
   

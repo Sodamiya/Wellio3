@@ -11,7 +11,7 @@ export function WelcomePage({ onGuestMode, onSignUp }: WelcomePageProps) {
     <div className="min-h-screen bg-white flex flex-col items-center justify-between px-5 py-10 max-w-[500px] mx-auto">
       {/* 타이틀 */}
       <div className="w-full max-w-[320px] text-left mt-2">
-        <h1 className="text-[25px] leading-[1.4] whitespace-pre-line text-[#1a1a1a]">
+        <h1 className="text-[28px] leading-[1.3] whitespace-pre-line text-[#202020] font-semibold">
           {`웰리오와 함께\n우리가족\n건강관리 시작하세요.`}
         </h1>
       </div>
@@ -36,7 +36,12 @@ export function WelcomePage({ onGuestMode, onSignUp }: WelcomePageProps) {
         </button>
         <button
           onClick={onSignUp}
-          className="w-full px-4 py-[15px] rounded-xl bg-white text-[#21d2c4] border-2 border-[#21d2c4] font-semibold hover:bg-[#f0fffe] transition-colors"
+          // **비활성화 속성 추가**
+          disabled
+          className="w-full px-4 py-[15px] rounded-xl bg-white text-[#21d2c4] border-2 border-[#21d2c4] font-semibold 
+                     // **비활성화 시 스타일 추가 (opacity 낮추고 커서 변경)**
+                     disabled:opacity-50 disabled:cursor-not-allowed
+                     hover:bg-[#f0fffe] transition-colors"
         >
           다른 방법으로 시작하기
         </button>
