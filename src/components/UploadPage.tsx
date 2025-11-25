@@ -192,11 +192,13 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
 
       // 키보드가 올라왔다고 판단되면 무조건 diff만큼 올립니다.
       // (기존의 isLayoutResized 체크를 제거하여 '부족한 현상' 방지)
-      if (diff > 100) {
-        setKeyboardHeight(diff);
-      } else {
-        setKeyboardHeight(0);
-      }
+   if (diff > 80) {
+  setKeyboardHeight(diff);
+  document.body.style.height = currentVisualHeight + "px";
+} else {
+  setKeyboardHeight(0);
+  document.body.style.height = "";
+}
     };
 
     window.visualViewport?.addEventListener("resize", handleResize);
@@ -386,7 +388,7 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
         height: `${TOOLBAR_HEIGHT}px`,
         // [핵심] 키보드 높이가 0이더라도, 기본적으로 바닥에 붙어있지 않도록
         // keyboardHeight를 그대로 사용하되, 혹시 모를 안전 영역(Safe Area) 고려
-        bottom: `${keyboardHeight}px`,
+        bottom: `calc(${keyboardHeight}px + env(safe-area-inset-bottom))`,
         paddingBottom: "env(safe-area-inset-bottom)", // 아이폰 홈 바 대응
         boxSizing: "content-box", // 패딩이 높이에 포함되지 않게 설정
       }}
@@ -894,7 +896,7 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
         showTextInput이 true일 때만 표시 (= 텍스트창 활성화 시)
       */}
       <AnimatePresence>
-        {selectedImage && isDetailEditMode && showTextInput && AICaptionToolbar}
+        {selectedImage && showTextInput && AICaptionToolbar}
       </AnimatePresence>
     </>
   );
