@@ -84,6 +84,82 @@ const familyMembers = [
   },
 ];
 
+// === [NEW] 드롭다운 컴포넌트 분리 (재사용성 및 가독성 향상) ===
+const FamilyDropdown = ({
+  showFamilyDropdown,
+  setShowFamilyDropdown,
+  familyMembers,
+  selectedFamilyMember,
+  setSelectedFamilyMember,
+  currentUserName,
+}: {
+  showFamilyDropdown: boolean;
+  setShowFamilyDropdown: (show: boolean) => void;
+  familyMembers: typeof familyMembers;
+  selectedFamilyMember: string | null;
+  setSelectedFamilyMember: (member: string | null) => void;
+  currentUserName: string;
+}) => (
+  <AnimatePresence>
+    {showFamilyDropdown && (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }} // 애니메이션: 위에서 아래로 슬라이드
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.2 }}
+        // [수정] absolute 위치, 버튼 아래에 붙고, 그림자/둥근 모서리 유지
+        className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-fit bg-white rounded-2xl shadow-xl z-50 overflow-hidden border border-gray-100"
+      >
+        <div className="p-2 min-w-[140px]">
+          {familyMembers.map((member) => {
+            const isGrayedOut =
+              member.id === "kim" || member.id === "park";
+            const memberName =
+              member.id === "me"
+                ? currentUserName
+                : member.name;
+            const isSelected =
+              (member.id === "all" && !selectedFamilyMember) ||
+              selectedFamilyMember === memberName;
+
+            return (
+              <button
+                key={member.id}
+                onClick={() => {
+                  if (isGrayedOut) return;
+
+                  if (member.id === "all") {
+                    setSelectedFamilyMember(null);
+                  } else {
+                    setSelectedFamilyMember(memberName);
+                  }
+                  setShowFamilyDropdown(false);
+                }}
+                className={`w-full flex items-center px-4 py-3 rounded-xl transition-colors text-lg font-medium whitespace-nowrap justify-start
+                  ${
+                    isGrayedOut
+                      ? "text-gray-400 cursor-default"
+                      : isSelected
+                        ? "text-[#1A1A1A] bg-gray-100"
+                        : "text-[#1A1A1A] hover:bg-gray-50"
+                  }`}
+                disabled={isGrayedOut}
+              >
+                <span
+                  className={`${isGrayedOut ? "text-gray-400" : "text-[#1A1A1A]"} leading-none`}
+                >
+                  {memberName}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+// ========================================================
+
 export function CommunityPage({
   onBack,
   onUploadClick,
@@ -189,7 +265,7 @@ export function CommunityPage({
       spread: 70,
       origin: { y: 0.6 },
     });
-    
+
     // 이모지 떠오르는 애니메이션 생성
     const count = Math.floor(Math.random() * 9) + 4; // 4~12개 (기존 로직과 동일)
     const newEmojis = Array.from({ length: count }, (_, i) => ({
@@ -201,11 +277,13 @@ export function CommunityPage({
       delay: Math.random() * 2, // 0~2초 딜레이
     }));
     setFloatingEmojis((prev) => [...prev, ...newEmojis]);
-    
+
     // 5초 후 제거
     setTimeout(() => {
-      setFloatingEmojis((prev) => 
-        prev.filter((e) => !newEmojis.some((ne) => ne.id === e.id))
+      setFloatingEmojis((prev) =>
+        prev.filter(
+          (e) => !newEmojis.some((ne) => ne.id === e.id),
+        ),
       );
     }, 5000);
   };
@@ -233,7 +311,7 @@ export function CommunityPage({
     }));
 
     setNewComment("");
-    
+
     // 댓글 작성 후 해당 게시물의 세부 화면으로 이동
     setSelectedPostForReaction(postId);
   };
@@ -345,7 +423,7 @@ export function CommunityPage({
       const hasMyComment = addedComments[post.id]?.some(
         (comment) => comment.userName === currentUser.userName,
       );
-      
+
       // 2. 내가 새로 추가한 리액션 확인 (addedReactions)
       const hasMyAddedReaction = addedReactions[post.id]?.some(
         (reaction) =>
@@ -353,7 +431,7 @@ export function CommunityPage({
             (user) => user.userName === currentUser.userName,
           ),
       );
-      
+
       // 3. 목 데이터의 원래 리액션 확인 (post.reactions)
       const hasMyOriginalReaction = post.reactions?.some(
         (reaction) =>
@@ -361,14 +439,28 @@ export function CommunityPage({
             (user) => user.userName === currentUser.userName,
           ),
       );
-      
-      const hasMyReaction = hasMyComment || hasMyAddedReaction || hasMyOriginalReaction;
-      
+
+      const hasMyReaction =
+        hasMyComment ||
+        hasMyAddedReaction ||
+        hasMyOriginalReaction;
+
       // 4. 특정 인물이 선택된 경우 교집합 필터링
       if (selectedFamilyMember) {
-        return hasMyReaction && post.userName === selectedFamilyMember;
+        // [수정된 부분: '나'를 currentUserName으로 처리]
+        const isMe = selectedFamilyMember === currentUserName;
+        if (isMe) {
+          return (
+            hasMyReaction && post.userName === currentUserName
+          );
+        } else {
+          return (
+            hasMyReaction &&
+            post.userName === selectedFamilyMember
+          );
+        }
       }
-      
+
       return hasMyReaction;
     });
 
@@ -386,7 +478,7 @@ export function CommunityPage({
             (u) => u.userName === currentUser.userName,
           ),
       );
-      
+
       // 원래 있던 리액션에서 해당 이모지 확인
       const hasOriginalReaction = post.reactions?.some(
         (reaction) =>
@@ -395,7 +487,7 @@ export function CommunityPage({
             (u) => u.userName === currentUser.userName,
           ),
       );
-      
+
       return hasAddedReaction || hasOriginalReaction;
     });
   };
@@ -403,23 +495,31 @@ export function CommunityPage({
   // 내가 사용한 리액션 이모지 목록 추출
   const getMyUsedEmojis = () => {
     const usedEmojis = new Set<string>();
-    
+
     posts.forEach((post) => {
       // 원래 있던 리액션에서 내가 남긴 이모지 찾기
       post.reactions?.forEach((reaction) => {
-        if (reaction.users.some((u) => u.userName === currentUser.userName)) {
+        if (
+          reaction.users.some(
+            (u) => u.userName === currentUser.userName,
+          )
+        ) {
           usedEmojis.add(reaction.emoji);
         }
       });
-      
+
       // 새로 추가한 리액션에서 내가 남긴 이모지 찾기
       addedReactions[post.id]?.forEach((reaction) => {
-        if (reaction.users.some((u) => u.userName === currentUser.userName)) {
+        if (
+          reaction.users.some(
+            (u) => u.userName === currentUser.userName,
+          )
+        ) {
           usedEmojis.add(reaction.emoji);
         }
       });
     });
-    
+
     return Array.from(usedEmojis);
   };
 
@@ -444,7 +544,13 @@ export function CommunityPage({
 
   const filteredPosts = posts.filter((post) => {
     if (selectedFamilyMember) {
-      if (post.userName !== selectedFamilyMember) {
+      // [수정된 부분: '나'를 currentUserName으로 처리]
+      const isMe = selectedFamilyMember === currentUserName;
+      if (isMe) {
+        if (post.userName !== currentUserName) {
+          return false;
+        }
+      } else if (post.userName !== selectedFamilyMember) {
         return false;
       }
     }
@@ -486,7 +592,10 @@ export function CommunityPage({
               onClick={onBack}
               className="w-6 h-6 flex items-center justify-center flex-shrink-0"
             >
-              <ChevronLeft size={24} className="text-[#1A1A1A]" />
+              <ChevronLeft
+                size={24}
+                className="text-[#1A1A1A]"
+              />
             </button>
             <div
               className={`bg-gray-100 rounded-lg px-4 py-2 flex items-center gap-2 transition-all border-2 flex-1 ${
@@ -524,7 +633,10 @@ export function CommunityPage({
               onClick={() => setIsReactionView(false)}
               className="absolute left-0 w-6 h-6 flex items-center justify-center"
             >
-              <ChevronLeft size={24} className="text-[#1A1A1A]" />
+              <ChevronLeft
+                size={24}
+                className="text-[#1A1A1A]"
+              />
             </button>
             <span className="text-lg font-bold text-[#1A1A1A]">
               리액션 모아보기
@@ -536,26 +648,49 @@ export function CommunityPage({
               onClick={() => setIsGridView(false)}
               className="absolute left-0 w-6 h-6 flex items-center justify-center"
             >
-              <ChevronLeft size={24} className="text-[#1A1A1A]" />
-            </button>
-            <button
-              className="flex items-center gap-1"
-              onClick={() =>
-                setShowFamilyDropdown(!showFamilyDropdown)
-              }
-            >
-              <span className="text-lg font-bold text-[#1A1A1A]">
-                {selectedFamilyMember
-                  ? familyMembers.find(
-                      (m) => m.name === selectedFamilyMember,
-                    )?.name || "모아보기"
-                  : "모아보기"}
-              </span>
-              <ChevronDown
-                size={20}
-                className="text-gray-600"
+              <ChevronLeft
+                size={24}
+                className="text-[#1A1A1A]"
               />
             </button>
+
+            {/* [수정] Grid View - 드롭다운 Anchor */}
+            <div className="relative z-50">
+              <button
+                className="flex items-center gap-1"
+                onClick={() =>
+                  setShowFamilyDropdown(!showFamilyDropdown)
+                }
+              >
+                <span className="text-lg font-bold text-[#1A1A1A]">
+                  {selectedFamilyMember
+                    ? familyMembers.find(
+                        (m) =>
+                          (m.id === "me"
+                            ? currentUserName
+                            : m.name) === selectedFamilyMember,
+                      )?.name || "모아보기"
+                    : "모아보기"}
+                </span>
+                <ChevronDown
+                  size={20}
+                  className="text-gray-600"
+                />
+              </button>
+              {/* [추가] 드롭다운 컴포넌트 */}
+              <FamilyDropdown
+                showFamilyDropdown={showFamilyDropdown}
+                setShowFamilyDropdown={setShowFamilyDropdown}
+                familyMembers={familyMembers}
+                selectedFamilyMember={selectedFamilyMember}
+                setSelectedFamilyMember={
+                  setSelectedFamilyMember
+                }
+                currentUserName={currentUserName}
+              />
+            </div>
+            {/* ---------------------------------- */}
+
             <button
               onClick={() => setIsReactionView(true)}
               className="absolute right-0 w-10 h-10 flex items-center justify-center rounded-full bg-[#F5F5F5]/80 backdrop-blur-md text-gray-500 hover:text-gray-800 transition-colors"
@@ -569,26 +704,48 @@ export function CommunityPage({
               onClick={onBack}
               className="absolute left-0 w-6 h-6 flex items-center justify-center"
             >
-              <ChevronLeft size={24} className="text-[#1A1A1A]" />
-            </button>
-            <button
-              className="flex items-center gap-1"
-              onClick={() =>
-                setShowFamilyDropdown(!showFamilyDropdown)
-              }
-            >
-              <span className="text-lg font-bold text-[#1A1A1A]">
-                {selectedFamilyMember
-                  ? familyMembers.find(
-                      (m) => m.name === selectedFamilyMember,
-                    )?.name || "우리가족"
-                  : "우리가족"}
-              </span>
-              <ChevronDown
-                size={20}
-                className="text-gray-600"
+              <ChevronLeft
+                size={24}
+                className="text-[#1A1A1A]"
               />
             </button>
+
+            {/* [수정] Default View - 드롭다운 Anchor */}
+            <div className="relative z-50">
+              <button
+                className="flex items-center gap-1"
+                onClick={() =>
+                  setShowFamilyDropdown(!showFamilyDropdown)
+                }
+              >
+                <span className="text-lg font-bold text-[#1A1A1A]">
+                  {selectedFamilyMember
+                    ? familyMembers.find(
+                        (m) =>
+                          (m.id === "me"
+                            ? currentUserName
+                            : m.name) === selectedFamilyMember,
+                      )?.name || "우리가족"
+                    : "우리가족"}
+                </span>
+                <ChevronDown
+                  size={20}
+                  className="text-gray-600"
+                />
+              </button>
+              {/* [추가] 드롭다운 컴포넌트 */}
+              <FamilyDropdown
+                showFamilyDropdown={showFamilyDropdown}
+                setShowFamilyDropdown={setShowFamilyDropdown}
+                familyMembers={familyMembers}
+                selectedFamilyMember={selectedFamilyMember}
+                setSelectedFamilyMember={
+                  setSelectedFamilyMember
+                }
+                currentUserName={currentUserName}
+              />
+            </div>
+            {/* ---------------------------------- */}
 
             <div className="absolute right-0 flex items-center gap-4">
               <button
@@ -611,87 +768,7 @@ export function CommunityPage({
         )}
       </header>
 
-      {/* 가족 구성원 드롭다운 */}
-      <AnimatePresence>
-        {showFamilyDropdown && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/30 z-40"
-              onClick={() => setShowFamilyDropdown(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="fixed top-[120px] left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] bg-white rounded-2xl shadow-2xl z-50 overflow-hidden"
-            >
-              <div className="p-2">
-                {familyMembers.map((member) => (
-                  <button
-                    key={member.id}
-                    onClick={() => {
-                      if (member.id === "all") {
-                        setSelectedFamilyMember(null);
-                      } else {
-                        setSelectedFamilyMember(member.name);
-                      }
-                      setShowFamilyDropdown(false);
-                    }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                      (member.id === "all" &&
-                        !selectedFamilyMember) ||
-                      member.name === selectedFamilyMember
-                        ? "bg-[#36D2C5]/10"
-                        : "hover:bg-gray-50"
-                    }`}
-                  >
-                    {member.avatar ? (
-                      <ImageWithFallback
-                        src={member.avatar}
-                        alt={member.name}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#36D2C5] to-[#00C2B3] flex items-center justify-center">
-                        <LayoutGrid
-                          size={20}
-                          className="text-white"
-                        />
-                      </div>
-                    )}
-                    <span className="text-[#1A1A1A] font-medium">
-                      {member.name}
-                    </span>
-                    {((member.id === "all" &&
-                      !selectedFamilyMember) ||
-                      member.name === selectedFamilyMember) && (
-                      <div className="ml-auto w-5 h-5 rounded-full bg-[#36D2C5] flex items-center justify-center">
-                        <svg
-                          width="12"
-                          height="10"
-                          viewBox="0 0 12 10"
-                          fill="none"
-                        >
-                          <path
-                            d="M1 5L4.5 8.5L11 1"
-                            stroke="white"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {/* [제거] 가족 구성원 드롭다운 섹션은 헤더 내부로 이동하고 배경 오버레이를 제거했습니다. */}
 
       {/* Content Area */}
       <div className="w-full">
@@ -928,42 +1005,58 @@ export function CommunityPage({
                                     // === [NEW] 클릭 시 애니메이션 재실행 ===
                                     onClick={(e) => {
                                       e.stopPropagation(); // 오버레이 닫힘 방지
-                                      triggerReactionAnimation(reaction.emoji); // 애니메이션 실행
+                                      triggerReactionAnimation(
+                                        reaction.emoji,
+                                      ); // 애니메이션 실행
                                     }}
                                     // ======================================
                                   >
                                     <span className="text-base">
                                       {reaction.emoji}
                                     </span>
-                                    
+
                                     {/* 사용자 프로필 겹쳐서 표시 */}
                                     <div className="flex -space-x-2.5">
                                       {/* 최대 3명의 사용자만 표시 (겹치는 효과를 위해) */}
                                       {reaction.users
-                                        .slice(0, 3) 
-                                        .map((user, userIdx) => (
-                                          <ImageWithFallback
-                                            key={`${reaction.emoji}-${user.userName}-${userIdx}`}
-                                            src={user.userAvatar}
-                                            alt={user.userName}
-                                            // 프로필 이미지 스타일: 크기, 겹침 효과를 위한 -space-x-2.5 와 대비되는 왼쪽 마진 0
-                                            className={`w-7 h-7 rounded-full object-cover border-2 border-white transition-all duration-300 ${
-                                              userIdx === 0 ? "ml-0" : ""
-                                            }`}
-                                            style={{
-                                              // 겹치는 정도를 조정
-                                              zIndex: reaction.users.length - userIdx,
-                                            }}
-                                          />
-                                        ))}
+                                        .slice(0, 3)
+                                        .map(
+                                          (user, userIdx) => (
+                                            <ImageWithFallback
+                                              key={`${reaction.emoji}-${user.userName}-${userIdx}`}
+                                              src={
+                                                user.userAvatar
+                                              }
+                                              alt={
+                                                user.userName
+                                              }
+                                              // 프로필 이미지 스타일: 크기, 겹침 효과를 위한 -space-x-2.5 와 대비되는 왼쪽 마진 0
+                                              className={`w-7 h-7 rounded-full object-cover border-2 border-white transition-all duration-300 ${
+                                                userIdx === 0
+                                                  ? "ml-0"
+                                                  : ""
+                                              }`}
+                                              style={{
+                                                // 겹치는 정도를 조정
+                                                zIndex:
+                                                  reaction.users
+                                                    .length -
+                                                  userIdx,
+                                              }}
+                                            />
+                                          ),
+                                        )}
 
                                       {/* 3명 초과 시 카운트 표시 */}
-                                      {reaction.users.length > 3 && (
+                                      {reaction.users.length >
+                                        3 && (
                                         <div
                                           className="w-7 h-7 rounded-full bg-gray-500/80 backdrop-blur-sm flex items-center justify-center text-white text-xs font-semibold border-2 border-white relative"
                                           style={{ zIndex: 0 }}
                                         >
-                                          +{reaction.users.length - 3}
+                                          +
+                                          {reaction.users
+                                            .length - 3}
                                         </div>
                                       )}
                                     </div>
@@ -972,7 +1065,7 @@ export function CommunityPage({
                               </div>
                             )}
                             {/* ================================================= */}
-                            
+
                             {/* [수정: Pressed 상태의 캡슐 위치 및 스타일 통일] */}
                             {(post.textOverlay ||
                               post.userName) && (
@@ -1228,7 +1321,9 @@ export function CommunityPage({
                                             post.id,
                                           );
                                           // === [NEW] 분리된 애니메이션 함수 호출 ===
-                                          triggerReactionAnimation(emoji);
+                                          triggerReactionAnimation(
+                                            emoji,
+                                          );
                                           // ======================================
                                         }}
                                         className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-2xl bg-[#F5F5F5]/80 backdrop-blur-md rounded-full transition-colors"
@@ -1423,25 +1518,31 @@ export function CommunityPage({
         {floatingEmojis.map((item) => (
           <motion.div
             key={item.id}
-            initial={{ 
+            initial={{
               y: 0,
               x: item.x,
               opacity: 0,
               scale: 0.3,
-              rotate: 0
+              rotate: 0,
             }}
-            animate={{ 
+            animate={{
               y: -window.innerHeight - 100,
-              x: [item.x, item.x + item.wobble, item.x - item.wobble / 2, item.x + item.wobble / 3, item.x],
+              x: [
+                item.x,
+                item.x + item.wobble,
+                item.x - item.wobble / 2,
+                item.x + item.wobble / 3,
+                item.x,
+              ],
               opacity: [0, 1, 1, 0.8, 0],
               scale: [0.3, 1, 1.05, 1, 0.9],
-              rotate: [0, 10, -10, 5, 0]
+              rotate: [0, 10, -10, 5, 0],
             }}
-            transition={{ 
+            transition={{
               duration: 5,
               delay: item.delay,
               ease: "easeOut",
-              times: [0, 0.1, 0.5, 0.8, 1]
+              times: [0, 0.1, 0.5, 0.8, 1],
             }}
             className="fixed pointer-events-none z-[100]"
             style={{

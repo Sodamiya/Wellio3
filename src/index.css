@@ -555,10 +555,6 @@
     top: 110px;
   }
 
-  .top-\[120px\] {
-    top: 120px;
-  }
-
   .top-\[calc\(100\%\+16px\)\] {
     top: calc(100% + 16px);
   }
@@ -665,6 +661,10 @@
 
   .mx-4 {
     margin-inline: calc(var(--spacing) * 4);
+  }
+
+  .mx-5 {
+    margin-inline: calc(var(--spacing) * 5);
   }
 
   .mx-auto {
@@ -817,10 +817,6 @@
 
   .ml-6 {
     margin-left: calc(var(--spacing) * 6);
-  }
-
-  .ml-auto {
-    margin-left: auto;
   }
 
   .block {
@@ -1158,6 +1154,10 @@
     width: 263px;
   }
 
+  .w-fit {
+    width: fit-content;
+  }
+
   .w-full {
     width: 100%;
   }
@@ -1186,16 +1186,8 @@
     max-width: 320px;
   }
 
-  .max-w-\[330px\] {
-    max-width: 330px;
-  }
-
   .max-w-\[340px\] {
     max-width: 340px;
-  }
-
-  .max-w-\[400px\] {
-    max-width: 400px;
   }
 
   .max-w-\[500px\] {
@@ -1216,6 +1208,10 @@
 
   .min-w-\[80px\] {
     min-width: 80px;
+  }
+
+  .min-w-\[140px\] {
+    min-width: 140px;
   }
 
   .min-w-full {
@@ -1671,10 +1667,6 @@
     border-color: #2ecaca;
   }
 
-  .border-\[\#21d2c4\] {
-    border-color: #21d2c4;
-  }
-
   .border-\[\#36D2C5\] {
     border-color: #36d2c5;
   }
@@ -1779,6 +1771,10 @@
     background-color: #2dc7b7;
   }
 
+  .bg-\[\#2ECACA\] {
+    background-color: #2ecaca;
+  }
+
   .bg-\[\#2a8f8f\] {
     background-color: #2a8f8f;
   }
@@ -1795,16 +1791,8 @@
     background-color: #4dc2c0;
   }
 
-  .bg-\[\#21d2c4\] {
-    background-color: #21d2c4;
-  }
-
   .bg-\[\#36D2C5\] {
     background-color: #36d2c5;
-  }
-
-  .bg-\[\#36D2C5\]\/10 {
-    background-color: oklab(78.3001% -.125071 -.0142475 / .1);
   }
 
   .bg-\[\#555555\] {
@@ -1909,10 +1897,6 @@
 
   .bg-\[\#ffffff\] {
     background-color: #fff;
-  }
-
-  .bg-\[f7f7f7\] {
-    background-color: f7f7f7;
   }
 
   .bg-background {
@@ -2156,11 +2140,6 @@
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
 
-  .from-\[\#36D2C5\] {
-    --tw-gradient-from: #36d2c5;
-    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
-  }
-
   .from-\[\#A8E6CF\] {
     --tw-gradient-from: #a8e6cf;
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
@@ -2190,11 +2169,6 @@
     --tw-gradient-via: var(--color-pink-300);
     --tw-gradient-via-stops: var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to) var(--tw-gradient-to-position);
     --tw-gradient-stops: var(--tw-gradient-via-stops);
-  }
-
-  .to-\[\#00C2B3\] {
-    --tw-gradient-to: #00c2b3;
-    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
 
   .to-\[\#36D2C5\] {
@@ -2373,10 +2347,6 @@
 
   .py-\[7px\] {
     padding-block: 7px;
-  }
-
-  .py-\[15px\] {
-    padding-block: 15px;
   }
 
   .pt-1 {
@@ -2734,10 +2704,6 @@
 
   .text-\[\#9C27B0\] {
     color: #9c27b0;
-  }
-
-  .text-\[\#21d2c4\] {
-    color: #21d2c4;
   }
 
   .text-\[\#36D2C5\] {
@@ -3110,18 +3076,6 @@
     user-select: none;
   }
 
-  @media (hover: hover) {
-    .group-hover\:text-gray-600:is(:where(.group):hover *) {
-      color: var(--color-gray-600);
-    }
-  }
-
-  @media (hover: hover) {
-    .group-hover\:text-gray-800:is(:where(.group):hover *) {
-      color: var(--color-gray-800);
-    }
-  }
-
   .selection\:bg-primary ::selection, .selection\:bg-primary::selection {
     background-color: var(--primary);
   }
@@ -3221,14 +3175,14 @@
   }
 
   @media (hover: hover) {
-    .hover\:bg-\[\#1bc0b2\]:hover {
-      background-color: #1bc0b2;
+    .hover\:bg-\[\#2FC0B3\]:hover {
+      background-color: #2fc0b3;
     }
   }
 
   @media (hover: hover) {
-    .hover\:bg-\[\#2FC0B3\]:hover {
-      background-color: #2fc0b3;
+    .hover\:bg-\[\#239C9C\]:hover {
+      background-color: #239c9c;
     }
   }
 
@@ -3385,12 +3339,6 @@
   @media (hover: hover) {
     .hover\:text-gray-800:hover {
       color: var(--color-gray-800);
-    }
-  }
-
-  @media (hover: hover) {
-    .hover\:text-gray-900:hover {
-      color: var(--color-gray-900);
     }
   }
 

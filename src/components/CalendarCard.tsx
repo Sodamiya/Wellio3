@@ -12,14 +12,22 @@ export function CalendarCard() {
   const daysOfWeek = ["월", "화", "수", "목", "금", "토", "일"];
 
   // 날짜별 일정 데이터
-  const scheduleData: { [key: string]: { message: string; highlight: string } } = {
-    "25": { message: "김웰리님 오늘", highlight: "오후 9시", },
-    "26": { message: "김웰리님 내일", highlight: "오전 8시 30분", },
-    "27": { message: "김웰리님", highlight: "오후 2시", },
-    "28": { message: "김웰리님", highlight: "오후 7시 30분", },
-    "29": { message: "김웰리님", highlight: "오전 11시", },
-    "30": { message: "김웰리님 이번 주말", highlight: "오후 4시", },
-    "1": { message: "김웰리님 다음 달", highlight: "오전 9시", },
+  const scheduleData: {
+    [key: string]: { message: string; highlight: string };
+  } = {
+    "25": { message: "김웰리님 오늘", highlight: "오후 9시" },
+    "26": {
+      message: "김웰리님 내일",
+      highlight: "오전 8시 30분",
+    },
+    "27": { message: "김웰리님", highlight: "오후 2시" },
+    "28": { message: "김웰리님", highlight: "오후 7시 30분" },
+    "29": { message: "김웰리님", highlight: "오전 11시" },
+    "30": {
+      message: "김웰리님 이번 주말",
+      highlight: "오후 4시",
+    },
+    "1": { message: "김웰리님 다음 달", highlight: "오전 9시" },
   };
 
   // 메시지 접미사 배리에이션
@@ -83,7 +91,7 @@ export function CalendarCard() {
     // 반응형 패딩 추가
     <div className="w-full bg-white rounded-t-2xl overflow-hidden shadow-[0_2px_2.5px_0_#C9D0D833]">
       {/* 1. 달력 헤더 (년/월, 아이콘) */}
-      <div className="flex justify-between items-center mb-4 px-4 sm:px-6 md:px-8 pt-4">
+      <div className="flex justify-between items-center mb-4 px-5 pt-4">
         <h3 className="text-lg font-semibold text-gray-800">
           {formatMonth(currentMonth)}
         </h3>
@@ -93,7 +101,7 @@ export function CalendarCard() {
       {/* 2. 요일 헤더 삭제됨 */}
 
       {/* 3. 날짜 그리드 */}
-      <div className="grid grid-cols-7 gap-y-1 text-center px-4 sm:px-6 md:px-8">
+      <div className="grid grid-cols-7 gap-y-1 text-center px-5">
         {weekDays.map((day, index) => {
           const isSelected = day === selectedDay;
           const dayOfWeekIndex = index; // 0:월, 1:화, ..., 6:일
@@ -154,12 +162,13 @@ export function CalendarCard() {
       </div>
 
       {/* 4. 하단 알림 텍스트 */}
-      <div className="mt-4 pt-4 border-t border-gray-100 px-4 sm:px-6 md:px-8 pb-4">
+      <div className="mt-4 pt-4 border-t border-gray-100 px-5 pb-4 text-center">
         {(() => {
           const schedule = scheduleData[selectedDay.toString()];
           if (schedule) {
             // 날짜를 기반으로 접미사 선택 (일관성 있게)
-            const suffixIndex = selectedDay % messageSuffixes.length;
+            const suffixIndex =
+              selectedDay % messageSuffixes.length;
             return (
               <p className="text-sm text-gray-700">
                 {schedule.message}{" "}

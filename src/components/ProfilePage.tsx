@@ -38,7 +38,7 @@ export function ProfilePage({
       {/* 헤더 높이(h-16)만큼 pt-16 추가 */}
       <main className="flex-grow bg-[#F7F7F7] pt-16 pb-24">
         {/* User Info Section */}
-        <div className="py-6 px-4 sm:px-6 md:px-8 relative">
+        <div className="py-6 px-5 relative">
           {/* 프로필 정보 컨테이너 */}
           <div className="flex items-center">
             
@@ -83,7 +83,7 @@ export function ProfilePage({
               </h2>
 
               {/* 가족관리 링크 (민트색 하트 아이콘) */}
-              <button className="group flex items-center text-gray-600 hover:text-gray-900 transition-colors">
+              <button className="group flex items-center text-gray-600">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -93,13 +93,13 @@ export function ProfilePage({
                   <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
                 </svg>
 
-                <span className="text-lg font-medium text-gray-600 group-hover:text-gray-800">
+                <span className="text-lg font-medium text-gray-600">
                   가족관리
                 </span>
 
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 ml-1 text-gray-400 group-hover:text-gray-600"
+                  className="h-5 w-5 ml-1 text-gray-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -117,7 +117,7 @@ export function ProfilePage({
         </div>
 
         {/* Point Section */}
-        <div className="bg-white mx-4 sm:mx-6 md:mx-8 p-4 rounded-lg shadow-sm mt-3 flex items-center justify-between">
+        <div className="bg-white mx-5 p-4 rounded-lg shadow-sm mt-3 flex items-center justify-between">
           <span className="text-gray-700 font-medium">보유포인트</span>
           <div className="flex items-center">
             <span className="text-lg font-bold text-[#4CAF50]">2,025P</span>
@@ -139,7 +139,7 @@ export function ProfilePage({
         </div>
 
         {/* Activity Buttons */}
-        <div className="flex bg-white mx-4 sm:mx-6 md:mx-8 rounded-lg shadow-sm mt-3 overflow-hidden">
+        <div className="flex bg-white mx-5 rounded-lg shadow-sm mt-3 overflow-hidden">
           <button
             className="flex-1 flex items-center justify-center py-3 text-gray-700 font-medium border-r border-gray-200"
             onClick={onMyReviewsClick}
@@ -182,7 +182,7 @@ export function ProfilePage({
 
         {/* Features Section */}
         <div className="mt-6 bg-white py-6">
-          <div className="px-4 sm:px-6 md:px-8 flex items-center">
+          <div className="px-5 flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6 text-yellow-500 mr-2"
@@ -209,7 +209,7 @@ export function ProfilePage({
             ].map((feature, index) => (
               <li
                 key={index}
-                className={`px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between last:border-b-0 ${
+                className={`px-5 py-3 flex items-center justify-between last:border-b-0 ${
                   feature === "가까운 병원 찾기"
                     ? "cursor-pointer hover:bg-gray-50 transition-colors"
                     : ""
@@ -242,7 +242,7 @@ export function ProfilePage({
 
         {/* Health Record Section */}
         <div className="mt-6 bg-white py-6">
-          <div className="px-4 sm:px-6 md:px-8 flex items-center">
+          <div className="px-5 flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6 text-gray-500 mr-2"
@@ -261,7 +261,7 @@ export function ProfilePage({
           </div>
           <ul className="mt-4">
             <li
-              className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between last:border-b-0 cursor-pointer hover:bg-gray-50 transition-colors"
+              className="px-5 py-3 flex items-center justify-between last:border-b-0 cursor-pointer hover:bg-gray-50 transition-colors"
               onClick={() => onPageChange("medical-history")}
             >
               <span className="text-gray-700">진료 이력</span>
@@ -280,7 +280,7 @@ export function ProfilePage({
                 />
               </svg>
             </li>
-            <li className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between border-b border-gray-100 last:border-b-0">
+            <li className="px-5 py-3 flex items-center justify-between border-b border-gray-100 last:border-b-0">
               <span className="text-gray-700">건강검진 내역</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -302,7 +302,7 @@ export function ProfilePage({
 
         {/* Customer Service Section */}
         <div className="mt-6 bg-white py-6">
-          <div className="px-4 sm:px-6 md:px-8 flex items-center">
+          <div className="px-5 flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6 text-blue-500 mr-2"
@@ -320,7 +320,7 @@ export function ProfilePage({
             <h3 className="text-lg font-bold text-gray-900">고객센터</h3>
           </div>
           <ul className="mt-4">
-            <li className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between last:border-b-0">
+            <li className="px-5 py-3 flex items-center justify-between last:border-b-0">
               <span className="text-gray-700">공지사항</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -337,7 +337,7 @@ export function ProfilePage({
                 />
               </svg>
             </li>
-            <li className="px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between border-b border-gray-100 last:border-b-0">
+            <li className="px-5 py-3 flex items-center justify-between border-b border-gray-100 last:border-b-0">
               <span className="text-gray-700">고객센터 문의하기</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"

@@ -177,83 +177,91 @@ export function MedicalHistoryPage({
 
   return (
     <div className="relative bg-[#f7f7f7] flex flex-col max-w-[500px] mx-auto min-h-screen">
-      {/* Header */}
-      <header className="sticky top-0 z-30 px-5 py-4 flex items-center justify-between border-b border-gray-100 w-full bg-[#f7f7f7]">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={onBack}
-            className="w-6 h-6 flex items-center justify-center"
-          >
-            <ChevronLeft size={24} className="text-[#1A1A1A]" />
-          </button>
-          <span className="text-lg font-bold text-[#1A1A1A]">
-            진료내역
-          </span>
-        </div>
-      </header>
-
-      {/* Tabs */}
-      <div className="flex border-b border-gray-200 bg-[f7f7f7]">
-        <button
-          onClick={() => setActiveTab("treatment")}
-          className={`flex-1 py-4 text-center transition-colors ${
-            activeTab === "treatment"
-              ? "text-[#36D2C5] border-b-2 border-[#36D2C5]"
-              : "text-gray-400"
-          }`}
-        >
-          진료 내역
-        </button>
-        <button
-          onClick={() => setActiveTab("medical")}
-          className={`flex-1 py-4 text-center transition-colors ${
-            activeTab === "medical"
-              ? "text-[#36D2C5] border-b-2 border-[#36D2C5]"
-              : "text-gray-400"
-          }`}
-        >
-          의료 내역
-        </button>
-      </div>
-
-      {/* Filter Tags */}
-      {activeTab === "treatment" && (
-        <div className="px-5 pt-5 pb-3 flex gap-2 overflow-x-auto bg-[#f7f7f7]">
-          {filters.map((filter) => (
+      
+      {/* 🌟 수정된 부분: Header와 Tabs/Filters를 감싸는 하나의 Sticky Container */}
+      <div className="sticky top-0 z-30 bg-[#f7f7f7]">
+        {/* Header (sticky 속성 제거) */}
+        <header className="px-5 py-4 flex items-center justify-between w-full">
+          <div className="flex items-center gap-4">
             <button
-              key={filter.id}
-              onClick={() => setSelectedFilter(filter.id)}
-              className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors border ${
-                selectedFilter === filter.id
-                  ? "bg-[#e8e8e8] text-[#2b2b2b] border-transparent"
-                  : "text-[#777777] border-[#aeaeae] hover:bg-gray-200"
+              onClick={onBack}
+              className="w-6 h-6 flex items-center justify-center"
+            >
+              <ChevronLeft size={24} className="text-[#1A1A1A]" />
+            </button>
+            <span className="text-lg font-bold text-[#1A1A1A]">
+              진료내역
+            </span>
+          </div>
+        </header>
+
+        {/* Tabs & Filters Container (sticky 속성 및 offset 제거) */}
+        <div>
+          {/* Tabs */}
+          <div className="flex border-b border-gray-200 bg-[#f7f7f7]/80 backdrop-blur-xs">
+            <button
+              onClick={() => setActiveTab("treatment")}
+              className={`flex-1 py-4 text-center transition-colors ${
+                activeTab === "treatment"
+                  ? "text-[#36D2C5] border-b-2 border-[#36D2C5]"
+                  : "text-gray-400"
               }`}
             >
-              {filter.label}
-              {filter.id === "period" && (
-                <ChevronDown
-                  size={16}
-                  className="inline-block ml-1"
-                />
-              )}
-              {filter.id === "kim-ds" && (
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
-                  alt="김동석"
-                  className="w-5 h-5 rounded-full inline-block ml-1"
-                />
-              )}
-              {filter.id === "kim-ds2" && (
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
-                  alt="김동석"
-                  className="w-5 h-5 rounded-full inline-block ml-1"
-                />
-              )}
+              진료 내역
             </button>
-          ))}
+            <button
+              onClick={() => setActiveTab("medical")}
+              className={`flex-1 py-4 text-center transition-colors ${
+                activeTab === "medical"
+                  ? "text-[#36D2C5] border-b-2 border-[#36D2C5]"
+                  : "text-gray-400"
+              }`}
+            >
+              의료 내역
+            </button>
+          </div>
+
+          {/* Filter Tags */}
+          {activeTab === "treatment" && (
+            <div className="px-5 pt-5 pb-3 flex gap-2 overflow-x-auto bg-[#f7f7f7]">
+              {filters.map((filter) => (
+                <button
+                  key={filter.id}
+                  onClick={() => setSelectedFilter(filter.id)}
+                  className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors border ${
+                    selectedFilter === filter.id
+                      ? "bg-[#e8e8e8] text-[#2b2b2b] border-transparent"
+                      : "text-[#777777] border-[#aeaeae] hover:bg-gray-200"
+                  }`}
+                >
+                  {filter.label}
+                  {filter.id === "period" && (
+                    <ChevronDown
+                      size={16}
+                      className="inline-block ml-1"
+                    />
+                  )}
+                  {filter.id === "kim-ds" && (
+                    <ImageWithFallback
+                      src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
+                      alt="김동석"
+                      className="w-5 h-5 rounded-full inline-block ml-1"
+                    />
+                  )}
+                  {filter.id === "kim-ds2" && (
+                    <ImageWithFallback
+                      src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
+                      alt="김동석"
+                      className="w-5 h-5 rounded-full inline-block ml-1"
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
+      {/* 🌟 수정된 부분 끝 */}
 
       {/* Content */}
       {/* 배경색을 흰색이 아닌 #F7F7F7로 변경 */}
@@ -351,7 +359,7 @@ export function MedicalHistoryPage({
                             onViewReviews?.();
                           }
                         }}
-                        className={`flex-1 py-3 h-12 text-[14px] font-medium border-2 hover:bg-gray-50 transition-colors ${
+                        className={`flex-1 py-3 h-[60px] text-[14px] font-medium border-2 hover:bg-gray-50 transition-colors ${
                           hasReview
                             ? "border-[#e8e8e8] text-[#777777] bg-[#ffffff]"
                             : "border-[#2ECACA] text-[#239C9C] bg-[#ffffff]"
@@ -359,7 +367,7 @@ export function MedicalHistoryPage({
                       >
                         {hasReview ? "작성한 리뷰" : "리뷰쓰기"}
                       </Button>
-                      <Button className="flex-1 py-3 h-12 text-[14px] font-medium bg-[#36D2C5] text-white rounded-lg hover:bg-[#00C2B3] transition-colors">
+                      <Button className="flex-1 py-3 h-[60px] text-[14px] font-medium bg-[#36D2C5] text-white rounded-lg hover:bg-[#00C2B3] transition-colors">
                         재접수하기
                       </Button>
                     </div>
@@ -397,7 +405,7 @@ export function MedicalHistoryPage({
                   <Button
                     variant="outline"
                     // 버튼 스타일: 시안과 같이 흰 배경, 민트색 테두리, 민트색 텍스트
-                    className="w-full py-3 h-12 text-sm font-semibold border-1 border-[#e8e8e8] text-[#2b2b2b] bg-white hover:bg-gray-50 transition-colors mt-2"
+                    className="w-full py-3 h-[60px] text-sm font-semibold border-1 border-[#e8e8e8] text-[#2b2b2b] bg-white hover:bg-gray-50 transition-colors mt-2"
                   >
                     내가 받은 약 보기
                   </Button>

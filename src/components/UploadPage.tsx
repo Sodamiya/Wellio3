@@ -277,14 +277,61 @@ export function UploadPage({ onBack, onUpload }: UploadPageProps) {
     onBack();
   };
 
-  const handleCapture = () => {
+  // Canvas를 사용하여 필터가 적용된 이미지를 생성하는 함수
+  const applyFilterToImage = (imageSrc: string, filterString: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        
+        if (!ctx) {
+          reject(new Error("Canvas context not available"));
+          return;
+        }
+        
+        // Canvas에 필터 적용
+        ctx.filter = filterString;
+        ctx.drawImage(img, 0, 0);
+        
+        // Base64로 변환
+        resolve(canvas.toDataURL("image/jpeg", 0.95));
+      };
+      
+      img.onerror = () => {
+        reject(new Error("Image load failed"));
+      };
+      
+      img.src = imageSrc;
+    });
+  };
+
+  const handleCapture = async () => {
     if (isUploadMode) {
       if (!selectedImage) {
         setShowNoImageAlert(true);
         return;
       }
+      
+      // 필터가 적용된 이미지 생성
+      let finalImage = selectedImage;
+      const currentFilter = ORIGINAL_FILTERS.find((f) => f.name === selectedFilter);
+      
+      if (currentFilter && currentFilter.filter !== "none") {
+        try {
+          finalImage = await applyFilterToImage(selectedImage, currentFilter.filter);
+        } catch (error) {
+          console.error("필터 적용 실패:", error);
+          // 필터 적용 실패 시 원본 이미지 사용
+        }
+      }
+      
       onUpload({
-        image: selectedImage,
+        image: finalImage,
         caption: textInput,
         textOverlay: textInput,
         location: locationInput,

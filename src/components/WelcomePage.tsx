@@ -1,4 +1,5 @@
-import image_b41bc2e4319a3db074275b4da6314c6ddf33f5db from 'figma:asset/b41bc2e4319a3db074275b4da6314c6ddf33f5db.png';
+import image_ad59ec3fafaba2eab87ac3f4761da31b497da3e7 from "figma:asset/ad59ec3fafaba2eab87ac3f4761da31b497da3e7.png";
+import image_b41bc2e4319a3db074275b4da6314c6ddf33f5db from "figma:asset/b41bc2e4319a3db074275b4da6314c6ddf33f5db.png";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 interface WelcomePageProps {
@@ -6,11 +7,14 @@ interface WelcomePageProps {
   onSignUp: () => void;
 }
 
-export function WelcomePage({ onGuestMode, onSignUp }: WelcomePageProps) {
+export function WelcomePage({
+  onGuestMode,
+  onSignUp,
+}: WelcomePageProps) {
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-between px-5 py-10 max-w-[500px] mx-auto">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-between py-10 px-5 max-w-[500px] mx-auto">
       {/* 타이틀 */}
-      <div className="w-full max-w-[320px] text-left mt-2">
+      <div className="w-full text-left mt-2">
         <h1 className="text-[28px] leading-[1.3] whitespace-pre-line text-[#202020] font-semibold">
           {`웰리오와 함께\n우리가족\n건강관리 시작하세요.`}
         </h1>
@@ -19,7 +23,7 @@ export function WelcomePage({ onGuestMode, onSignUp }: WelcomePageProps) {
       {/* 이미지 - 수정된 부분 */}
       <div className="flex-1 flex items-center justify-center w-full my-10">
         <ImageWithFallback
-          src={image_b41bc2e4319a3db074275b4da6314c6ddf33f5db}
+          src={image_ad59ec3fafaba2eab87ac3f4761da31b497da3e7}
           alt="doctor illustration"
           // w-full: 가로 꽉 채움, h-auto: 높이 자동 비율
           className="w-full h-auto object-cover"
@@ -27,10 +31,10 @@ export function WelcomePage({ onGuestMode, onSignUp }: WelcomePageProps) {
       </div>
 
       {/* 버튼 그룹 */}
-      <div className="w-full max-w-[330px] space-y-3">
+      <div className="w-full space-y-3">
         <button
           onClick={onGuestMode}
-          className="w-full px-4 py-[15px] rounded-xl bg-[#21d2c4] text-white font-semibold hover:bg-[#1bc0b2] transition-colors"
+          className="w-full h-[60px] rounded-xl bg-[#2ECACA] text-white font-medium hover:bg-[#239C9C] transition-colors flex items-center justify-center"
         >
           관리자 계정으로 둘러보기
         </button>
@@ -38,10 +42,10 @@ export function WelcomePage({ onGuestMode, onSignUp }: WelcomePageProps) {
           onClick={onSignUp}
           // **비활성화 속성 추가**
           disabled
-          className="w-full px-4 py-[15px] rounded-xl bg-white text-[#21d2c4] border-2 border-[#21d2c4] font-semibold 
+          className="w-full h-[60px] rounded-xl bg-white text-[#777777] border-2 border-[#e8e8e8] font-medium 
                      // **비활성화 시 스타일 추가 (opacity 낮추고 커서 변경)**
                      disabled:opacity-50 disabled:cursor-not-allowed
-                     hover:bg-[#f0fffe] transition-colors"
+                     hover:bg-[#f0fffe] transition-colors flex items-center justify-center"
         >
           다른 방법으로 시작하기
         </button>
