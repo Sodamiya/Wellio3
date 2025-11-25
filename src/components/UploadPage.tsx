@@ -19,7 +19,7 @@ import {
   Flame, // 추가
   TrendingUp, // 추가 (오른층수용)
 } from "lucide-react";
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Button } from "./ui/button";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import {
@@ -35,7 +35,7 @@ import {
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import { toast } from "sonner@2.0.3";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion"; 
 
 // 원본 필터 목록
 const ORIGINAL_FILTERS = [
@@ -122,6 +122,10 @@ export function UploadPage({
   const [showNoImageAlert, setShowNoImageAlert] = useState(false);
   const textInputRef = useRef<HTMLInputElement>(null);
 
+  // 키보드 높이 감지 상태 및 Ref
+  const initialViewportHeight = useRef(0);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
   // 필터 모드 state
   const [isFilterMode, setIsFilterMode] = useState(false);
   const [selectedFilter, setSelectedFilter] =
@@ -143,8 +147,8 @@ export function UploadPage({
     { text: "갓 수확한 채소 🥬", color: "bg-purple-50 text-purple-600 border-purple-600/30" },
   ];
 
-  // 추천 캡션 클릭 핸들러 (수정됨: e.preventDefault() 추가)
-  const handleCaptionClick = (caption: string) => (e: React.MouseEvent<HTMLButtonElement>) => {
+  // 추천 캡션 클릭 핸들러
+  const handleCaptionClick = useCallback((caption: string) => (e: React.MouseEvent<HTMLButtonElement>) => {
     // 1. onMouseDown 이벤트에서 기본 동작을 막아 키보드가 닫히는 것을 방지합니다.
     if (e) {
       e.preventDefault();
@@ -158,7 +162,7 @@ export function UploadPage({
     if (textInputRef.current) {
       textInputRef.current.focus();
     }
-  };
+  }, [textInput]);
 
   // [수정] 무한 루프를 안정적으로 돌리기 위해 데이터를 3배로 불림
   const loopFilters = useMemo(() => {
@@ -184,10 +188,39 @@ export function UploadPage({
     // 초기 체크
     checkMobile();
     
-    // 리사이즈 이벤트 리스너
     window.addEventListener('resize', checkMobile);
     
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // 키보드 높이 감지 및 오버레이 위치 조정 useEffect
+  useEffect(() => {
+    // 1. 초기 뷰포트 높이 저장
+    if (initialViewportHeight.current === 0) {
+        initialViewportHeight.current = window.innerHeight;
+    }
+
+    // 2. 뷰포트 리사이즈 감지 (키보드가 열리거나 닫힐 때 발생)
+    const handleResize = () => {
+        // visualViewport를 사용하여 실제 뷰포트 높이 (키보드 제외)를 얻습니다.
+        const currentHeight = window.visualViewport?.height || window.innerHeight;
+        const initialHeight = initialViewportHeight.current;
+
+        const heightDifference = initialHeight - currentHeight;
+        
+        // 키보드가 열렸을 때 (높이 차이가 100px 이상일 경우) 키보드 높이를 설정
+        if (heightDifference > 100) {
+            setKeyboardHeight(heightDifference);
+        } else {
+            setKeyboardHeight(0);
+        }
+    };
+
+    window.visualViewport?.addEventListener('resize', handleResize);
+
+    return () => {
+        window.visualViewport?.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   // 카메라 스트림 시작
@@ -489,8 +522,12 @@ export function UploadPage({
       animate={{ y: 0 }}       // 제자리로 이동
       exit={{ y: "100%" }}     // 다시 화면 아래로 사라짐
       transition={{ type: "tween", duration: 0.15 }}
-      // 고정 위치 및 최대 너비 설정: HealthModal(z-50), 하단 버튼(z-10)보다 높게 설정
-      className="fixed bottom-0 left-0 right-0 z-[100] max-w-[500px] mx-auto bg-white border-t border-gray-200 shadow-2xl" 
+      // fixed, z-index, max-w 등은 유지
+      className="fixed left-0 right-0 z-[100] max-w-[500px] mx-auto bg-white border-t border-gray-200 shadow-2xl" 
+      style={{
+        // 💡 키보드 높이만큼 오버레이를 띄웁니다. (키보드 위에 위치)
+        bottom: `${keyboardHeight}px`,
+      }}
     >
       <div className="flex overflow-x-auto p-2 space-x-2 scrollbar-hide">
         {aiCaptions.map((caption, index) => (
@@ -675,7 +712,6 @@ export function UploadPage({
                           placeholder="텍스트를 입력하세요"
                           className="w-full text-black text-lg bg-white/80 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-md outline-none focus:ring-2 focus:ring-[#36D2C5] placeholder:text-gray-500/70"
                         />
-                        {/* ⚠️ 기존 모바일/데스크톱 AI 캡션 UI 제거됨. 하단 플로팅 오버레이 사용 */}
                       </>
                     ) : textInput ? (
                       <div className="w-full text-black text-lg bg-white/60 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-md">
@@ -778,7 +814,6 @@ export function UploadPage({
             /* 필터 모드: 필터 슬라이더만 표시, 버튼 숨김 */
             <div className="w-full h-28 relative flex items-center justify-center">
               {/* 가운데 고정된 원형 테두리 (민트색) */}
-              {/* z-30으로 높여서 슬라이더 위에 표시 */}
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
                 <div className="w-[68px] h-[68px] rounded-full border-[3px] border-[#36D2C5]" />
               </div>
@@ -786,16 +821,14 @@ export function UploadPage({
               {/* 필터 슬라이더 */}
               <div className="w-full h-full z-20">
                 <Swiper
-                  spaceBetween={14} // 간격 조정
+                  spaceBetween={14} 
                   slidesPerView="auto"
                   className="w-full h-full"
-                  // [수정] 정식 루프 기능 사용, 가짜 데이터 대신 루프 사용
                   loop={true}
                   centeredSlides={true}
-                  slideToClickedSlide={true} // 클릭 시 이동 지원
+                  slideToClickedSlide={true} 
                   threshold={10}
                   speed={400}
-                  // [수정] onRealIndexChange를 사용하여 실제 필터 인덱스 계산
                   onRealIndexChange={(swiper) => {
                     const realIndex =
                       swiper.realIndex %
@@ -805,10 +838,8 @@ export function UploadPage({
                     );
                   }}
                 >
-                  {/* [수정] 3배 복제된 데이터 사용 (루프 버퍼 확보) */}
                   {loopFilters.map((filter, index) => (
                     <SwiperSlide
-                      // [중요] key는 유니크하게
                       key={`${filter.name}-${index}`}
                       style={{
                         width: "auto",
@@ -819,8 +850,6 @@ export function UploadPage({
                     >
                       {({ isActive }) => (
                         <button
-                          // [수정] isActive를 사용하여 스타일 적용 (깜빡임 방지)
-                          // onClick 제거 (Swiper가 처리)
                           className={`w-16 h-16 rounded-full flex items-center justify-center text-[11px] font-bold tracking-wide select-none transition-all duration-200 ${
                             isActive
                               ? "bg-white text-gray-900 shadow-sm scale-100"
@@ -838,10 +867,9 @@ export function UploadPage({
           ) : isDetailEditMode ? (
             /* 세부조정 모드: 5개 동그란 아이콘 버튼(위) + 업로드 버튼(아래 중앙) */
             <div className="flex flex-col items-center gap-3 max-w-md mx-auto px-4">
-              {/* ⚠️ AI 추천 캡션 플로팅 오버레이로 분리됨. 이 영역에서는 버튼만 표시 */}
               {showTextInput && !isMobile ? (
                 /* 데스크톱 + 텍스트 입력 모드일 때 (5개 세부조정 버튼을 숨김) */
-                <div className="w-full h-[64px]" /> // 공간 확보용
+                <div className="w-full h-[64px]" /> 
               ) : (
                 /* 5개 세부조정 아이콘 버튼 (모바일이거나 텍스트 입력 모드가 아닐 때) */
                 <div className="flex items-center justify-center gap-4">
@@ -1145,6 +1173,7 @@ export function UploadPage({
       </AlertDialog>
 
       {/* -------------------- [NEW: 키보드 위에 AI 추천 캡션 오버레이] -------------------- */}
+      {/* showTextInput일 때만 캡션 표시 (키보드가 닫히면 showTextInput이 false가 되므로 사라짐) */}
       <AnimatePresence>
         {selectedImage && isDetailEditMode && showTextInput && AICaptionOverlay}
       </AnimatePresence>
