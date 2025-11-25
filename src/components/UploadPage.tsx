@@ -143,9 +143,21 @@ export function UploadPage({
     { text: "갓 수확한 채소 🥬", color: "bg-purple-50 text-purple-600 border-purple-600/30" },
   ];
 
-  // 추천 캡션 클릭 핸들러
-  const handleCaptionClick = (caption: string) => {
-    setTextInput(caption);
+  // 추천 캡션 클릭 핸들러 (수정됨: e.preventDefault() 추가)
+  const handleCaptionClick = (caption: string) => (e: React.MouseEvent<HTMLButtonElement>) => {
+    // 1. onMouseDown 이벤트에서 기본 동작을 막아 키보드가 닫히는 것을 방지합니다.
+    if (e) {
+      e.preventDefault();
+    }
+    
+    // 2. 텍스트에 캡션 추가
+    const newText = textInput.trim() ? `${textInput.trim()} ${caption}` : caption;
+    setTextInput(newText);
+
+    // 3. 텍스트 업데이트 후, 포커스를 input으로 돌려 입력 상태를 유지하고 커서를 맨 뒤로 이동시킵니다.
+    if (textInputRef.current) {
+      textInputRef.current.focus();
+    }
   };
 
   // [수정] 무한 루프를 안정적으로 돌리기 위해 데이터를 3배로 불림
@@ -467,6 +479,37 @@ export function UploadPage({
     setPreviousFilter(selectedFilter); // 현재 필터 저장
   };
 
+  // --------------------------------------------------------------------------
+  // 플로팅 AI 추천 캡션 오버레이 컴포넌트 정의
+  // --------------------------------------------------------------------------
+  const AICaptionOverlay = (
+    <motion.div
+      key="ai-caption-overlay-floating"
+      initial={{ y: "100%" }} // 화면 아래에서 시작
+      animate={{ y: 0 }}       // 제자리로 이동
+      exit={{ y: "100%" }}     // 다시 화면 아래로 사라짐
+      transition={{ type: "tween", duration: 0.15 }}
+      // 고정 위치 및 최대 너비 설정: HealthModal(z-50), 하단 버튼(z-10)보다 높게 설정
+      className="fixed bottom-0 left-0 right-0 z-[100] max-w-[500px] mx-auto bg-white border-t border-gray-200 shadow-2xl" 
+    >
+      <div className="flex overflow-x-auto p-2 space-x-2 scrollbar-hide">
+        {aiCaptions.map((caption, index) => (
+          <button
+            key={index}
+            // onMouseDown으로 키보드 닫힘 방지 및 캡션 선택
+            onMouseDown={handleCaptionClick(caption.text)} 
+            // 캡션의 색상/스타일은 UploadPage.tsx의 aiCaptions 정의를 따름
+            className={`flex-shrink-0 px-3 py-1.5 text-sm font-medium ${caption.color} border rounded-full hover:opacity-80 transition-colors whitespace-nowrap`}
+          >
+            {caption.text}
+          </button>
+        ))}
+      </div>
+    </motion.div>
+  );
+  // --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+
   return (
     <>
       {/* 카메라 권한 팝업 (기존 유지) */}
@@ -632,29 +675,7 @@ export function UploadPage({
                           placeholder="텍스트를 입력하세요"
                           className="w-full text-black text-lg bg-white/80 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-md outline-none focus:ring-2 focus:ring-[#36D2C5] placeholder:text-gray-500/70"
                         />
-                        {/* 모바일에서만 AI 추천 캡션 표시 */}
-                        {isMobile && (
-                          <div className="mt-3 bg-gray-50/90 backdrop-blur-sm p-3 border border-gray-200/80 rounded-xl">
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-center">
-                                <h3 className="text-sm font-bold text-gray-800">
-                                  AI 추천 캡션
-                                </h3>
-                              </div>
-                              <div className="flex overflow-x-auto space-x-2 pb-1 scrollbar-hide">
-                                {aiCaptions.map((caption, idx) => (
-                                  <button
-                                    key={idx}
-                                    onClick={() => handleCaptionClick(caption.text)}
-                                    className={`flex-shrink-0 flex items-center ${caption.color} border rounded-full px-3 py-1.5 text-xs font-medium hover:opacity-80 transition-opacity`}
-                                  >
-                                    {caption.text}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                        {/* ⚠️ 기존 모바일/데스크톱 AI 캡션 UI 제거됨. 하단 플로팅 오버레이 사용 */}
                       </>
                     ) : textInput ? (
                       <div className="w-full text-black text-lg bg-white/60 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-md">
@@ -817,30 +838,10 @@ export function UploadPage({
           ) : isDetailEditMode ? (
             /* 세부조정 모드: 5개 동그란 아이콘 버튼(위) + 업로드 버튼(아래 중앙) */
             <div className="flex flex-col items-center gap-3 max-w-md mx-auto px-4">
-              {/* 텍스트 입력 모드가 활성화되고 데스크톱인 경우: AI 추천 캡션만 표시 */}
-              {/* 그 외: 5개 세부조정 버튼 표시 */}
+              {/* ⚠️ AI 추천 캡션 플로팅 오버레이로 분리됨. 이 영역에서는 버튼만 표시 */}
               {showTextInput && !isMobile ? (
-                /* 데스크톱 + 텍스트 입력 모드 - AI 추천 캡션만 */
-                <div className="w-full bg-gray-50 p-4 border border-gray-200 rounded-xl">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center">
-                      <h3 className="text-base font-bold text-gray-800">
-                        AI 추천 캡션
-                      </h3>
-                    </div>
-                    <div className="flex overflow-x-auto space-x-2 pb-1.5 scrollbar-hide">
-                      {aiCaptions.map((caption, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => handleCaptionClick(caption.text)}
-                          className={`flex-shrink-0 flex items-center ${caption.color} border rounded-full px-4 py-2 text-sm font-medium hover:opacity-80 transition-opacity`}
-                        >
-                          {caption.text}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                /* 데스크톱 + 텍스트 입력 모드일 때 (5개 세부조정 버튼을 숨김) */
+                <div className="w-full h-[64px]" /> // 공간 확보용
               ) : (
                 /* 5개 세부조정 아이콘 버튼 (모바일이거나 텍스트 입력 모드가 아닐 때) */
                 <div className="flex items-center justify-center gap-4">
@@ -1142,6 +1143,12 @@ export function UploadPage({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* -------------------- [NEW: 키보드 위에 AI 추천 캡션 오버레이] -------------------- */}
+      <AnimatePresence>
+        {selectedImage && isDetailEditMode && showTextInput && AICaptionOverlay}
+      </AnimatePresence>
+      {/* --------------------------------------------------------------------------------- */}
     </>
   );
 }
