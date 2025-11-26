@@ -958,7 +958,7 @@ export function CommunityPage({
               return (
                 <SwiperSlide key={post.id}>
                   <div className={`h-full flex flex-col items-center px-5 xs:px-6 sm:px-8 py-4 ${isKeyboardVisible ? 'justify-start pt-12 overflow-y-auto' : 'justify-center'}`}>
-                    <div className={`relative max-h-[calc(90%-112px)] aspect-[335/447] mx-auto overflow-visible ${isKeyboardVisible ? 'flex-shrink-0' : ''} ${!isKeyboardVisible ? 'top-[-72px]' : ''}`}>
+                    <div className={`relative w-full mx-auto overflow-visible flex-shrink-0 ${isKeyboardVisible ? 'max-w-[335px] h-auto aspect-[335/447]' : 'max-h-[calc(90%-112px)] aspect-[335/447] top-[-72px]'}`}>
                       {post.userName ===
                         currentUser.userName && (
                         <div className="absolute inset-y-0 -right-2 w-32 flex items-center justify-center z-0">
