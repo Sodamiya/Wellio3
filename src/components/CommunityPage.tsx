@@ -957,7 +957,7 @@ export function CommunityPage({
               const isDeleting = postToDelete === post.id;
               return (
                 <SwiperSlide key={post.id}>
-                  <div className={`h-full flex flex-col items-center px-4 py-4 ${isKeyboardVisible ? 'justify-start pt-12 overflow-y-auto' : 'justify-center'}`}>
+                  <div className={`h-full flex flex-col items-center px-5 xs:px-6 sm:px-8 py-4 ${isKeyboardVisible ? 'justify-start pt-12 overflow-y-auto' : 'justify-center'}`}>
                     <div className={`relative max-h-[calc(90%-112px)] aspect-[335/447] mx-auto overflow-visible ${isKeyboardVisible ? 'flex-shrink-0' : ''} ${!isKeyboardVisible ? 'top-[-72px]' : ''}`}>
                       {post.userName ===
                         currentUser.userName && (
