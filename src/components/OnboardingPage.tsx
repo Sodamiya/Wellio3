@@ -212,7 +212,7 @@ export function OnboardingPage({
               backgroundColor: "rgba(46, 202, 202, 0.5)",
             }}
           >
-            <h2 className="text-xl mb-2 font-bold">
+            <h2 className="text-[21px] mb-2 font-semibold">
               {steps[currentStep].title}
             </h2>
             <p className="text-sm leading-relaxed opacity-100">
@@ -224,7 +224,7 @@ export function OnboardingPage({
               className="absolute transition-all duration-500 ease-in-out"
               style={{
                 left: `calc( (100% + 40px) * (${currentStep * 2 + 1} / 8) - 20px )`,
-                bottom: "-10px",
+                bottom: "-11px",
                 transform: "translateX(-50%)",
                 width: 0,
                 height: 0,
