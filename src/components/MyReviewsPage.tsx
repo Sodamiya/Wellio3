@@ -60,7 +60,9 @@ export function MyReviewsPage({
   >(null);
 
   // 드래그 삭제 관련 state
-  const [dragStartX, setDragStartX] = useState<number | null>(null);
+  const [dragStartX, setDragStartX] = useState<number | null>(
+    null,
+  );
 
   // reviews prop이 변경되면 displayReviews 업데이트
   useEffect(() => {
@@ -135,7 +137,9 @@ export function MyReviewsPage({
     setEditingReviewId(null);
     setEditText("");
     if (onEditReview) {
-      const updatedReview = displayReviews.find((r) => r.id === id);
+      const updatedReview = displayReviews.find(
+        (r) => r.id === id,
+      );
       if (updatedReview) {
         onEditReview(updatedReview);
       }
@@ -162,19 +166,19 @@ export function MyReviewsPage({
 
   return (
     <div className="relative bg-[#F7F7F7] flex flex-col max-w-[500px] mx-auto min-h-screen">
-      <header className="sticky top-0 z-30 px-5 py-4 flex items-center gap-4 border-b border-gray-100 w-full bg-[#f7f7f7]">
+      <header className="sticky top-0 z-30 px-4 xs:px-6 sm:px-8 py-4 flex items-center justify-center border-b border-gray-100 w-full bg-[#f7f7f7] relative">
         <button
           onClick={onBack}
-          className="w-6 h-6 flex items-center justify-center"
+          className="absolute left-4 xs:left-6 sm:left-8 w-6 h-6 flex items-center justify-center"
         >
           <ChevronLeft size={24} className="text-[#1A1A1A]" />
         </button>
-        <span className="text-lg font-bold text-[#1A1A1A]">
+        <span className="text-[19px] font-semibold text-[#1A1A1A]">
           나의 후기
         </span>
       </header>
 
-      <div className="px-5 pt-5 pb-20 space-y-3">
+      <div className="px-4 xs:px-6 sm:px-8 pt-5 pb-20 space-y-3">
         <AnimatePresence>
           {displayReviews.map((review) => {
             const isExpanded = expandedReviewId === review.id;
@@ -189,7 +193,7 @@ export function MyReviewsPage({
 
                 {/* 리뷰 카드 */}
                 <motion.div
-                  className={`bg-white rounded-xl p-5 shadow-sm transition-colors relative flex flex-col overflow-hidden ${isEditing ? "cursor-default" : "cursor-pointer hover:shadow-md"} z-10`}
+                  className={`pt-[22px] pb-[26px] px-[20px] bg-white rounded-xl shadow-sm transition-colors relative flex flex-col overflow-hidden ${isEditing ? "cursor-default" : "cursor-pointer hover:shadow-md"} z-10`}
                   onClick={() => handleCardClick(review.id)}
                   drag="x"
                   dragConstraints={{ left: -120, right: 0 }}
@@ -211,37 +215,39 @@ export function MyReviewsPage({
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-1">
-                      <span className="font-bold text-gray-900 text-lg">
+                      <span className="font-semibold text-[#2b2b2b] text-[19px]">
                         {review.hospitalName}
                       </span>
                       <ChevronRight
-                        size={18}
-                        className="text-gray-400"
+                        size={20}
+                        className="text-[#555555]"
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm mb-3">
+                  <div className="flex items-center gap-2 text-sm mb-2">
                     <div className="flex items-center gap-0.5">
                       {[...Array(5)].map((_, index) => (
                         <Star
                           key={index}
-                          size={16}
+                          size={14}
                           className={
                             index < review.rating
                               ? "fill-[#FFB800] text-[#FFB800]"
-                              : "text-gray-200"
+                              : "text-[#aeaeae]"
                           }
                         />
                       ))}
                     </div>
 
-                    <div className="flex items-center gap-2 text-[#999999] text-[13px]">
+                    <div className="flex items-center gap-2 text-[#777777] text-[12px]">
                       <span className="ml-1">
                         {review.visitDate}
                       </span>
-                      <span className="text-gray-300">|</span>
-                      <span>{review.visitType || "첫방문"}</span>
+                      <span className="text-[#777777]">|</span>
+                      <span>
+                        {review.visitType || "첫방문"}
+                      </span>
                     </div>
                   </div>
 
@@ -250,7 +256,7 @@ export function MyReviewsPage({
                       {review.keywords.map((keyword, index) => (
                         <span
                           key={index}
-                          className="px-2.5 py-1 bg-white border border-[#36D2C5] text-[#36D2C5] rounded-[14px] text-[12px]"
+                          className="px-2 py-0.5 border border-[#2ECACA] text-[#239C9C] rounded-[14px] text-[12px] font-medium"
                           style={{ borderRadius: "999px" }}
                         >
                           {keyword}
@@ -280,15 +286,21 @@ export function MyReviewsPage({
                       <motion.div
                         initial={false}
                         animate={{
-                          height: isExpanded ? "auto" : 48,
+                          height: isExpanded ? "auto" : "auto",
                         }}
                         transition={{
                           duration: 0.3,
                           ease: "easeInOut",
                         }}
-                        className="text-[15px] text-[#333333] leading-normal overflow-hidden"
+                        className="text-[14px] text-[#555555] leading-[1.4]"
                       >
-                        <p>{review.reviewText}</p>
+                        <p
+                          className={
+                            isExpanded ? "" : "line-clamp-2"
+                          }
+                        >
+                          {review.reviewText}
+                        </p>
                       </motion.div>
                     )
                   )}
@@ -354,7 +366,10 @@ export function MyReviewsPage({
                               </button>
                               <button
                                 onClick={(e) =>
-                                  handleDeleteClick(e, review.id)
+                                  handleDeleteClick(
+                                    e,
+                                    review.id,
+                                  )
                                 }
                                 className="flex items-center gap-1 text-gray-500 hover:text-red-500 text-sm py-1 px-1 transition-colors"
                               >

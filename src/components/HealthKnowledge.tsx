@@ -52,7 +52,7 @@ function ArticleCard({
           className="w-full h-full object-cover"
         />
       </div>
-      <div className="mt-3">
+      <div className="mt-3 ml-[6px]">
         <h4 className="font-bold text-gray-900 text-lg">
           {article.title}
         </h4>
@@ -70,10 +70,10 @@ export function HealthKnowledge() {
     <div className="w-full overflow-hidden pb-10">
       {/* 1. 타이틀 (건강지식 / 전체보기) */}
       <div className="flex justify-between items-center mb-4 px-4 sm:px-6 md:px-8">
-        <h3 className="text-lg font-bold text-gray-900">
+        <h3 className="text-[21px] font-bold text-[#202020] ml-[6px]">
           건강지식
         </h3>
-        <button className="text-sm font-medium text-gray-500 hover:text-gray-800">
+        <button className="text-sm font-normal text-[#202020] hover:text-[#2b2b2b]">
           전체보기 {">"}
         </button>
       </div>

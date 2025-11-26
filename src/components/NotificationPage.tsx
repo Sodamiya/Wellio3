@@ -218,14 +218,14 @@ export function NotificationPage({
   return (
     <div className="min-h-screen bg-[#f4f6f8] max-w-[500px] mx-auto">
       {/* 헤더 */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4 flex items-center sticky top-0 z-40">
+      <div className="bg-white border-b border-gray-200 px-4 xs:px-6 sm:px-8 py-4 flex items-center justify-center sticky top-0 z-40 relative">
         <button
           onClick={onBack}
-          className="text-[#555] hover:text-[#333] transition-colors mr-5 relative z-50 cursor-pointer p-2 -m-2"
+          className="absolute left-4 xs:left-6 sm:left-8 text-[#555] hover:text-[#333] transition-colors cursor-pointer p-2 -m-2"
         >
           <ChevronLeft size={24} className="text-[#1A1A1A]" />
         </button>
-        <h1 className="flex-1 text-center text-lg -ml-10 font-bold text-gray-800">
+        <h1 className="text-[19px] font-semibold text-gray-800">
           알림
         </h1>
       </div>

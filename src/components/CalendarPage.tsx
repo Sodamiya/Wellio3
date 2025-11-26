@@ -196,18 +196,17 @@ export function CalendarPage({ onBack }: CalendarPageProps) {
         }
       `}</style>
 
-      {/* 헤더 (동일) */}
-      <div className="flex-none bg-white flex justify-between items-center p-5 z-20 border-b border-gray-100/50 backdrop-blur-sm bg-white/95 sticky top-0">
-        <button onClick={onBack} className="w-6 h-6">
+      {/* Header - 기존과 동일 + Sticky 유지 */}
+      <div className="sticky top-0 z-10 bg-white px-4 xs:px-6 sm:px-8 py-4 flex items-center justify-center shadow-sm relative">
+        <button onClick={onBack} className="absolute left-4 xs:left-6 sm:left-8 w-6 h-6">
           <ChevronLeft size={24} className="text-gray-800" />
         </button>
         <div className="flex items-center gap-1">
-          <span className="text-lg font-bold text-gray-800">
+          <span className="text-[19px] font-semibold text-gray-800">
             캘린더
           </span>
           <ChevronDown size={18} className="text-gray-800" />
         </div>
-        <div className="w-6" />
       </div>
 
       {/* 💡 Swiper 영역 */}

@@ -112,7 +112,7 @@ export function ReviewWritePage({
   return (
     <div className="relative bg-[#F7F7F7] flex flex-col max-w-[500px] mx-auto min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-30 px-5 py-4 flex items-center gap-4 border-b border-gray-100 w-full bg-[#f7f7f7]">
+      <header className="sticky top-0 z-30 px-4 xs:px-6 sm:px-8 py-4 flex items-center justify-center border-b border-gray-100 w-full bg-[#f7f7f7] relative">
         <button
           type="button"
           onClick={(e) => {
@@ -120,17 +120,17 @@ export function ReviewWritePage({
             e.stopPropagation();
             onBack();
           }}
-          className="w-6 h-6 flex items-center justify-center"
+          className="absolute left-4 xs:left-6 sm:left-8 w-6 h-6 flex items-center justify-center"
         >
           <ChevronLeft size={24} className="text-[#1A1A1A]" />
         </button>
-        <span className="text-lg text-[#1A1A1A] flex-1 text-center mr-6">
+        <span className="text-[19px] font-semibold text-[#1A1A1A]">
           리뷰 작성
         </span>
       </header>
 
       {/* Content */}
-      <div className="pb-32 px-5 pt-5 space-y-3">
+      <div className="pb-32 px-4 xs:px-6 sm:px-8 pt-5 space-y-3">
         {/* 병원 정보 카드 */}
         <div className="flex items-center bg-white p-4 rounded-xl shadow-sm">
           <div className="w-[60px] h-[60px] rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 mr-4">

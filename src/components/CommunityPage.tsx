@@ -244,7 +244,7 @@ export function CommunityPage({
     }>;
   }>({});
 
-  const emojis = ["❤️", "😊", "👍", "👏"];
+  const emojis = ["❤️", "😊", "👍", "🎉"];
 
   // 이모지 애니메이션 상태
   const [floatingEmojis, setFloatingEmojis] = useState<
@@ -260,13 +260,17 @@ export function CommunityPage({
 
   // === [NEW] 애니메이션 실행 로직 분리 ===
   const triggerReactionAnimation = (emoji: string) => {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-    });
+    // 폭죽 이모지일 때는 confetti만 발생하고 이모지는 안 떠오름
+    if (emoji === "🎉") {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+      });
+      return; // 폭죽은 이모지 떠오르는 애니메이션 없음
+    }
 
-    // 이모지 떠오르는 애니메이션 생성
+    // 다른 이모지들은 떠오르는 애니메이션 생성
     const count = Math.floor(Math.random() * 9) + 4; // 4~12개 (기존 로직과 동일)
     const newEmojis = Array.from({ length: count }, (_, i) => ({
       id: Date.now() + i,

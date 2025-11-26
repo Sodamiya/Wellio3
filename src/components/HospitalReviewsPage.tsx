@@ -79,22 +79,21 @@ export function HospitalReviewsPage({
   return (
     <div className="relative min-h-screen bg-white flex flex-col max-w-[500px] mx-auto">
       {/* 1. 헤더 */}
-      <header className="sticky top-0 z-20 bg-white px-4 py-4 flex items-center justify-between border-b border-gray-100">
+      <header className="sticky top-0 z-20 bg-white px-4 xs:px-6 sm:px-8 py-4 flex items-center justify-center border-b border-gray-100 relative">
         <button
           onClick={onBack}
-          className="w-10 h-10 flex items-center justify-start -ml-2"
+          className="absolute left-4 xs:left-6 sm:left-8 w-10 h-10 flex items-center justify-start -ml-2"
         >
           <ChevronLeft size={24} className="text-[#1A1A1A]" />
         </button>
-        <h1 className="text-lg font-bold text-[#1A1A1A] absolute left-1/2 -translate-x-1/2">
+        <h1 className="text-[19px] font-semibold text-[#1A1A1A]">
           {hospitalName}
         </h1>
-        <div className="w-8" /> {/* 공간 채우기용 */}
       </header>
 
       <main className="flex-1 overflow-y-auto pb-6">
         {/* 2. 상단 요약 섹션 */}
-        <div className="px-5 pt-6 pb-8 border-b border-gray-100">
+        <div className="px-4 xs:px-6 sm:px-8 pt-6 pb-8 border-b border-gray-100">
           <div className="flex gap-6 mb-6">
             {/* 왼쪽: 별점 */}
             <div className="flex flex-col items-center justify-center min-w-[80px]">
@@ -135,7 +134,7 @@ export function HospitalReviewsPage({
         </div>
 
         {/* 3. 필터 및 총 개수 */}
-        <div className="px-5 py-4 flex items-center justify-between bg-white">
+        <div className="px-4 xs:px-6 sm:px-8 py-4 flex items-center justify-between bg-white">
           <div className="relative">
             <button
               className="flex items-center gap-1 px-3 py-1.5 border border-gray-300 rounded-full text-sm font-medium text-gray-700"
@@ -183,7 +182,7 @@ export function HospitalReviewsPage({
         ) : (
           <div className="divide-y divide-gray-100">
             {sortedReviews.map((review) => (
-              <div key={review.id} className="px-5 py-6">
+              <div key={review.id} className="px-4 xs:px-6 sm:px-8 py-6">
                 {/* 헤더: 별점, 유저정보, 좋아요 */}
                 <div className="flex justify-between items-start mb-3">
                   <div>

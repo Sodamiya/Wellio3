@@ -20,7 +20,7 @@ export function CTAButtons({
         // 4. 배경/텍스트색 변경 (디자인 시안에 맞게)
         // 5. 폰트 굵기 추가
         // 6. 반응형 높이 추가
-        className="bg-[#E8F8F7] text-[#00C2B3] rounded-2xl flex items-center justify-center hover:bg-[#D4FBF7] transition-colors h-15 md:h-20 font-semibold"
+        className="border border-[#C9E3FF] bg-[#D7EAFF] text-[#555555] rounded-2xl flex items-center justify-center hover:bg-[#C9E3FF] transition-colors h-15 xs:h-20 font-medium xs:text-[19px] "
       >
         병원 접수하기
       </button>
@@ -34,7 +34,7 @@ export function CTAButtons({
         // 4. 배경/텍스��색 변경 (디자인 시안에 맞게)
         // 5. 폰트 굵기 추가
         // 6. 반응형 높이 추가
-        className="bg-gray-100 text-gray-700 rounded-2xl flex items-center justify-center hover:bg-gray-200 transition-colors h-15 md:h-20 font-semibold"
+        className="border border-[#e8e8e8] bg-[#f0f0f0] text-[#555555] rounded-2xl flex items-center justify-center hover:bg-[#e8e8e8] transition-colors h-15 xs:h-20 font-medium xs:text-[19px]"
       >
         복약관리
       </button>

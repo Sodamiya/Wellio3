@@ -184,7 +184,7 @@ export function OnboardingPage({
       {/* -------------------- 3. 온보딩 텍스트 및 버튼 콘텐츠 -------------------- */}
       <div className="relative z-[60] flex flex-col min-h-screen max-w-[500px] mx-auto">
         {/* 상단 바 */}
-        <div className="px-5 py-4 flex items-center justify-between">
+        <div className="px-4 xs:px-6 sm:px-8 py-4 flex items-center justify-between">
           <div className="flex-1 h-1 bg-white/30 rounded-full mr-5 overflow-hidden">
             <div
               className="h-full bg-[#4dc2c0] rounded-full transition-all duration-300"
@@ -204,7 +204,7 @@ export function OnboardingPage({
 
         <div className="flex-1"></div>
 
-        <div className="px-5 pt-5 pb-24">
+        <div className="px-4 xs:px-6 sm:px-8 pt-5 pb-24">
           {/* [수정 2] Tailwind 대신 style로 RGBA 강제 적용 */}
           <div
             className="relative rounded-2xl p-5 mb-5 backdrop-blur-xs transition-colors duration-300"

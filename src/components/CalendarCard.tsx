@@ -91,13 +91,18 @@ export function CalendarCard() {
     // 반응형 패딩 추가
     <div className="w-full bg-white rounded-t-2xl overflow-hidden shadow-[0_2px_2.5px_0_#C9D0D833]">
       {/* 1. 달력 헤더 (년/월, 아이콘) */}
-      <div className="flex justify-between items-center mb-4 px-5 pt-4">
-        <h3 className="text-lg font-semibold text-gray-800">
+      <div className="relative mb-4 px-5 pt-3">
+        {/* 가운데 정렬된 텍스트 */}
+        <h3 className="text-[19px] font-semibold text-[#202020] text-center">
           {formatMonth(currentMonth)}
         </h3>
-        <CalendarDays size={20} className="text-gray-500" />
-      </div>
 
+        {/* 오른쪽 정렬 아이콘 */}
+        <CalendarDays
+          size={20}
+          className="text-gray-500 absolute right-5 top-4"
+        />
+      </div>
       {/* 2. 요일 헤더 삭제됨 */}
 
       {/* 3. 날짜 그리드 */}
@@ -117,14 +122,14 @@ export function CalendarCard() {
                   className={`w-full h-full rounded-lg flex flex-col justify-center items-center transition-all 
                     ${
                       isSelected
-                        ? "bg-[#36D2C5]" // 선택된 날짜 배경
-                        : "hover:bg-gray-50" // 선택 안된 날짜 호버
+                        ? "bg-[#2ECACA]" // 선택된 날짜 배경
+                        : "hover:bg-[#f0f0f0]" // 선택 안된 날짜 호버
                     }`}
                 >
                   {isSelected ? (
                     // --- 1. 선택된 날 (요일 + 흰색 원형 숫자) ---
                     <>
-                      <span className="text-sm font-bold text-white">
+                      <span className="text-[17px] font-medium text-white">
                         {daysOfWeek[dayOfWeekIndex]}
                       </span>
                       <div className="mt-1 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg text-sm md:text-base font-medium bg-white text-gray-800">
@@ -135,7 +140,7 @@ export function CalendarCard() {
                     // --- 2. 선택되지 않은 날 (요일 + 숫자) ---
                     <>
                       <span
-                        className={`text-sm font-bold ${
+                        className={`text-[17px] font-medium ${
                           dayOfWeekIndex === 6
                             ? "text-red-400"
                             : "text-gray-500"
@@ -170,9 +175,9 @@ export function CalendarCard() {
             const suffixIndex =
               selectedDay % messageSuffixes.length;
             return (
-              <p className="text-sm text-gray-700">
+              <p className="text-[15px] text-[#202020]">
                 {schedule.message}{" "}
-                <span className="text-blue-600 font-semibold">
+                <span className="text-[#2ECACA] font-normal">
                   {schedule.highlight}
                 </span>
                 {messageSuffixes[suffixIndex]}
@@ -180,7 +185,7 @@ export function CalendarCard() {
             );
           } else {
             return (
-              <p className="text-sm text-gray-500">
+              <p className="text-[15px] text-[#202020]">
                 일정이 없습니다
               </p>
             );

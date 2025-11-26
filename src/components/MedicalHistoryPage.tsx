@@ -1,5 +1,3 @@
-"use client";
-
 import {
   ChevronLeft,
   Calendar,
@@ -7,10 +5,13 @@ import {
   Building2,
   Pill,
   Edit,
+  Plus,
 } from "lucide-react";
 import { useState } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Button } from "./ui/button"; // Button 컴포넌트를 사용하기 위해 추가
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 
 interface MedicalHistoryPageProps {
   onBack: () => void;
@@ -165,46 +166,112 @@ export function MedicalHistoryPage({
     useState<string>("period");
 
   const filters = [
-    { id: "period", label: "기간검색" },
-    { id: "kim-welly", label: "김웰리" },
-    { id: "park-sw", label: "박승희" },
-    { id: "kim-ds", label: "김동석" },
-    { id: "kim-ds2", label: "김동석" },
+    {
+      id: "period",
+      label: "기간검색",
+      isPeriodButton: true,
+    },
+    {
+      id: "kim-welly",
+      label: "김웰리",
+      avatar:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+    },
+    {
+      id: "park-sw",
+      label: "박승희",
+      avatar:
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+    },
+    {
+      id: "kim-ds",
+      label: "김동석",
+      avatar:
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
+    },
+    {
+      id: "add-family",
+      label: "가족추가",
+      isAddButton: true,
+    },
+  ];
+
+  // 프로필 필터만 별도로 분리 (기간검색 제외)
+  const profileFilters = [
+    {
+      id: "kim-welly",
+      label: "김웰리",
+      avatar:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+    },
+    {
+      id: "park-sw",
+      label: "박승희",
+      avatar:
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+    },
+    {
+      id: "kim-ds",
+      label: "김동석",
+      avatar:
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
+    },
+    {
+      id: "add-family",
+      label: "가족추가",
+      isAddButton: true,
+    },
   ];
 
   // records가 전달되지 않으면 mockRecords를 사용
-  const displayRecords = records || mockRecords;
+  const allRecords = records || mockRecords;
+
+  // 선택된 필터에 따라 진료내역 필터링
+  const displayRecords =
+    selectedFilter === "period"
+      ? allRecords
+      : allRecords.filter((record) => {
+          // 필터 ID와 환자 이름 매핑
+          const filterNameMap: { [key: string]: string } = {
+            "kim-welly": "김웰리",
+            "park-sw": "박승희",
+            "kim-ds": "김동석",
+          };
+          return (
+            record.patientName === filterNameMap[selectedFilter]
+          );
+        });
 
   return (
     <div className="relative bg-[#f7f7f7] flex flex-col max-w-[500px] mx-auto min-h-screen">
-      
       {/* 🌟 수정된 부분: Header와 Tabs/Filters를 감싸는 하나의 Sticky Container */}
       <div className="sticky top-0 z-30 bg-[#f7f7f7]">
         {/* Header (sticky 속성 제거) */}
-        <header className="px-5 py-4 flex items-center justify-between w-full">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onBack}
-              className="w-6 h-6 flex items-center justify-center"
-            >
-              <ChevronLeft size={24} className="text-[#1A1A1A]" />
-            </button>
-            <span className="text-lg font-bold text-[#1A1A1A]">
-              진료내역
-            </span>
-          </div>
+        <header className="px-4 xs:px-6 sm:px-8 py-4 flex items-center justify-center w-full relative">
+          <button
+            onClick={onBack}
+            className="absolute left-4 xs:left-6 sm:left-8 w-6 h-6 flex items-center justify-center"
+          >
+            <ChevronLeft
+              size={24}
+              className="text-[#1A1A1A]"
+            />
+          </button>
+          <span className="text-[19px] font-semibold text-[#1A1A1A]">
+            진료내역
+          </span>
         </header>
 
         {/* Tabs & Filters Container (sticky 속성 및 offset 제거) */}
         <div>
           {/* Tabs */}
-          <div className="flex border-b border-gray-200 bg-[#f7f7f7]/80 backdrop-blur-xs">
+          <div className="flex border-b border-[#e1e1e1] bg-[#f7f7f7]/80 backdrop-blur-xs text-[19px] font-semibold">
             <button
               onClick={() => setActiveTab("treatment")}
               className={`flex-1 py-4 text-center transition-colors ${
                 activeTab === "treatment"
-                  ? "text-[#36D2C5] border-b-2 border-[#36D2C5]"
-                  : "text-gray-400"
+                  ? "text-[#135252] border-b-2 border-[#135252]"
+                  : "text-[#aeaeae]"
               }`}
             >
               진료 내역
@@ -213,50 +280,74 @@ export function MedicalHistoryPage({
               onClick={() => setActiveTab("medical")}
               className={`flex-1 py-4 text-center transition-colors ${
                 activeTab === "medical"
-                  ? "text-[#36D2C5] border-b-2 border-[#36D2C5]"
-                  : "text-gray-400"
+                  ? "text-[#135252] border-b-2 border-[#135252]"
+                  : "text-[#aeaeae]"
               }`}
             >
               의료 내역
             </button>
           </div>
 
-          {/* Filter Tags */}
+          {/* Filter Tags: 기간검색(고정) + 프로필 Swiper */}
           {activeTab === "treatment" && (
-            <div className="px-5 pt-5 pb-3 flex gap-2 overflow-x-auto bg-[#f7f7f7]">
-              {filters.map((filter) => (
-                <button
-                  key={filter.id}
-                  onClick={() => setSelectedFilter(filter.id)}
-                  className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors border ${
-                    selectedFilter === filter.id
-                      ? "bg-[#e8e8e8] text-[#2b2b2b] border-transparent"
-                      : "text-[#777777] border-[#aeaeae] hover:bg-gray-200"
-                  }`}
+            <div className="flex gap-2 px-4 xs:px-6 sm:px-8 pt-5 pb-3">
+              {/* 기간검색 버튼 (고정) */}
+              <button
+                onClick={() => setSelectedFilter("period")}
+                className="px-3 py-2 rounded-full whitespace-nowrap text-sm transition-colors border flex items-center gap-1 bg-[#e8e8e8] border-[#e8e8e8] text-[#2b2b2b] flex-shrink-0"
+              >
+                <span>기간검색</span>
+                <ChevronDown
+                  size={16}
+                  className="text-[#555555]"
+                />
+              </button>
+
+              {/* 프로필 필터 Swiper */}
+              <div className="flex-1 overflow-hidden">
+                <Swiper
+                  slidesPerView="auto"
+                  spaceBetween={8}
+                  className="w-full"
                 >
-                  {filter.label}
-                  {filter.id === "period" && (
-                    <ChevronDown
-                      size={16}
-                      className="inline-block ml-1"
-                    />
-                  )}
-                  {filter.id === "kim-ds" && (
-                    <ImageWithFallback
-                      src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
-                      alt="김동석"
-                      className="w-5 h-5 rounded-full inline-block ml-1"
-                    />
-                  )}
-                  {filter.id === "kim-ds2" && (
-                    <ImageWithFallback
-                      src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
-                      alt="김동석"
-                      className="w-5 h-5 rounded-full inline-block ml-1"
-                    />
-                  )}
-                </button>
-              ))}
+                  {profileFilters.map((filter) => (
+                    <SwiperSlide
+                      key={filter.id}
+                      className="!w-auto"
+                    >
+                      <button
+                        onClick={() =>
+                          setSelectedFilter(filter.id)
+                        }
+                        className={`px-3 py-2 rounded-full whitespace-nowrap text-sm transition-colors border flex items-center gap-2 ${
+                          selectedFilter === filter.id
+                            ? "bg-[#BCEEEE] border-[#BCEEEE] text-[#2b2b2b] font-medium"
+                            : "border-[#aeaeae] text-[#777] font-normal"
+                        }`}
+                      >
+                        {filter.isAddButton ? (
+                          <>
+                            <Plus
+                              size={16}
+                              className="text-[#777]"
+                            />
+                            <span>{filter.label}</span>
+                          </>
+                        ) : (
+                          <>
+                            <ImageWithFallback
+                              src={filter.avatar || ""}
+                              alt={filter.label}
+                              className="w-5 h-5 rounded-full"
+                            />
+                            <span>{filter.label}</span>
+                          </>
+                        )}
+                      </button>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
             </div>
           )}
         </div>
@@ -264,11 +355,10 @@ export function MedicalHistoryPage({
       {/* 🌟 수정된 부분 끝 */}
 
       {/* Content */}
-      {/* 배경색을 흰색이 아닌 #F7F7F7로 변경 */}
-      <div className="px-5 pb-20 bg-[#F7F7F7] flex-1">
+      <div className="px-4 xs:px-6 sm:px-8 pb-20 bg-[#F7F7F7] flex-1">
         {activeTab === "treatment" ? (
           // 진료내역 (이전 수정 내용 유지)
-          <div className="space-y-3 pt-5">
+          <div className="space-y-3">
             {displayRecords.map((record) => {
               const isMyAppointment =
                 record.isMyAppointment !== false; // 기본값 true
@@ -279,11 +369,11 @@ export function MedicalHistoryPage({
               return (
                 <div
                   key={record.id}
-                  className="bg-white rounded-xl shadow-sm space-y-3 border border-gray-100 pt-[22px] px-[20px] pb-[26px]"
+                  className="bg-white rounded-xl shadow-sm space-y-3 pt-[22px] px-[20px] pb-[26px]"
                 >
                   {/* 1. 진료코드 + 프로필+이름 */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[14px] text-[#777777]">
                       {record.code}
                     </span>
                     <div className="flex items-center gap-2">
@@ -292,21 +382,21 @@ export function MedicalHistoryPage({
                         alt={record.patientName}
                         className="w-6 h-6 rounded-full"
                       />
-                      <span className="text-sm font-medium text-gray-800">
+                      <span className="text-sm text-[#2b2b2b]">
                         {record.patientName}
                       </span>
                     </div>
                   </div>
 
                   {/* 2. 병원이름 */}
-                  <div className="text-lg font-bold text-gray-900">
+                  <div className="text-[19px] font-semibold text-[#2b2b2b] mb-2">
                     {record.hospitalName}
                   </div>
 
                   {/* 3. 내원일 */}
-                  <div className="flex items-center text-sm text-gray-600">
+                  <div className="flex items-center gap-4 text-[15px] text-[#777777] mb-1">
                     <span>내원일</span>
-                    <span className="text-gray-800 font-medium">
+                    <span className="text-[#555555]">
                       {record.visitDate}
                       {getDayOfWeek(record.visitDate)}{" "}
                       {record.visitTime}
@@ -314,19 +404,19 @@ export function MedicalHistoryPage({
                   </div>
 
                   {/* 4. 진료의 */}
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <div className="flex items-center gap-4 text-[15px] text-[#777777] mb-3">
                     <span>진료의</span>
-                    <span className="text-gray-800 font-medium">
+                    <span className="text-[#555555]">
                       {record.doctor}
                     </span>
                   </div>
 
                   {/* 5. 한줄메모 - 내 예약인 경우만 표시 */}
                   {isMyAppointment && (
-                    <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 flex items-start gap-2">
+                    <div className="bg-[#f7f7f7] rounded-[8px] p-3 text-[15px] text-[#555555] flex items-start gap-1">
                       <Edit
                         size={16}
-                        className="text-gray-500 mt-0.5 flex-shrink-0"
+                        className="text-[#777777] mt-0.5 flex-shrink-0"
                       />
                       <div
                         contentEditable
@@ -359,7 +449,7 @@ export function MedicalHistoryPage({
                             onViewReviews?.();
                           }
                         }}
-                        className={`flex-1 py-3 h-[60px] text-[14px] font-medium border-2 hover:bg-gray-50 transition-colors ${
+                        className={`flex-1 py-3 h-[60px] text-[14px] font-medium border-1 hover:bg-gray-50 transition-colors ${
                           hasReview
                             ? "border-[#e8e8e8] text-[#777777] bg-[#ffffff]"
                             : "border-[#2ECACA] text-[#239C9C] bg-[#ffffff]"
@@ -386,12 +476,12 @@ export function MedicalHistoryPage({
                 className="bg-white rounded-xl pt-[22px] px-[20px] pb-[26px] shadow-none space-y-2.5"
               >
                 {/* 1. 병원/약국 이름 */}
-                <div className="text-[19px] font-semibold text-gray-900">
+                <div className="text-[19px] font-semibold text-[#2b2b2b] mt-2">
                   {visit.name}
                 </div>
 
                 {/* 2. 내원일 (아이콘 제거, 텍스트 스타일 변경) */}
-                <div className="text-[15px] text-[#777777] gap-4 font-normal">
+                <div className="flex items-center gap-4 text-[15px] text-[#777777]">
                   <span>내원일</span>
                   {/* 시안 형식: 2025.07.14(월) */}
                   <span className="ml-2 text-[#555555]">
@@ -405,7 +495,7 @@ export function MedicalHistoryPage({
                   <Button
                     variant="outline"
                     // 버튼 스타일: 시안과 같이 흰 배경, 민트색 테두리, 민트색 텍스트
-                    className="w-full py-3 h-[60px] text-sm font-semibold border-1 border-[#e8e8e8] text-[#2b2b2b] bg-white hover:bg-gray-50 transition-colors mt-2"
+                    className="w-full py-3 h-[60px] text-sm font-semibold border-1 border-[#e8e8e8] text-[#2b2b2b] bg-white hover:bg-gray-50 transition-colors mt-3"
                   >
                     내가 받은 약 보기
                   </Button>

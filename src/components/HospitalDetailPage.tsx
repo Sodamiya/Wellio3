@@ -277,14 +277,14 @@ export function HospitalDetailPage({
   return (
     <div className="relative min-h-screen bg-[#F7F7F7] flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-white px-4 sm:px-6 md:px-8 py-4 flex items-center border-b border-gray-100">
+      <header className="sticky top-0 z-20 bg-white px-4 xs:px-6 sm:px-8 py-4 flex items-center justify-center border-b border-gray-100 relative">
         <button
           onClick={onBack}
-          className="w-6 h-6 flex items-center justify-center mr-4"
+          className="absolute left-4 xs:left-6 sm:left-8 w-6 h-6 flex items-center justify-center"
         >
           <ChevronLeft size={24} className="text-[#1A1A1A]" />
         </button>
-        <h1 className="text-lg font-semibold text-[#1A1A1A]">
+        <h1 className="text-[19px] font-semibold text-[#1A1A1A]">
           {hospital.name}
         </h1>
       </header>
@@ -351,7 +351,7 @@ export function HospitalDetailPage({
         </div>
 
         {/* 1. 진료 과목 */}
-        <div className="mt-8 px-4 sm:px-6 md:px-8">
+        <div className="mt-8 px-4 xs:px-6 sm:px-8">
           <h3 className="text-lg font-bold text-gray-900 mb-3 ml-1">
             진료 과목
           </h3>
@@ -369,7 +369,7 @@ export function HospitalDetailPage({
 
         {/* 2. 의사 정보 */}
         <div className="mt-8">
-          <div className="px-4 sm:px-6 md:px-8 mb-3 ml-1">
+          <div className="px-4 xs:px-6 sm:px-8 mb-3 ml-1">
             <h3 className="text-lg font-bold text-gray-900">
               의사 정보
             </h3>
@@ -393,7 +393,7 @@ export function HospitalDetailPage({
         </div>
 
         {/* 3. 병원 위치 */}
-        <div className="mt-8 px-4 sm:px-6 md:px-8">
+        <div className="mt-8 px-4 xs:px-6 sm:px-8">
           <h3 className="text-lg font-bold text-gray-900 mb-3 ml-1">
             병원 위치
           </h3>
@@ -429,7 +429,7 @@ export function HospitalDetailPage({
         </div>
 
         {/* 4. 병원 후기 */}
-        <div className="mt-8 px-4 sm:px-6 md:px-8">
+        <div className="mt-8 px-4 xs:px-6 sm:px-8">
           <h3 className="text-lg font-bold text-gray-900 mb-3 ml-1">
             병원 후기
           </h3>
@@ -485,7 +485,7 @@ export function HospitalDetailPage({
             </span>
           </div>
 
-          {/* 리뷰 리스트 카드 */}
+          {/* ���뷰 리스트 카드 */}
           <div className="bg-white rounded-2xl p-5 shadow-sm">
             <div className="mb-4 relative">
               <button
@@ -585,7 +585,7 @@ export function HospitalDetailPage({
         </div>
 
         {/* 5. 병원 접수 안내 */}
-        <div className="mt-8 px-4 sm:px-6 md:px-8">
+        <div className="mt-8 px-4 xs:px-6 sm:px-8">
           <h3 className="text-lg font-bold text-gray-900 mb-3 ml-1">
             병원 접수 안내
           </h3>

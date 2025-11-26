@@ -43,23 +43,24 @@ export function HomePage({
       <main className="bg-[#F7F7F7] pb-24">
         <UserGreeting userName={userName} />
 
-        <div className="relative -mt-20 z-10">
+        <div className="relative -mt-10 z-10">
           {" "}
           <CalendarCard />
         </div>
 
-        <div className="px-4 sm:px-6 md:px-8 mt-6">
+        <div className="px-4 xs:px-6 sm:px-8 mt-5">
           <CTAButtons
             onHospitalClick={() => onPageChange("hospital")}
+            onCommunityClick={() => onPageChange("community")}
           />
         </div>
 
-        <div className="px-4 sm:px-6 md:px-8 mt-3">
+        <div className="px-4 xs:px-6 sm:px-8 mt-3">
           {" "}
           <SecondaryMenu />
         </div>
 
-        <div className="px-4 sm:px-6 md:px-8 mt-6">
+        <div className="px-4 xs:px-6 sm:px-8 mt-5">
           <PromoBanner />
         </div>
         <div className="mt-8">

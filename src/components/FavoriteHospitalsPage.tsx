@@ -19,20 +19,20 @@ export function FavoriteHospitalsPage({
   return (
     <div className="relative bg-[#F7F7F7] flex flex-col max-w-[500px] mx-auto min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-30 px-5 py-4 flex items-center gap-4 border-b border-gray-100 w-full bg-[#f7f7f7]">
+      <header className="sticky top-0 z-30 px-4 xs:px-6 sm:px-8 py-4 flex items-center justify-center border-b border-gray-100 w-full bg-[#f7f7f7] relative">
         <button
           onClick={onBack}
-          className="w-6 h-6 flex items-center justify-center"
+          className="absolute left-4 xs:left-6 sm:left-8 w-6 h-6 flex items-center justify-center"
         >
           <ChevronLeft size={24} className="text-[#1A1A1A]" />
         </button>
-        <span className="text-lg font-bold text-[#1A1A1A]">
+        <span className="text-[19px] font-semibold text-[#1A1A1A]">
           찜한 병원
         </span>
       </header>
 
       {/* Content */}
-      <div className="px-5 pt-5 pb-20 space-y-3">
+      <div className="px-4 xs:px-6 sm:px-8 pt-5 pb-20 space-y-3">
         {favoriteHospitals.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <p className="text-gray-500">

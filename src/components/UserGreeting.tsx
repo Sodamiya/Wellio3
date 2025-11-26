@@ -69,7 +69,7 @@ function BackgroundSvg() {
 
 export function UserGreeting({ userName }: UserGreetingProps) {
   return (
-    <div className="relative w-full h-[250px] md:h-[420px] min-h-[360px] overflow-hidden">
+    <div className="relative w-full h-[250px] xs:h-[420px] min-h-[300px] overflow-hidden">
       {/* 1. SVG 배경 - 왼쪽에서 오른쪽으로 드러나는 애니메이션 */}
       <motion.div
         initial={{ clipPath: "inset(0 100% 0 0)" }}
@@ -88,12 +88,13 @@ export function UserGreeting({ userName }: UserGreetingProps) {
       {/* [수정] 텍스트 패딩을 pt-12 (48px) -> pt-20 (80px)로 수정
         (헤더 높이 h-16 (64px) 보다 크게)
       */}
-      <div className="relative z-10 px-4 sm:px-6 md:px-8 pt-20 md:pt-24 space-y-1">
-        <h1 className="text-2xl md:text-3xl font-bold text-[#1A1A1A]">
-          {userName}님
+      <div className="relative z-10 px-5 xs:px-8 pt-20 xs:pt-24 space-y-1">
+        <h1 className="text-[21px] font-semibold text-[#202020] xs:text-[28px] mb-[8px]">
+          {userName}
+          <span className="text-[#777777]">님</span>
         </h1>
-        <p className="text-2xl md:text-3xl font-bold text-[#1A1A1A]">
-          이번주는 혈압이 안정적이예요!
+        <p className="text-[24px] font-semibold text-[#202020] xs:text-3xl whitespace-pre-line leading-[1.3]">
+          {`이번주는 혈압이\n안정적이에요!`}
         </p>
       </div>
     </div>

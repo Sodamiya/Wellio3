@@ -1,6 +1,8 @@
 import { ChevronLeft, Search } from "lucide-react";
 import { useState } from "react";
 import { HospitalCard } from "./HospitalCard"; // 수정된 HospitalCard 임포트
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 
 interface HospitalSearchPageProps {
   onBack: () => void;
@@ -24,10 +26,12 @@ export function HospitalSearchPage({
 
   const filters = [
     "거리순",
-    "진료종",
-    "즉시접수",
+    "진료중",
+    "즉시접수가능",
     "야간진료",
     "약/주사",
+    "24시간",
+    "당일 검사",
   ];
 
   // hospital 데이터는 변경 없음
@@ -41,7 +45,8 @@ export function HospitalSearchPage({
       distance: "37m",
       address: "서울 서초구 서초대로 59번길 19, 201호",
       phone: "02-1234-5678",
-      description: "환자 중심의 진료를 제공하는 가정의학과 전문 병원입니다. 만성질환 관리부터 건강검진까지 종합적인 의료 서비스를 제공합니다.",
+      description:
+        "환자 중심의 진료를 제공하는 가정의학과 전문 병원입니다. 만성질환 관리부터 건강검진까지 종합적인 의료 서비스를 제공합니다.",
       isAvailableNow: true,
       rating: 4.8,
       reviews: 223,
@@ -59,13 +64,14 @@ export function HospitalSearchPage({
       distance: "58m",
       address: "서울 서초구 서초대로 16가길, 3층",
       phone: "02-2345-6789",
-      description: "최신 피부과 시술 장비를 갖춘 전문 클리닉입니다. 여드름, 미백, 안티에이징 등 다양한 피부 치료를 제공합니다.",
+      description:
+        "최신 피부과 시술 장비를 갖춘 전문 클리닉입니다. 여드름, 미백, 안티에이징 등 다양한 피부 치료를 제공합니다.",
       isAvailableNow: true,
       rating: 4.6,
       reviews: 12,
       imageUrl:
         "https://via.placeholder.com/100x100/E7F3FF/2F80ED?text=Logo",
-      latitude: 37.4950,
+      latitude: 37.495,
       longitude: 127.0285,
     },
     {
@@ -77,14 +83,15 @@ export function HospitalSearchPage({
       distance: "167m",
       address: "서울 서초구 강남대로 102",
       phone: "02-3456-7890",
-      description: "사랑니 발치 전문 치과입니다. 통증 최소화와 빠른 회복을 위한 최신 시술 방법을 사용합니다.",
+      description:
+        "사랑니 발치 전문 치과입니다. 통증 최소화와 빠른 회복을 위한 최신 시술 방법을 사용합니다.",
       isAvailableNow: true,
       rating: 4.7,
       reviews: 41,
       imageUrl:
         "https://via.placeholder.com/100x100/E8F8F7/00C2B3?text=Logo",
       latitude: 37.4955,
-      longitude: 127.0290,
+      longitude: 127.029,
     },
     {
       id: 4,
@@ -95,13 +102,14 @@ export function HospitalSearchPage({
       distance: "720m",
       address: "서울시 강남구 선릉로 345",
       phone: "02-4567-8901",
-      description: "심미 치과 치료를 전문으로 하는 치과입니다. 라미네이트, 임플란트 등 다양한 치료를 제공합니다.",
+      description:
+        "심미 치과 치료를 전문으로 하는 치과입니다. 라미네이트, 임플란트 등 다양한 치료를 제공합니다.",
       isAvailableNow: false,
       rating: 4.7,
       reviews: 312,
       imageUrl:
         "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop",
-      latitude: 37.4960,
+      latitude: 37.496,
       longitude: 127.0295,
     },
   ];
@@ -109,71 +117,82 @@ export function HospitalSearchPage({
   // 검색어에 따라 병원 필터링
   const filteredHospitals = hospitals.filter((hospital) => {
     if (!searchQuery.trim()) return true; // 검색어가 없으면 모두 표시
-    
+
     const query = searchQuery.toLowerCase();
     const name = hospital.name.toLowerCase();
     const department = hospital.department.toLowerCase();
-    
+
     return name.includes(query) || department.includes(query);
   });
 
   return (
     <div className="bg-[#f7f7f7] flex flex-col min-h-screen">
       {/* Header: sticky, z-10, bg-white, border-b 유지 */}
-      <header className="sticky top-0 z-10 bg-[#f7f7f7] px-5 pt-4 pb-2 space-y-4">
+      <header className="sticky top-0 z-10 bg-[#f7f7f7] px-4 xs:px-6 sm:px-8 pt-4 pb-2 space-y-4">
         {/* Title Bar */}
-        <div className="flex items-center justify-between pb-2">
-          <button onClick={onBack} className="w-10 p-2 -ml-2">
+        <div className="flex items-center justify-center pb-2 relative">
+          <button onClick={onBack} className="absolute left-0 w-10 p-2 -ml-2">
             <ChevronLeft size={24} className="text-[#1A1A1A]" />
           </button>
-          <h1 className="text-xl font-bold text-[#1A1A1A] text-center flex-1">
+          <h1 className="text-[19px] font-semibold text-[#1A1A1A]">
             병원 찾기
           </h1>
-          <div className="w-10" /> {/* Spacer for centering */}
         </div>
 
         {/* Search */}
         <div className="flex items-center gap-3">
-          <div className={`flex-1 bg-gray-100 rounded-lg px-4 py-3 flex items-center gap-2 transition-all border-2 ${
-            isSearchFocused ? 'border-[#36D9D9]' : 'border-transparent'
-          }`}>
-            <Search size={20} className="text-gray-400" />
+          <div
+            className={`flex-1 bg-transparent rounded-lg px-4 py-3 flex items-center gap-4 transition-all border-2 ${
+              isSearchFocused
+                ? "border-[#2ECACA]"
+                : "border-[#2ECACA]"
+            }`}
+          >
+            <Search size={20} className="text-[#2ECACA]" />
             <input
               type="text"
               placeholder="진료과, 병원이름을 검색해보세요"
-              className="flex-1 bg-transparent outline-none text-[#1A1A1A] placeholder:text-gray-400"
+              className="flex-1 bg-transparent outline-none text-[#1A1A1A] placeholder:text-[#aeaeae]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
             />
           </div>
-          <button className="text-[#1A1A1A] text-sm font-medium">
+          <button className="text-[#777777] text-[17px] font-noraml">
             취소
           </button>
         </div>
 
-        {/* ⭐️ [수정] Filter Tags: 'scrollbar-hide' 클래스 제거. 플러그인이 없을 경우 오류 방지. */}
-        <div className="flex gap-2 overflow-x-auto pb-3">
+        {/* Filter Tags: Swiper로 변경 */}
+        <Swiper
+          slidesPerView="auto"
+          spaceBetween={8}
+          className="w-full !pb-3"
+        >
           {filters.map((filter) => (
-            <button
+            <SwiperSlide
               key={filter}
-              onClick={() => setSelectedFilter(filter)}
-              className={`px-4 py-1.5 rounded-full whitespace-nowrap transition-colors text-sm font-medium ${
-                selectedFilter === filter
-                  ? "bg-[#E7F3FF] text-[#2F80ED]" // 시안과 일치
-                  : "bg-gray-100 text-gray-700"
-              }`}
+              className="!w-auto first:!ml-0"
             >
-              {filter}
-            </button>
+              <button
+                onClick={() => setSelectedFilter(filter)}
+                className={`px-3 py-2 rounded-full whitespace-nowrap transition-colors text-sm ${
+                  selectedFilter === filter
+                    ? "bg-[#BCEEEE] border border-[#BCEEEE] text-[#2b2b2b] font-medium"
+                    : "border border-[#aeaeae] text-[#777] font-normal"
+                }`}
+              >
+                {filter}
+              </button>
+            </SwiperSlide>
           ))}
-        </div>
+        </Swiper>
       </header>
 
       {/* Hospital List: 내부 스크롤 방지 유지 */}
-      <div className="overflow-y-hidden px-5 pt-5 pb-20 space-y-3">
-        <div className="grid grid-cols-1 gap-3">
+      <div className="overflow-y-hidden pb-20 space-y-3 px-4 xs:px-6 sm:px-8">
+        <div className="grid grid-cols-1">
           {filteredHospitals.map((hospital) => (
             <HospitalCard
               key={hospital.id}
@@ -181,7 +200,9 @@ export function HospitalSearchPage({
               onClick={() => onHospitalClick(hospital)}
               favoriteHospitals={favoriteHospitals}
               onToggleFavorite={onToggleFavorite}
-              reviewCount={getHospitalReviewCount?.(hospital.id)}
+              reviewCount={getHospitalReviewCount?.(
+                hospital.id,
+              )}
             />
           ))}
         </div>
