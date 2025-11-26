@@ -860,6 +860,10 @@
     display: inline-flex;
   }
 
+  .aspect-\[335\/447\] {
+    aspect-ratio: 335 / 447;
+  }
+
   .aspect-square {
     aspect-ratio: 1;
   }
@@ -1019,10 +1023,6 @@
     height: 250px;
   }
 
-  .h-\[447px\] {
-    height: 447px;
-  }
-
   .h-\[calc\(100vh-110px\)\] {
     height: calc(100vh - 110px);
   }
@@ -1173,10 +1173,6 @@
 
   .w-\[263px\] {
     width: 263px;
-  }
-
-  .w-\[335px\] {
-    width: 335px;
   }
 
   .w-fit {
