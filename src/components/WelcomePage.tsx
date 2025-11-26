@@ -15,7 +15,7 @@ export function WelcomePage({
     <div className="min-h-screen bg-white flex flex-col items-center justify-between py-10 max-w-[500px] mx-auto px-4 xs:px-6 sm:px-8">
       {/* 타이틀 */}
       <div className="w-full text-left mt-2">
-        <h1 className="text-[28px] leading-[1.3] whitespace-pre-line text-[#202020] font-semibold sm:text-3xl pt-[28px]">
+        <h1 className="text-[28px] leading-[1.3] whitespace-pre-line text-[#202020] font-semibold sm:text-3xl xs:pt-[28px]">
           {`웰리오와 함께\n우리가족\n건강관리 시작하세요.`}
         </h1>
       </div>

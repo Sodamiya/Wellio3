@@ -138,7 +138,7 @@ export function HospitalCard({
             </span>
           )}
           <div className="flex items-center gap-1 text-[14px]">
-            <Star size={16} className="fill-[#FFCE00]" />
+            <Star size={16} className="fill-[#FFB800] text-[#FFB800]" />
             <span className="text-[#555555] font-normal">
               {hospital.rating}
             </span>

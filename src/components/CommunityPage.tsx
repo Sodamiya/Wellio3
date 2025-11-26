@@ -218,6 +218,9 @@ export function CommunityPage({
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // 키보드 감지를 위한 state 추가
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
   const currentUser = {
     userName: currentUserName,
     userAvatar:
@@ -586,6 +589,30 @@ export function CommunityPage({
     }
   }, [filteredPosts, currentPostId]);
 
+  // 모바일 키보드 감지 useEffect
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+
+    const handleResize = () => {
+      const viewport = window.visualViewport;
+      if (!viewport) return;
+
+      // viewport 높이가 window 높이보다 작으면 키보드가 올라온 것
+      const isKeyboard = viewport.height < window.innerHeight * 0.75;
+      setIsKeyboardVisible(isKeyboard);
+    };
+
+    window.visualViewport.addEventListener('resize', handleResize);
+    window.visualViewport.addEventListener('scroll', handleResize);
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize);
+        window.visualViewport.removeEventListener('scroll', handleResize);
+      }
+    };
+  }, []);
+
   return (
     <div className="relative bg-white flex flex-col max-w-[500px] mx-auto h-screen overflow-hidden">
       {/* Header */}
@@ -930,8 +957,8 @@ export function CommunityPage({
               const isDeleting = postToDelete === post.id;
               return (
                 <SwiperSlide key={post.id}>
-                  <div className="h-full flex flex-col items-center justify-center px-4 py-4">
-                    <div className="relative max-h-[calc(90%-112px)] aspect-[335/447] mx-auto overflow-visible top-[-72px]">
+                  <div className={`h-full flex flex-col items-center px-4 py-4 ${isKeyboardVisible ? 'justify-start pt-12 overflow-y-auto' : 'justify-center'}`}>
+                    <div className={`relative max-h-[calc(90%-112px)] aspect-[335/447] mx-auto overflow-visible ${isKeyboardVisible ? 'flex-shrink-0' : ''} ${!isKeyboardVisible ? 'top-[-72px]' : ''}`}>
                       {post.userName ===
                         currentUser.userName && (
                         <div className="absolute inset-y-0 -right-2 w-32 flex items-center justify-center z-0">

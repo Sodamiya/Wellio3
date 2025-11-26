@@ -1,4 +1,6 @@
-"use client";
+import image_805450b4d414bbaaf2578da077f46c191f207225 from "figma:asset/805450b4d414bbaaf2578da077f46c191f207225.png";
+import image_5ba541968b614c80557b21a496869e3d9baa098e from "figma:asset/5ba541968b614c80557b21a496869e3d9baa098e.png";
+("use client");
 
 import { useEffect, useState } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
@@ -7,27 +9,30 @@ export function PromoBanner() {
   const [banners] = useState([
     {
       id: 1,
-      title: "건강검진 예약 시",
-      description: "최대 30% 할인 혜택",
+      title: "고려은단 헬스케어",
+      description: "N포인트로 다양한 할인 혜택을 받아보세요",
       image:
         "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=200&q=80",
-      bgColor: "from-[#4EC7FF] to-[#36D2C5]",
+      bgColor: "#FFDD80",
     },
     {
       id: 2,
-      title: "약 배송 서비스",
-      description: "집 앞까지 무료 배송",
-      image:
-        "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&q=80",
-      bgColor: "from-[#FF6B9D] to-[#C44569]",
+      title: "Doctor's Best, 소화 효소",
+      description: "포인트로 다양한 할인 혜택을 받아보세요 ",
+      image: image_805450b4d414bbaaf2578da077f46c191f207225,
+      bgColor: "#002E60",
+      titleColor: "#FBFFD2",
+      descColor: "#f0f0f0",
     },
     {
       id: 3,
-      title: "24시간 원격 상담",
-      description: "의사와 실시간 채팅",
-      image:
-        "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=200&q=80",
-      bgColor: "from-[#A8E6CF] to-[#56AB91]",
+      title: "오므론 스마트 혈압계",
+      description:
+        "똑똑한 혈압계로 간편하게 혈압을 기록해 보세요",
+      image: image_5ba541968b614c80557b21a496869e3d9baa098e,
+      bgColor: "#2b2b2b",
+      titleColor: "#BCEEEE",
+      descColor: "#f0f0f0",
     },
   ]);
 
@@ -65,7 +70,7 @@ export function PromoBanner() {
   };
 
   return (
-    <div className="relative h-[80px] overflow-hidden rounded-2xl">
+    <div className="relative h-[80px] overflow-hidden rounded-[12px]">
       {/* 배너 슬라이드 */}
       <div
         className={`flex h-full ${
@@ -78,21 +83,25 @@ export function PromoBanner() {
         {augmentedBanners.map((banner, index) => (
           <div
             key={index}
-            className={`min-w-full h-full bg-gradient-to-br ${banner.bgColor} relative overflow-hidden`}
+            className="min-w-full h-full relative overflow-hidden"
+            style={{ backgroundColor: banner.bgColor }}
           >
-            {/* ... (배너 컨텐츠는 동일) ... */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-8 translate-x-8" />
-            <div className="absolute bottom-0 right-8 w-20 h-20 bg-white/10 rounded-full translate-y-8" />
-            <div className="relative z-10 h-full flex items-center justify-between pl-6 pr-3">
+            <div className="relative z-10 h-full flex items-center justify-between pl-5 pr-5">
               <div className="flex-1">
-                <h3 className="text-white mb-1">
+                <h3
+                  className="mb-1 text-[17px] font-semibold"
+                  style={{ color: banner.titleColor }}
+                >
                   {banner.title}
                 </h3>
-                <p className="text-white/90">
+                <p
+                  className="text-[13px] font-normal"
+                  style={{ color: banner.descColor }}
+                >
                   {banner.description}
                 </p>
               </div>
-              <div className="w-[60px] h-[60px] rounded-xl overflow-hidden bg-white/20 backdrop-blur-sm flex-shrink-0 ml-4">
+              <div className="w-[60px] h-[60px] rounded-xl overflow-hidden flex-shrink-0 ml-4">
                 <ImageWithFallback
                   src={banner.image}
                   alt={banner.title}

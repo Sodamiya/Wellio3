@@ -41,7 +41,7 @@ export function ProfilePage({
       />
 
       {/* 헤더 높이(h-16)만큼 pt-16 추가 */}
-      <main className="flex-grow bg-[#F7F7F7] pt-16 pb-24">
+      <main className="flex-grow bg-[#F7F7F7] pb-24">
         {/* User Info Section */}
         <div className="py-5 px-5 relative">
           {/* 프로필 정보 컨테이너 */}

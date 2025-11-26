@@ -1,3 +1,9 @@
+import image_88f427bc51591d8592169cc85c0d7bf56c21995a from "figma:asset/88f427bc51591d8592169cc85c0d7bf56c21995a.png";
+import image_4b8856fb1220ee4593967ce52764ef089118466a from "figma:asset/4b8856fb1220ee4593967ce52764ef089118466a.png";
+import image_b88f8ac92a33b8d037d59251a778978dc83ac0c0 from "figma:asset/b88f8ac92a33b8d037d59251a778978dc83ac0c0.png";
+import image_69a9e50bc25177b16d022c841a02a37e3a74f13a from "figma:asset/69a9e50bc25177b16d022c841a02a37e3a74f13a.png";
+import image_37a1656f2c0d46ec52b454dab37e530a8a03a9f4 from "figma:asset/37a1656f2c0d46ec52b454dab37e530a8a03a9f4.png";
+import image_836d5a20cf72b3dd8be04e3482da174a43edfd92 from "figma:asset/836d5a20cf72b3dd8be04e3482da174a43edfd92.png";
 import image_ba471be49c63bdd07959dbe65d56797ab51ab9a5 from "figma:asset/ba471be49c63bdd07959dbe65d56797ab51ab9a5.png";
 import image_b5407d732c19e4bd29e79664b6917fd7f26d6faf from "figma:asset/b5407d732c19e4bd29e79664b6917fd7f26d6faf.png";
 import image_079cd83ca9fe115ba1d0bb01d0a8e56210a3f5af from "figma:asset/079cd83ca9fe115ba1d0bb01d0a8e56210a3f5af.png";
@@ -9,26 +15,26 @@ import "swiper/css";
 const articles = [
   {
     id: 1,
-    imageSrc: image_079cd83ca9fe115ba1d0bb01d0a8e56210a3f5af,
+    imageSrc: image_b88f8ac92a33b8d037d59251a778978dc83ac0c0,
     title: "혹시 나도 디스크?",
     description:
-      "시도 때도 없이 찌릿거리는 허리, 혹시 디스크가 아닌 지 확인해보세요",
+      "시도 때도 없이 찌릿거리는 허리,\n혹시 디스크가 아닌지 확인해보세요",
     bgColor: "bg-lime-50",
   },
   {
     id: 2,
-    imageSrc: image_b5407d732c19e4bd29e79664b6917fd7f26d6faf,
+    imageSrc: image_4b8856fb1220ee4593967ce52764ef089118466a,
     title: "현대인의 편두통",
     description:
-      "지긋지긋한 편두통, 간단한 마사지로 완화하는 방법",
+      "지긋지긋한 편두통\n간단한 마사지로 완화해보아요",
     bgColor: "bg-blue-50",
   },
   {
     id: 3,
-    imageSrc: image_ba471be49c63bdd07959dbe65d56797ab51ab9a5,
+    imageSrc: image_88f427bc51591d8592169cc85c0d7bf56c21995a,
     title: "환절기 비염",
     description:
-      "코막힘과 재채기, 알레르기 비염 관리법을 알아보세요",
+      "누적되는 피로감, 만성피로의 원인과\n관리 방법을 알아봅시다!",
     bgColor: "bg-yellow-50",
   },
 ];
@@ -42,21 +48,19 @@ function ArticleCard({
   return (
     // [수정] w-[260px] -> w-full (SwiperSlide 너비에 맞춤)
     <div className="w-full">
-      <div
-        className={`w-full h-40 rounded-2xl ${article.bgColor} overflow-hidden relative`}
-      >
-        {/* 이미지에 오버레이 효과 추가해서 텍스트 가독성 확보 (선택사항) */}
+      <div className="relative w-full h-40 rounded-2xl overflow-hidden">
         <img
           src={article.imageSrc}
           alt={article.title}
-          className="w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover"
         />
       </div>
+
       <div className="mt-3 ml-[6px]">
-        <h4 className="font-bold text-gray-900 text-lg">
+        <h4 className="font-semibold text-[#202020]text-lg">
           {article.title}
         </h4>
-        <p className="text-sm text-gray-500 mt-1 truncate">
+        <p className="text-sm text-[#2b2b2b] mt-1 font-light leading-[1.3] whitespace-pre-line">
           {article.description}
         </p>
       </div>

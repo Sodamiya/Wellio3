@@ -33,7 +33,7 @@ export function Header({
   // --- 'title' prop이 있으면 '서브 페이지 헤더' (내 정보) ---
   if (title) {
     return (
-      <header className="fixed top-0 left-0 right-0 z-40 px-4 xs:px-6 sm:px-8 py-4 flex w-full items-center justify-center mx-auto h-16 max-w-[500px] bg-[#f7f7f7]/80 backdrop-blur-xs relative">
+      <header className="sticky top-0 left-0 right-0 z-40 px-4 xs:px-6 sm:px-8 py-4 flex w-full items-center justify-center mx-auto h-16 max-w-[500px] bg-[#f7f7f7]/80 backdrop-blur-xs relative">
         {/* 왼쪽: 뒤로가기 */}
         {showBackButton && (
           <button

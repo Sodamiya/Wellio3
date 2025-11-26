@@ -449,7 +449,7 @@ export function MedicalHistoryPage({
                             onViewReviews?.();
                           }
                         }}
-                        className={`flex-1 py-3 h-[60px] text-[14px] font-medium border-1 hover:bg-gray-50 transition-colors ${
+                        className={`flex-1 py-3 h-[48px] text-[14px] font-medium border-1 hover:bg-gray-50 transition-colors ${
                           hasReview
                             ? "border-[#e8e8e8] text-[#777777] bg-[#ffffff]"
                             : "border-[#2ECACA] text-[#239C9C] bg-[#ffffff]"
@@ -457,7 +457,7 @@ export function MedicalHistoryPage({
                       >
                         {hasReview ? "작성한 리뷰" : "리뷰쓰기"}
                       </Button>
-                      <Button className="flex-1 py-3 h-[60px] text-[14px] font-medium bg-[#36D2C5] text-white rounded-lg hover:bg-[#00C2B3] transition-colors">
+                      <Button className="flex-1 py-3 h-[48px] text-[14px] font-medium bg-[#36D2C5] text-white rounded-lg hover:bg-[#00C2B3] transition-colors">
                         재접수하기
                       </Button>
                     </div>
@@ -495,7 +495,7 @@ export function MedicalHistoryPage({
                   <Button
                     variant="outline"
                     // 버튼 스타일: 시안과 같이 흰 배경, 민트색 테두리, 민트색 텍스트
-                    className="w-full py-3 h-[60px] text-sm font-semibold border-1 border-[#e8e8e8] text-[#2b2b2b] bg-white hover:bg-gray-50 transition-colors mt-3"
+                    className="w-full py-3 h-[48px] text-sm font-semibold border-1 border-[#e8e8e8] text-[#2b2b2b] bg-white hover:bg-gray-50 transition-colors mt-3"
                   >
                     내가 받은 약 보기
                   </Button>

@@ -55,7 +55,9 @@ export function ReviewWritePage({
   hospitalId = 1,
   editingReview,
 }: ReviewWritePageProps) {
-  const [rating, setRating] = useState(editingReview?.rating || 0);
+  const [rating, setRating] = useState(
+    editingReview?.rating || 0,
+  );
   const [hoveredRating, setHoveredRating] = useState(0);
   const [selectedKeywords, setSelectedKeywords] = useState<
     string[]
@@ -86,19 +88,24 @@ export function ReviewWritePage({
     if (!isFormValid) return;
 
     // 리뷰 제출 로직
-    toast.success("리뷰가 작성되었습니다!");
-    
+    toast.success(
+      editingReview ? "리뷰가 수정되었습니다!" : "리뷰가 작성되었습니다!",
+    );
+
     if (onComplete) {
       onComplete({
         hospitalId,
         hospitalName,
-        hospitalImage: hospitalImage || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=120&h=120&fit=crop",
+        hospitalImage:
+          hospitalImage ||
+          "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=120&h=120&fit=crop",
         visitDate,
         rating,
         keywords: selectedKeywords,
         reviewText,
         userName,
-        userAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop",
+        userAvatar:
+          "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop",
         visitType: editingReview?.visitType,
       });
     } else {
@@ -107,7 +114,10 @@ export function ReviewWritePage({
   };
 
   // 폼 유효성 검사: 별점 선택, 키워드 1개 이상 필수
-  const isFormValid = rating > 0 && selectedKeywords.length >= 1;
+  const isFormValid =
+    rating > 0 && selectedKeywords.length >= 1;
+
+  const isEditMode = !!editingReview;
 
   return (
     <div className="relative bg-[#F7F7F7] flex flex-col max-w-[500px] mx-auto min-h-screen">
@@ -122,18 +132,18 @@ export function ReviewWritePage({
           }}
           className="absolute left-4 xs:left-6 sm:left-8 w-6 h-6 flex items-center justify-center"
         >
-          <ChevronLeft size={24} className="text-[#1A1A1A]" />
+          <ChevronLeft size={24} className="text-[#555555]" />
         </button>
-        <span className="text-[19px] font-semibold text-[#1A1A1A]">
-          리뷰 작성
+        <span className="text-[19px] font-semibold text-[#202020]">
+          {isEditMode ? "후기 수정" : "후기 작성"}
         </span>
       </header>
 
       {/* Content */}
       <div className="pb-32 px-4 xs:px-6 sm:px-8 pt-5 space-y-3">
         {/* 병원 정보 카드 */}
-        <div className="flex items-center bg-white p-4 rounded-xl shadow-sm">
-          <div className="w-[60px] h-[60px] rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 mr-4">
+        <div className="flex items-center bg-white p-4 rounded-[16px] shadow-sm px-5 py-4">
+          <div className="w-[48px] h-[48px] rounded-[8px] overflow-hidden border border-[#f0f0f0] flex-shrink-0 mr-4">
             <ImageWithFallback
               src={
                 hospitalImage ||
@@ -144,19 +154,21 @@ export function ReviewWritePage({
             />
           </div>
           <div>
-            <p className="text-[#1A1A1A] mb-1">
+            <p className="text-[#2b2b2b] mb-1 text-[19px] font-semibold">
               {hospitalName}
             </p>
-            <p className="text-sm text-gray-500">{visitDate}</p>
+            <p className="text-[15px] text-[#555555]">
+              {visitDate}
+            </p>
           </div>
         </div>
 
         {/* 별점 선택 영역 */}
-        <div className="bg-white p-5 mb-4 rounded-xl shadow-sm text-center">
-          <h3 className="text-gray-700 mb-4">
+        <div className="bg-white px-5 pt-[22px] pb-[26px] mb-3 rounded-[16px] shadow-sm text-center">
+          <h3 className="text-[#202020] mb-3 text-[17px] font-medium">
             별점을 선택해 주세요.
           </h3>
-          <div className="flex justify-center gap-1">
+          <div className="flex justify-center gap-4">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
@@ -179,7 +191,7 @@ export function ReviewWritePage({
         </div>
 
         {/* 키워드 선택 영역 */}
-        <div className="bg-white p-4 mb-4 rounded-xl shadow-sm">
+        <div className="bg-white px-5 pt-[22px] pb-[26px] mb-3 rounded-[16px] shadow-sm">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-[#1A1A1A]">키워드 선택</h3>
             <span
@@ -197,10 +209,10 @@ export function ReviewWritePage({
               <button
                 key={keyword}
                 onClick={() => handleKeywordClick(keyword)}
-                className={`px-4 py-2 rounded-full text-sm transition-all ${
+                className={`px-3 py-2 rounded-[8px] text-sm transition-all ${
                   selectedKeywords.includes(keyword)
-                    ? "bg-[#36D2C5] text-white border-[#36D2C5]"
-                    : "bg-white text-gray-600 border border-gray-300 hover:border-[#36D2C5]"
+                    ? "bg-[#E2F7F7] text-[#2b2b2b] border-[#BCEEEE]"
+                    : "bg-white text-[#777777] border border-[#e8e8e8] hover:border-[#E2F7F7]"
                 }`}
               >
                 {keyword}
@@ -210,13 +222,7 @@ export function ReviewWritePage({
         </div>
 
         {/* 리뷰 텍스트 영역 */}
-        <div>
-          <div className="text-xs text-gray-600 mb-3 p-3 bg-gray-100 rounded-lg leading-relaxed">
-            모든 리뷰는 확인 후 반영됩니다.
-            <br />
-            진료와 무관한 내용이나 부정확한 정보는 노출되지 않을
-            수 있어요.
-          </div>
+        <div className="relative">
           <textarea
             value={reviewText}
             onChange={(e) => {
@@ -225,26 +231,30 @@ export function ReviewWritePage({
               }
             }}
             placeholder="선택하신 키워드를 바탕으로 후기를 작성해주세요."
-            className="w-full h-[150px] p-4 border border-gray-200 rounded-xl resize-none text-sm focus:outline-none focus:border-[#36D2C5] transition-colors"
+            className="w-full h-[150px] px-5 pt-[22px] pb-[26px] rounded-[16px] resize-none text-sm 
+               focus:outline-none focus:border-[#36D2C5] transition-colors bg-white shadow-lg"
           />
-          <div className="text-right text-xs text-gray-500 mt-1">
-            {reviewText.length} / 400
-          </div>
+
+          {/* 글자수 카운트 → 내부 오른쪽 아래 배치 */}
+       <span className="absolute bottom-[26px] right-5 text-[12px]">
+  <span className="text-[#777777]">{reviewText.length}</span>
+  <span className="text-[#aeaeae]"> / 400</span>
+</span>
         </div>
       </div>
 
       {/* 하단 고정 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-[500px] mx-auto p-4 pb-8 bg-white border-t border-gray-100 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 max-w-[500px] mx-auto p-5 pb-[46px] bg-white shadow-[0_-2px_5px_0_rgba(0,0,0,0.10)] rounded-t-[16px]">
         <button
           onClick={handleSubmit}
           disabled={!isFormValid}
-          className={`w-full py-4 rounded-xl text-white transition-all ${
+          className={`h-[60px] w-full rounded-xl text-white transition-all ${
             isFormValid
-              ? "bg-[#36D2C5] hover:bg-[#2FC0B3] cursor-pointer"
-              : "bg-gray-300 cursor-not-allowed"
+              ? "bg-[#2ECACA] hover:bg-[#239C9C] cursor-pointer"
+              : "bg-[#f0f0f0] cursor-not-allowed text-[#aeaeae]"
           }`}
         >
-          작성 완료
+          {isEditMode ? "수정 완료" : "작성 완료"}
         </button>
       </div>
     </div>

@@ -66,7 +66,7 @@ export function SecondaryMenu() {
       </div>
       {/* 3. 건강검진 */}
 
-      <button className="w-full aspect-square flex flex-col items-center justify-center bg-white rounded-2xl border border-[#d9d9d9] hover:bg-gray-50 transition-colors">
+      <button className="w-full aspect-square flex flex-col items-center justify-center bg-white rounded-2xl border border-[#d9d9d9] transition-colors">
         {/* TODO: 이 아이콘을 실제 SVG/이미지로 교체하세요 */}
         <UserCheck
           size={32}

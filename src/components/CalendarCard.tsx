@@ -114,12 +114,12 @@ export function CalendarCard() {
           return (
             <div
               key={index}
-              className="p-1 flex justify-center items-center h-20 md:h-24"
+              className="p-1 flex justify-center items-center h-20 xs:h-24"
             >
               {day !== null && (
                 <button
                   onClick={() => handleDayClick(day)}
-                  className={`w-full h-full rounded-lg flex flex-col justify-center items-center transition-all 
+                  className={`w-full h-full rounded-[12px] flex flex-col justify-center items-center transition-all 
                     ${
                       isSelected
                         ? "bg-[#2ECACA]" // 선택된 날짜 배경
@@ -132,7 +132,7 @@ export function CalendarCard() {
                       <span className="text-[17px] font-medium text-white">
                         {daysOfWeek[dayOfWeekIndex]}
                       </span>
-                      <div className="mt-1 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg text-sm md:text-base font-medium bg-white text-gray-800">
+                      <div className="mt-1 w-[70%] h-[45%] rounded-[8px] bg-white flex items-center justify-center">
                         {day}
                       </div>
                     </>
