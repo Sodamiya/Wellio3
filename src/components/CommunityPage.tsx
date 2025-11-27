@@ -16,12 +16,12 @@ import {
   Smile,
   Trash2,
 } from "lucide-react"
-import { useState, useRef, useEffect, useMemo } from "react" // useMemo 추가
+import { useState, useRef, useEffect } from "react"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
-// import { Swiper, SwiperSlide } from "swiper/react" // Swiper 제거
+import { Swiper, SwiperSlide } from "swiper/react"
 import { motion, AnimatePresence } from "motion/react"
 import confetti from "canvas-confetti"
-// import "swiper/css" // Swiper CSS 제거
+import "swiper/css"
 import { BottomNav } from "./BottomNav"
 
 interface CommunityPageProps {
@@ -112,23 +112,12 @@ const FamilyDropdown = ({
       >
         <div className="p-2 min-w-[140px]">
           {familyMembers.map((member) => {
-            // "me" ID를 가진 가족 구성원이 없으므로, 현재 사용자 이름과 일치하도록 처리 로직 조정
-            // 목데이터에 없는 임시 ID를 비활성화 처리
             const isGrayedOut = member.id === "kim" || member.id === "park"
-
-            // '전체보기'가 아닐 때 멤버 이름을 가져옴. 'me'에 해당하는 ID가 없으므로 `currentUserName`으로 대체하는 로직은 제거하고,
-            // 목데이터의 `name`을 사용하되, 선택 시 `currentUserName`으로 비교하도록 로직을 조정함.
-            // 하지만 현재 목데이터에는 'me' ID가 없으므로, 명시적으로 '나'를 추가하거나, 현재 로직을 유지하면서 선택 로직만 조정합니다.
-            // 여기서는 원본 목데이터를 유지하고 선택된 멤버 이름만 조정합니다.
-            const memberName = member.name // 목데이터의 이름을 그대로 사용
-
-            // '전체보기' 선택 여부: selectedFamilyMember가 null이거나 '전체보기'인 경우
-            // 특정 멤버 선택 여부: selectedFamilyMember가 현재 멤버의 이름 또는 currentUserName과 일치하는 경우
+            const memberName =
+              member.id === "me" ? currentUserName : member.name
             const isSelected =
               (member.id === "all" && !selectedFamilyMember) ||
-              selectedFamilyMember === member.name ||
-              (member.id === "admin" &&
-                selectedFamilyMember === currentUserName) // 현재 코드는 admin에 currentUserName을 넣는 로직이 없지만, 혹시 모를 상황 대비
+              selectedFamilyMember === memberName
 
             return (
               <button
@@ -137,12 +126,9 @@ const FamilyDropdown = ({
                   if (isGrayedOut) return
 
                   if (member.id === "all") {
-                    setSelectedFamilyMember(null) // 전체보기는 null
-                  } else if (member.id === "admin") {
-                    // 관리자는 관리자 이름으로 설정 (currentUserName이 아닌 목데이터의 이름)
-                    setSelectedFamilyMember(member.name)
+                    setSelectedFamilyMember(null)
                   } else {
-                    setSelectedFamilyMember(member.name)
+                    setSelectedFamilyMember(memberName)
                   }
                   setShowFamilyDropdown(false)
                 }}
@@ -218,18 +204,11 @@ export function CommunityPage({
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [postToDelete, setPostToDelete] = useState<number | null>(null)
 
-  // [수정] 스크롤 관련 상태 제거: 스크롤 스냅 기능 도입으로 필요성이 줄어듦
-  // const [isScrolling, setIsScrolling] = useState(false)
-  // const scrollTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const [isScrolling, setIsScrolling] = useState(false)
+  const scrollTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // 키보드 감지를 위한 state 추가
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false)
-
-  // [NEW] 스크롤 컨테이너 ref 추가
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-
-  // [NEW] 현재 피드 인덱스 상태 추가
-  const [currentFeedIndex, setCurrentFeedIndex] = useState(0)
 
   const currentUser = {
     userName: currentUserName,
@@ -270,13 +249,6 @@ export function CommunityPage({
       delay: number
     }>
   >([])
-
-  // 하단 네비게이션 바의 예상 높이 (80px)
-  const NAV_HEIGHT_PX = 80
-  // 헤더의 예상 높이 (min-h-[110px])
-  const HEADER_HEIGHT_PX = 110
-  // 피드 영역 높이: 뷰포트 높이 - 헤더 높이 - 네비게이션 높이
-  const FEED_AREA_HEIGHT_CALC = `calc(100vh - ${HEADER_HEIGHT_PX}px - ${NAV_HEIGHT_PX}px)`
 
   // === [NEW] 애니메이션 실행 로직 분리 ===
   const triggerReactionAnimation = (emoji: string) => {
@@ -386,6 +358,11 @@ export function CommunityPage({
     }, 2000)
   }
 
+  const generateRandomPosition = () => ({
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+  })
+
   const getAllComments = (postId: number, originalComments?: Array<any>) => {
     const original = originalComments || []
     const added = addedComments[postId] || []
@@ -442,11 +419,12 @@ export function CommunityPage({
       // 4. 특정 인물이 선택된 경우 교집합 필터링
       if (selectedFamilyMember) {
         // [수정된 부분: '나'를 currentUserName으로 처리]
-        // Note: selectedFamilyMember는 FamilyDropdown에서 목데이터의 name으로 설정됨.
-        // currentUserName과 일치하는 경우는 'admin', '엄마', '아빠' 등의 이름이 currentUserName과 같을 경우임.
-        // 현재 로직상 '나'에 대한 명시적인 필터링은 selectedFamilyMember에 `currentUserName`이 들어갈 때 작동하며,
-        // 드롭다운 목데이터에 'me' 항목이 없어 현재는 '관리자', '엄마', '아빠' 이름으로 필터링됨.
-        return hasMyReaction && post.userName === selectedFamilyMember
+        const isMe = selectedFamilyMember === currentUserName
+        if (isMe) {
+          return hasMyReaction && post.userName === currentUserName
+        } else {
+          return hasMyReaction && post.userName === selectedFamilyMember
+        }
       }
 
       return hasMyReaction
@@ -518,31 +496,34 @@ export function CommunityPage({
     setExpandedPostId(null)
   }
 
-  // [수정] 필터링 로직: selectedFamilyMember는 목데이터의 name으로 필터링
-  const filteredPosts = useMemo(() => {
-    return posts.filter((post) => {
-      if (selectedFamilyMember) {
-        if (post.userName !== selectedFamilyMember) {
+  const filteredPosts = posts.filter((post) => {
+    if (selectedFamilyMember) {
+      // [수정된 부분: '나'를 currentUserName으로 처리]
+      const isMe = selectedFamilyMember === currentUserName
+      if (isMe) {
+        if (post.userName !== currentUserName) {
           return false
         }
+      } else if (post.userName !== selectedFamilyMember) {
+        return false
       }
+    }
 
-      if (!searchQuery.trim()) return true
+    if (!searchQuery.trim()) return true
 
-      const query = searchQuery.toLowerCase()
-      const caption = post.caption?.toLowerCase() || ""
-      const textOverlay = post.textOverlay?.toLowerCase() || ""
-      const health = post.health?.toLowerCase() || ""
-      const userName = post.userName?.toLowerCase() || ""
+    const query = searchQuery.toLowerCase()
+    const caption = post.caption?.toLowerCase() || ""
+    const textOverlay = post.textOverlay?.toLowerCase() || ""
+    const health = post.health?.toLowerCase() || ""
+    const userName = post.userName?.toLowerCase() || ""
 
-      return (
-        caption.includes(query) ||
-        textOverlay.includes(query) ||
-        health.includes(query) ||
-        userName.includes(query)
-      )
-    })
-  }, [posts, selectedFamilyMember, searchQuery])
+    return (
+      caption.includes(query) ||
+      textOverlay.includes(query) ||
+      health.includes(query) ||
+      userName.includes(query)
+    )
+  })
 
   const expandedPost = posts.find((p) => p.id === expandedPostId)
 
@@ -577,29 +558,9 @@ export function CommunityPage({
     }
   }, [])
 
-  // [NEW] 스크롤 이벤트 핸들러: 현재 보이는 피드 ID 업데이트 (선택 사항이지만 스냅 상태 유지에 도움)
-  const handleScroll = () => {
-    if (!scrollContainerRef.current) return
-
-    // 네비게이션과 헤더 높이를 제외한 순수 피드 영역 높이 (px)
-    const feedHeight = scrollContainerRef.current.clientHeight
-    const scrollTop = scrollContainerRef.current.scrollTop
-
-    // 현재 스크롤 위치를 피드 높이로 나누어 인덱스 계산
-    // Math.round를 사용하여 가장 근접한 피드를 현재 인덱스로 설정
-    const index = Math.round(scrollTop / feedHeight)
-
-    if (filteredPosts[index]) {
-      setCurrentPostId(filteredPosts[index].id)
-      setCurrentFeedIndex(index)
-    }
-  }
-
   return (
-    // [유지] h-screen -> min-h-screen h-full
-    <div className="relative bg-white flex flex-col max-w-[500px] mx-auto min-h-screen h-full overflow-hidden">
+    <div className="relative bg-white flex flex-col max-w-[500px] mx-auto h-screen overflow-hidden">
       {/* Header */}
-      {/* [유지] sticky top-0, min-h-[110px], z-30 */}
       <header className="sticky top-0 z-30 px-4 flex flex-col justify-center w-full bg-white min-h-[110px]">
         {isSearchActive ? (
           <div className="flex items-center gap-3">
@@ -666,8 +627,11 @@ export function CommunityPage({
               >
                 <span className="text-lg font-bold text-[#1A1A1A]">
                   {selectedFamilyMember
-                    ? familyMembers.find((m) => m.name === selectedFamilyMember)
-                        ?.name || "모아보기"
+                    ? familyMembers.find(
+                        (m) =>
+                          (m.id === "me" ? currentUserName : m.name) ===
+                          selectedFamilyMember
+                      )?.name || "모아보기"
                     : "모아보기"}
                 </span>
                 <ChevronDown size={20} className="text-gray-600" />
@@ -708,8 +672,11 @@ export function CommunityPage({
               >
                 <span className="text-lg font-bold text-[#1A1A1A]">
                   {selectedFamilyMember
-                    ? familyMembers.find((m) => m.name === selectedFamilyMember)
-                        ?.name || "우리가족"
+                    ? familyMembers.find(
+                        (m) =>
+                          (m.id === "me" ? currentUserName : m.name) ===
+                          selectedFamilyMember
+                      )?.name || "우리가족"
                     : "우리가족"}
                 </span>
                 <ChevronDown size={20} className="text-gray-600" />
@@ -747,22 +714,14 @@ export function CommunityPage({
         )}
       </header>
 
+      {/* [제거] 가족 구성원 드롭다운 섹션은 헤더 내부로 이동하고 배경 오버레이를 제거했습니다. */}
+
       {/* Content Area */}
-      {/* [수정] 스크롤 스냅 기능 구현 핵심
-        1. overflow-y-scroll: 스크롤 가능하게
-        2. snap-y: y축 방향으로 스냅
-        3. snap-mandatory: 스크롤 시 반드시 요소에 스냅
-        4. h-full: 헤더를 제외한 나머지 높이(flex-1)를 차지하도록 함. (이 경우 min-h-screen이 적용된 부모의 높이를 따름)
-      */}
-      <div
-        ref={scrollContainerRef}
-        className="w-full flex-1 overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
-        onScroll={handleScroll}
-      >
+      <div className="w-full">
         {isReactionView ? (
           <div className="pb-20">
             {/* 리액션 필터 바 (가로 스크롤) */}
-            <div className="px-4 py-4 flex gap-3 overflow-x-auto scrollbar-hide bg-white sticky top-[0] z-20 justify-center">
+            <div className="px-4 py-4 flex gap-3 overflow-x-auto scrollbar-hide bg-white sticky top-[110px] z-20 justify-center">
               {/* ALL 버튼 */}
               <button
                 onClick={() => setReactionFilter("ALL")}
@@ -874,410 +833,445 @@ export function CommunityPage({
             </div>
           </div>
         ) : (
-          /* [수정] 스크롤 스냅을 위한 각 피드 아이템 래퍼
-            1. snap-start: 각 아이템이 스크롤 컨테이너의 시작점에 스냅되도록 함.
-            2. min-h-[calc(100vh-110px-80px)]: 화면 높이에서 헤더(110px)와 네비게이션(80px) 높이를 제외한 만큼의 최소 높이를 강제하여 한 페이지에 하나의 피드가 오도록 함.
-            3. justify-center: 피드 내용을 중앙에 배치 (키보드 팝업 시 상단에 배치하는 로직은 유지).
-          */
-          <div className="w-full">
+          <Swiper
+            direction={"vertical"}
+            className="w-full h-[calc(100vh-110px)]"
+            allowTouchMove={dragStartX === null}
+            onSlideChange={(swiper) => {
+              const activeIndex = swiper.activeIndex
+              if (filteredPosts[activeIndex]) {
+                setCurrentPostId(filteredPosts[activeIndex].id)
+              }
+            }}
+            onSliderMove={() => {
+              setIsScrolling(true)
+              if (scrollTimerRef.current) {
+                clearTimeout(scrollTimerRef.current)
+              }
+            }}
+            onSlideChangeTransitionStart={() => setIsScrolling(true)}
+            onSlideChangeTransitionEnd={() => setIsScrolling(false)}
+            onTouchEnd={() => {
+              if (scrollTimerRef.current) {
+                clearTimeout(scrollTimerRef.current)
+              }
+              scrollTimerRef.current = setTimeout(() => {
+                setIsScrolling(false)
+              }, 150)
+            }}
+          >
             {filteredPosts.map((post) => {
               const isDeleting = postToDelete === post.id
               return (
-                <div
-                  className={`w-full flex flex-col items-center px-5 xs:px-6 sm:px-8 py-4 snap-start
-                  min-h-[${FEED_AREA_HEIGHT_CALC}]
-                  ${
-                    isKeyboardVisible ? "justify-start pt-12" : "justify-center"
-                  }`}
-                  key={post.id}
-                >
-                  <div className="relative w-full mx-auto overflow-visible flex-shrink-0 aspect-[335/447]">
-                    {post.userName === currentUser.userName && (
-                      <div className="absolute inset-y-0 -right-2 w-32 flex items-center justify-center z-0">
-                        <Trash2 size={32} className="text-gray-400" />
-                      </div>
-                    )}
-                    <motion.div
-                      className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg touch-none"
-                      drag={
-                        post.userName === currentUser.userName ? "x" : false
-                      }
-                      dragConstraints={{
-                        left: -200,
-                        right: 0,
-                      }}
-                      dragElastic={0.1}
-                      dragMomentum={false}
-                      dragSnapToOrigin={!isDeleting}
-                      animate={{ x: isDeleting ? -200 : 0 }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 30,
-                      }}
-                      whileDrag={{ scale: 0.98 }}
-                      onDragStart={(event, info) => setDragStartX(info.point.x)}
-                      onDragEnd={(event, info) => {
-                        if (info.offset.x < -120) {
-                          setPostToDelete(post.id)
-                          setShowDeleteModal(true)
-                        }
-                        setDragStartX(null)
-                      }}
-                      onClick={(e) => {
-                        if (!dragStartX) setSelectedPostForReaction(post.id)
-                      }}
+                <SwiperSlide key={post.id}>
+                  <div
+                    className={`h-full flex flex-col items-center px-5 xs:px-6 sm:px-8 py-4
+    ${
+      isKeyboardVisible
+        ? "justify-start pt-12 overflow-y-auto"
+        : "justify-center"
+    }
+  `}
+                  >
+                    <div
+                      className="
+      relative w-full mx-auto overflow-visible flex-shrink-0
+      aspect-[335/447] top-[-72px] 
+    "
                     >
-                      <ImageWithFallback
-                        src={post.image}
-                        alt="Community post"
-                        className="w-full h-full object-cover bg-gray-100 pointer-events-none"
-                      />
-                      {selectedPostForReaction === post.id && (
-                        <div
-                          className="absolute inset-0 bg-black/70 z-10 flex flex-col cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setSelectedPostForReaction(null)
-                          }}
-                        >
-                          {/* === [수정된 부분: 리액션 묶음 표시 - 배경 투명] === */}
-                          {getAllReactions(post.id, post.reactions).length >
-                            0 && (
-                            <div className="absolute top-4 right-4 flex flex-wrap gap-2 justify-end max-w-[60%] z-20">
-                              {getAllReactions(post.id, post.reactions).map(
-                                (reaction) => (
-                                  <div
-                                    key={reaction.emoji}
-                                    // 배경 투명
-                                    className="rounded-full pl-2 pr-3 py-1.5 flex items-center gap-2"
-                                    // === [NEW] 클릭 시 애니메이션 재실행 ===
-                                    onClick={(e) => {
-                                      e.stopPropagation() // 오버레이 닫힘 방지
-                                      triggerReactionAnimation(reaction.emoji) // 애니메이션 실행
-                                    }}
-                                    // ======================================
-                                  >
-                                    <span className="text-base">
-                                      {reaction.emoji}
-                                    </span>
-
-                                    {/* 사용자 프로필 겹쳐서 표시 */}
-                                    <div className="flex -space-x-2.5">
-                                      {/* 최대 3명의 사용자만 표시 (겹치는 효과를 위해) */}
-                                      {reaction.users
-                                        .slice(0, 3)
-                                        .map((user, userIdx) => (
-                                          <ImageWithFallback
-                                            key={`${reaction.emoji}-${user.userName}-${userIdx}`}
-                                            src={user.userAvatar}
-                                            alt={user.userName}
-                                            // 프로필 이미지 스타일: 크기, 겹침 효과를 위한 -space-x-2.5 와 대비되는 왼쪽 마진 0
-                                            className={`w-7 h-7 rounded-full object-cover border-2 border-white transition-all duration-300 ${
-                                              userIdx === 0 ? "ml-0" : ""
-                                            }`}
-                                            style={{
-                                              // 겹치는 정도를 조정
-                                              zIndex:
-                                                reaction.users.length - userIdx,
-                                            }}
-                                          />
-                                        ))}
-
-                                      {/* 3명 초과 시 카운트 표시 */}
-                                      {reaction.users.length > 3 && (
-                                        <div
-                                          className="w-7 h-7 rounded-full bg-gray-500/80 backdrop-blur-sm flex items-center justify-center text-white text-xs font-semibold border-2 border-white relative"
-                                          style={{ zIndex: 0 }}
-                                        >
-                                          +{reaction.users.length - 3}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          )}
-                          {/* ================================================= */}
-
-                          {/* [유지: Pressed 상태의 캡슐 위치 및 스타일 통일] */}
-                          {(post.textOverlay || post.userName) && (
-                            <div className="absolute bottom-4 left-4 flex items-center gap-3 z-20 max-w-[90%]">
-                              {/* 1. 프로필 + 텍스트 캡슐 */}
-                              <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full pl-1 pr-5 py-3 gap-3 shadow-sm border border-white/20 shrink-0">
-                                <ImageWithFallback
-                                  src={post.userAvatar}
-                                  alt={post.userName}
-                                  // 이미지: w-12 h-12 (48px), -my-4, -ml-2
-                                  className="w-12 h-12 rounded-full object-cover border-3 border-white -my-4 -ml-2 shadow-sm"
-                                />
-                                <p className="text-[15px] text-gray-900 whitespace-nowrap font-bold leading-none">
-                                  {post.textOverlay || post.userName}
-                                </p>
-                              </div>
-                            </div>
-                          )}
-                          {getAllComments(post.id, post.comments).length >
-                            0 && (
-                            <div
-                              // [유지] right-4 -> right-0 변경. p-4가 있으므로 시각적으로는 16px 떨어짐.
-                              className="absolute bottom-20 right-0 flex flex-col gap-5 items-end max-w-[70%] max-h-[50vh] overflow-y-auto z-20 p-4 scrollbar-hide"
-                            >
-                              {getAllComments(post.id, post.comments).map(
-                                (comment, idx) => (
-                                  <div
-                                    key={`comment-${post.id}-${idx}-${comment.userName}-${comment.timestamp}`}
-                                    // [유지] 댓글 캡슐: 우측 정렬이므로 flex-row-reverse 및 padding 반전 (pl-5 pr-1)
-                                    className="inline-flex flex-row-reverse items-center bg-white/90 backdrop-blur-sm rounded-full pl-5 pr-1 py-3 gap-3 shadow-sm border border-white/20"
-                                  >
-                                    <ImageWithFallback
-                                      src={comment.userAvatar}
-                                      alt={comment.userName}
-                                      // [유지] 이미지: w-11 h-11, -my-4, -mr-2(오른쪽돌출)
-                                      className="w-9 h-9 rounded-full object-cover border-2 border-white -my-4 -mr-0.5 shadow-sm"
-                                    />
-                                    <p className="text-[15px] text-gray-900 whitespace-nowrap font-medium leading-none">
-                                      {comment.text}
-                                    </p>
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          )}
+                      {post.userName === currentUser.userName && (
+                        <div className="absolute inset-y-0 -right-2 w-32 flex items-center justify-center z-0">
+                          <Trash2 size={32} className="text-gray-400" />
                         </div>
                       )}
-                      {selectedPostForReaction !== post.id && (
-                        <>
-                          <div className="absolute top-4 left-4 flex flex-row flex-wrap gap-2 max-w-[calc(100%-2rem)]">
-                            {post.location && (
-                              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                                <MapPin size={16} className="text-white" />
-                                <span className="text-white text-sm">
-                                  {post.location}
-                                </span>
-                              </div>
-                            )}
-                            {post.weather && (
-                              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                                <Cloud size={16} className="text-white" />
-                                <span className="text-white text-sm">
-                                  {post.weather}
-                                </span>
-                              </div>
-                            )}
-                            {post.time && (
-                              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                                <Clock size={16} className="text-white" />
-                                <span className="text-white text-sm">
-                                  {post.time}
-                                </span>
-                              </div>
-                            )}
-                            {post.health && (
-                              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
-                                <Heart size={16} className="text-white" />
-                                <span className="text-white text-sm">
-                                  {post.health}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          {post.badge &&
-                            !post.location &&
-                            !post.weather &&
-                            !post.time &&
-                            !post.health && (
-                              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1 text-sm font-medium">
-                                <span>{post.badge}</span>
-                              </div>
-                            )}
-
-                          {/* === [유지: 하단 프로필 캡슐 및 댓글 카운트 (Outside State)] === */}
-                          {/* Pressed State와 완전히 동일한 크기/패딩/위치를 사용하여 
-                                전환 시 '점프' 현상을 방지함.
-                            */}
-                          <div className="absolute bottom-4 left-4 flex items-center gap-3 z-10 max-w-[90%]">
-                            {/* 1. 프로필 + 텍스트 캡슐 */}
-                            {/* pl-1 pr-5 py-3 gap-3 사용 (Pressed State와 동일) */}
-                            <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full pl-1 pr-5 py-3 gap-3 shadow-sm border border-white/20 shrink-0">
-                              <ImageWithFallback
-                                src={
-                                  post.userName === currentUserName
-                                    ? currentUserAvatar
-                                    : post.userAvatar
-                                }
-                                alt={post.userName}
-                                // 이미지: w-12 h-12, -my-4, -ml-2 (Pressed State와 동일)
-                                className="w-12 h-12 rounded-full object-cover border-3 border-white -my-4 -ml-2 shadow-sm"
-                              />
-                              {/* 폰트: text-[15px] font-bold (Pressed State와 동일) */}
-                              <span className="text-[15px] text-gray-900 font-bold leading-none">
-                                {post.textOverlay || post.userName}
-                              </span>
-                            </div>
-
-                            {/* 2. 댓글 카운트 말풍선 */}
-                            <div className="bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-2 font-bold flex items-center justify-center shadow-sm border border-white/20 shrink-0 relative text-[16px]">
-                              +{getAllComments(post.id, post.comments).length}
-                              {getAllComments(post.id, post.comments).length >
-                                0 && (
-                                <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full"></span>
-                              )}
-                            </div>
-                          </div>
-                          {/* ================================================= */}
-                        </>
-                      )}
-                    </motion.div>
-
-                    {/* 댓글 입력창 - 이미지 카드 바로 아래 16px 간격 */}
-                    {/* [수정] 스크롤 스냅 시 입력창이 중앙에 위치하도록 패딩 조정 */}
-                    <div className="z-40 pointer-events-none mt-5 mb-5">
-                      <div className="relative w-full h-[48px] pointer-events-auto px-1">
-                        <div className="flex items-center gap-2 w-full mx-auto h-full">
-                          <button
-                            className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors overflow-hidden relative"
-                            onClick={() => {
-                              setCurrentPostId(post.id)
-                              setShowEmojiPicker(!showEmojiPicker)
+                      <motion.div
+                        className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg touch-none"
+                        drag={
+                          !isScrolling && post.userName === currentUser.userName
+                            ? "x"
+                            : false
+                        }
+                        dragConstraints={{
+                          left: -200,
+                          right: 0,
+                        }}
+                        dragElastic={0.1}
+                        dragMomentum={false}
+                        dragSnapToOrigin={!isDeleting}
+                        animate={{ x: isDeleting ? -200 : 0 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 30,
+                        }}
+                        whileDrag={{ scale: 0.98 }}
+                        onDragStart={(event, info) =>
+                          setDragStartX(info.point.x)
+                        }
+                        onDragEnd={(event, info) => {
+                          if (info.offset.x < -120) {
+                            setPostToDelete(post.id)
+                            setShowDeleteModal(true)
+                          }
+                          setDragStartX(null)
+                        }}
+                        onClick={(e) => {
+                          if (!dragStartX) setSelectedPostForReaction(post.id)
+                        }}
+                      >
+                        <ImageWithFallback
+                          src={post.image}
+                          alt="Community post"
+                          className="w-full h-full object-cover bg-gray-100 pointer-events-none"
+                        />
+                        {selectedPostForReaction === post.id && (
+                          <div
+                            className="absolute inset-0 bg-black/70 z-10 flex flex-col cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedPostForReaction(null)
                             }}
                           >
-                            <AnimatePresence mode="wait" initial={false}>
-                              {showEmojiPicker && currentPostId === post.id ? (
-                                <motion.div
-                                  key="close-icon"
-                                  initial={{
-                                    opacity: 0,
-                                    y: 10,
-                                  }}
-                                  animate={{
-                                    opacity: 1,
-                                    y: 0,
-                                  }}
-                                  exit={{
-                                    opacity: 0,
-                                    y: -10,
-                                  }}
-                                  transition={{
-                                    duration: 0.2,
-                                  }}
-                                  className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5]/80 backdrop-blur-md text-gray-800 rounded-full"
-                                >
-                                  <X size={20} />
-                                </motion.div>
-                              ) : (
-                                <motion.div
-                                  key="smile-icon"
-                                  initial={{
-                                    opacity: 0,
-                                    y: -10,
-                                  }}
-                                  animate={{
-                                    opacity: 1,
-                                    y: 0,
-                                  }}
-                                  exit={{ opacity: 0, y: 10 }}
-                                  transition={{
-                                    duration: 0.2,
-                                  }}
-                                  className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5]/80 backdrop-blur-md text-gray-500 hover:text-gray-800 rounded-full"
-                                >
-                                  <Smile size={24} />
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </button>
-                          <div className="flex-1 h-full relative flex items-center">
-                            <AnimatePresence mode="wait" initial={false}>
-                              {showEmojiPicker && currentPostId === post.id ? (
-                                <motion.div
-                                  key="emoji-list"
-                                  initial={{
-                                    opacity: 0,
-                                    y: 10,
-                                  }}
-                                  animate={{
-                                    opacity: 1,
-                                    y: 0,
-                                  }}
-                                  exit={{
-                                    opacity: 0,
-                                    y: -10,
-                                  }}
-                                  transition={{
-                                    duration: 0.2,
-                                  }}
-                                  className="absolute inset-0 flex items-center gap-2 overflow-x-auto no-scrollbar"
-                                >
-                                  {emojis.map((emoji) => (
-                                    <button
-                                      key={emoji}
-                                      onClick={() => {
-                                        handleEmojiReaction(emoji, post.id)
-                                        // === [NEW] 분리된 애니메이션 함수 호출 ===
-                                        triggerReactionAnimation(emoji)
-                                        // ======================================
+                            {/* === [수정된 부분: 리액션 묶음 표시 - 배경 투명] === */}
+                            {getAllReactions(post.id, post.reactions).length >
+                              0 && (
+                              <div className="absolute top-4 right-4 flex flex-wrap gap-2 justify-end max-w-[60%] z-20">
+                                {getAllReactions(post.id, post.reactions).map(
+                                  (reaction) => (
+                                    <div
+                                      key={reaction.emoji}
+                                      // 배경 투명
+                                      className="rounded-full pl-2 pr-3 py-1.5 flex items-center gap-2"
+                                      // === [NEW] 클릭 시 애니메이션 재실행 ===
+                                      onClick={(e) => {
+                                        e.stopPropagation() // 오버레이 닫힘 방지
+                                        triggerReactionAnimation(reaction.emoji) // 애니메이션 실행
                                       }}
-                                      className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-2xl bg-[#F5F5F5]/80 backdrop-blur-md rounded-full transition-colors"
+                                      // ======================================
                                     >
-                                      {emoji}
-                                    </button>
-                                  ))}
-                                </motion.div>
-                              ) : (
-                                <motion.div
-                                  key="comment-input"
-                                  initial={{
-                                    opacity: 0,
-                                    y: -10,
-                                  }}
-                                  animate={{
-                                    opacity: 1,
-                                    y: 0,
-                                  }}
-                                  exit={{ opacity: 0, y: 10 }}
-                                  transition={{
-                                    duration: 0.2,
-                                  }}
-                                  className="absolute inset-y-1 inset-x-0 flex items-center bg-[#F5F5F5]/80 backdrop-blur-md rounded-full px-4"
-                                >
-                                  <input
-                                    type="text"
-                                    placeholder="댓글을 작성해주세요"
-                                    className="w-full bg-transparent outline-none text-[#1A1A1A] placeholder:text-gray-400"
-                                    value={
-                                      currentPostId === post.id
-                                        ? newComment
-                                        : ""
-                                    }
-                                    onChange={(e) => {
-                                      if (currentPostId === post.id) {
-                                        setNewComment(e.target.value)
-                                      }
-                                    }}
-                                    onFocus={() => setCurrentPostId(post.id)}
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter" && !e.shiftKey) {
-                                        e.preventDefault()
-                                        if (currentPostId === post.id) {
-                                          handleAddComment(post.id)
-                                        }
-                                      }
-                                    }}
+                                      <span className="text-base">
+                                        {reaction.emoji}
+                                      </span>
+
+                                      {/* 사용자 프로필 겹쳐서 표시 */}
+                                      <div className="flex -space-x-2.5">
+                                        {/* 최대 3명의 사용자만 표시 (겹치는 효과를 위해) */}
+                                        {reaction.users
+                                          .slice(0, 3)
+                                          .map((user, userIdx) => (
+                                            <ImageWithFallback
+                                              key={`${reaction.emoji}-${user.userName}-${userIdx}`}
+                                              src={user.userAvatar}
+                                              alt={user.userName}
+                                              // 프로필 이미지 스타일: 크기, 겹침 효과를 위한 -space-x-2.5 와 대비되는 왼쪽 마진 0
+                                              className={`w-7 h-7 rounded-full object-cover border-2 border-white transition-all duration-300 ${
+                                                userIdx === 0 ? "ml-0" : ""
+                                              }`}
+                                              style={{
+                                                // 겹치는 정도를 조정
+                                                zIndex:
+                                                  reaction.users.length -
+                                                  userIdx,
+                                              }}
+                                            />
+                                          ))}
+
+                                        {/* 3명 초과 시 카운트 표시 */}
+                                        {reaction.users.length > 3 && (
+                                          <div
+                                            className="w-7 h-7 rounded-full bg-gray-500/80 backdrop-blur-sm flex items-center justify-center text-white text-xs font-semibold border-2 border-white relative"
+                                            style={{ zIndex: 0 }}
+                                          >
+                                            +{reaction.users.length - 3}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            )}
+                            {/* ================================================= */}
+
+                            {/* [수정: Pressed 상태의 캡슐 위치 및 스타일 통일] */}
+                            {(post.textOverlay || post.userName) && (
+                              <div className="absolute bottom-4 left-4 flex items-center gap-3 z-20 max-w-[90%]">
+                                {/* 1. 프로필 + 텍스트 캡슐 */}
+                                <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full pl-1 pr-5 py-3 gap-3 shadow-sm border border-white/20 shrink-0">
+                                  <ImageWithFallback
+                                    src={post.userAvatar}
+                                    alt={post.userName}
+                                    // 이미지: w-12 h-12 (48px), -my-4, -ml-2
+                                    className="w-12 h-12 rounded-full object-cover border-3 border-white -my-4 -ml-2 shadow-sm"
                                   />
-                                </motion.div>
+                                  <p className="text-[15px] text-gray-900 whitespace-nowrap font-bold leading-none">
+                                    {post.textOverlay || post.userName}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                            {getAllComments(post.id, post.comments).length >
+                              0 && (
+                              <div
+                                // [수정] right-4 -> right-0 변경. p-4가 있으므로 시각적으로는 16px 떨어짐.
+                                className="absolute bottom-20 right-0 flex flex-col gap-5 items-end max-w-[70%] max-h-[50vh] overflow-y-auto z-20 p-4 scrollbar-hide"
+                              >
+                                {getAllComments(post.id, post.comments).map(
+                                  (comment, idx) => (
+                                    <div
+                                      key={`comment-${post.id}-${idx}-${comment.userName}-${comment.timestamp}`}
+                                      // [수정] 댓글 캡슐: 우측 정렬이므로 flex-row-reverse 및 padding 반전 (pl-5 pr-1)
+                                      className="inline-flex flex-row-reverse items-center bg-white/90 backdrop-blur-sm rounded-full pl-5 pr-1 py-3 gap-3 shadow-sm border border-white/20"
+                                    >
+                                      <ImageWithFallback
+                                        src={comment.userAvatar}
+                                        alt={comment.userName}
+                                        // [수정] 이미지: w-11 h-11, -my-4, -mr-2(오른쪽돌출)
+                                        className="w-9 h-9 rounded-full object-cover border-2 border-white -my-4 -mr-0.5 shadow-sm"
+                                      />
+                                      <p className="text-[15px] text-gray-900 whitespace-nowrap font-medium leading-none">
+                                        {comment.text}
+                                      </p>
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {selectedPostForReaction !== post.id && (
+                          <>
+                            <div className="absolute top-4 left-4 flex flex-row flex-wrap gap-2 max-w-[calc(100%-2rem)]">
+                              {post.location && (
+                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                  <MapPin size={16} className="text-white" />
+                                  <span className="text-white text-sm">
+                                    {post.location}
+                                  </span>
+                                </div>
                               )}
-                            </AnimatePresence>
+                              {post.weather && (
+                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                  <Cloud size={16} className="text-white" />
+                                  <span className="text-white text-sm">
+                                    {post.weather}
+                                  </span>
+                                </div>
+                              )}
+                              {post.time && (
+                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                  <Clock size={16} className="text-white" />
+                                  <span className="text-white text-sm">
+                                    {post.time}
+                                  </span>
+                                </div>
+                              )}
+                              {post.health && (
+                                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-full">
+                                  <Heart size={16} className="text-white" />
+                                  <span className="text-white text-sm">
+                                    {post.health}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            {post.badge &&
+                              !post.location &&
+                              !post.weather &&
+                              !post.time &&
+                              !post.health && (
+                                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1 text-sm font-medium">
+                                  <span>{post.badge}</span>
+                                </div>
+                              )}
+
+                            {/* === [수정된 부분: 하단 프로필 캡슐 및 댓글 카운트 (Outside State)] === */}
+                            {/* Pressed State와 완전히 동일한 크기/패딩/위치를 사용하여 
+                                전환 시 '점프' 현상을 방지함.
+                            */}
+                            <div className="absolute bottom-4 left-4 flex items-center gap-3 z-10 max-w-[90%]">
+                              {/* 1. 프로필 + 텍스트 캡슐 */}
+                              {/* pl-1 pr-5 py-3 gap-3 사용 (Pressed State와 동일) */}
+                              <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full pl-1 pr-5 py-3 gap-3 shadow-sm border border-white/20 shrink-0">
+                                <ImageWithFallback
+                                  src={
+                                    post.userName === currentUserName
+                                      ? currentUserAvatar
+                                      : post.userAvatar
+                                  }
+                                  alt={post.userName}
+                                  // 이미지: w-12 h-12, -my-4, -ml-2 (Pressed State와 동일)
+                                  className="w-12 h-12 rounded-full object-cover border-3 border-white -my-4 -ml-2 shadow-sm"
+                                />
+                                {/* 폰트: text-[15px] font-bold (Pressed State와 동일) */}
+                                <span className="text-[15px] text-gray-900 font-bold leading-none">
+                                  {post.textOverlay || post.userName}
+                                </span>
+                              </div>
+
+                              {/* 2. 댓글 카운트 말풍선 */}
+                              <div className="bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-2 font-bold flex items-center justify-center shadow-sm border border-white/20 shrink-0 relative text-[16px]">
+                                +{getAllComments(post.id, post.comments).length}
+                                {getAllComments(post.id, post.comments).length >
+                                  0 && (
+                                  <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full"></span>
+                                )}
+                              </div>
+                            </div>
+                            {/* ================================================= */}
+                          </>
+                        )}
+                      </motion.div>
+
+                      {/* 댓글 입력창 - 이미지 카드 바로 아래 16px 간격 */}
+                      <div className="absolute left-0 right-0 top-[calc(100%+16px)] z-40 pointer-events-none">
+                        <div className="relative w-full h-[48px] pointer-events-auto px-1">
+                          <div className="flex items-center gap-2 w-full mx-auto h-full">
+                            <button
+                              className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors overflow-hidden relative"
+                              onClick={() => {
+                                setCurrentPostId(post.id)
+                                setShowEmojiPicker(!showEmojiPicker)
+                              }}
+                            >
+                              <AnimatePresence mode="wait" initial={false}>
+                                {showEmojiPicker &&
+                                currentPostId === post.id ? (
+                                  <motion.div
+                                    key="close-icon"
+                                    initial={{
+                                      opacity: 0,
+                                      y: 10,
+                                    }}
+                                    animate={{
+                                      opacity: 1,
+                                      y: 0,
+                                    }}
+                                    exit={{
+                                      opacity: 0,
+                                      y: -10,
+                                    }}
+                                    transition={{
+                                      duration: 0.2,
+                                    }}
+                                    className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5]/80 backdrop-blur-md text-gray-800 rounded-full"
+                                  >
+                                    <X size={20} />
+                                  </motion.div>
+                                ) : (
+                                  <motion.div
+                                    key="smile-icon"
+                                    initial={{
+                                      opacity: 0,
+                                      y: -10,
+                                    }}
+                                    animate={{
+                                      opacity: 1,
+                                      y: 0,
+                                    }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    transition={{
+                                      duration: 0.2,
+                                    }}
+                                    className="absolute inset-0 flex items-center justify-center bg-[#F5F5F5]/80 backdrop-blur-md text-gray-500 hover:text-gray-800 rounded-full"
+                                  >
+                                    <Smile size={24} />
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </button>
+                            <div className="flex-1 h-full relative flex items-center">
+                              <AnimatePresence mode="wait" initial={false}>
+                                {showEmojiPicker &&
+                                currentPostId === post.id ? (
+                                  <motion.div
+                                    key="emoji-list"
+                                    initial={{
+                                      opacity: 0,
+                                      y: 10,
+                                    }}
+                                    animate={{
+                                      opacity: 1,
+                                      y: 0,
+                                    }}
+                                    exit={{
+                                      opacity: 0,
+                                      y: -10,
+                                    }}
+                                    transition={{
+                                      duration: 0.2,
+                                    }}
+                                    className="absolute inset-0 flex items-center gap-2 overflow-x-auto no-scrollbar"
+                                  >
+                                    {emojis.map((emoji) => (
+                                      <button
+                                        key={emoji}
+                                        onClick={() => {
+                                          handleEmojiReaction(emoji, post.id)
+                                          // === [NEW] 분리된 애니메이션 함수 호출 ===
+                                          triggerReactionAnimation(emoji)
+                                          // ======================================
+                                        }}
+                                        className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-2xl bg-[#F5F5F5]/80 backdrop-blur-md rounded-full transition-colors"
+                                      >
+                                        {emoji}
+                                      </button>
+                                    ))}
+                                  </motion.div>
+                                ) : (
+                                  <motion.div
+                                    key="comment-input"
+                                    initial={{
+                                      opacity: 0,
+                                      y: -10,
+                                    }}
+                                    animate={{
+                                      opacity: 1,
+                                      y: 0,
+                                    }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    transition={{
+                                      duration: 0.2,
+                                    }}
+                                    className="absolute inset-y-1 inset-x-0 flex items-center bg-[#F5F5F5]/80 backdrop-blur-md rounded-full px-4"
+                                  >
+                                    <input
+                                      type="text"
+                                      placeholder="댓글을 작성해주세요"
+                                      className="w-full bg-transparent outline-none text-[#1A1A1A] placeholder:text-gray-400"
+                                      value={
+                                        currentPostId === post.id
+                                          ? newComment
+                                          : ""
+                                      }
+                                      onChange={(e) => {
+                                        if (currentPostId === post.id) {
+                                          setNewComment(e.target.value)
+                                        }
+                                      }}
+                                      onFocus={() => setCurrentPostId(post.id)}
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter" && !e.shiftKey) {
+                                          e.preventDefault()
+                                          if (currentPostId === post.id) {
+                                            handleAddComment(post.id)
+                                          }
+                                        }
+                                      }}
+                                    />
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </SwiperSlide>
               )
             })}
-          </div>
+          </Swiper>
         )}
       </div>
 
@@ -1333,7 +1327,7 @@ export function CommunityPage({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-            // [유지] 닫기 핸들러 사용
+            // [수정] 닫기 핸들러 사용
             onClick={handleCloseLightbox}
           >
             <motion.div
@@ -1355,11 +1349,7 @@ export function CommunityPage({
       {/* 커뮤니티 전용 하단 네비게이션 */}
       {!isGridView && !isReactionView && (
         <div className="fixed bottom-0 left-0 right-0 z-50 max-w-[500px] mx-auto bg-white">
-          {/* [수정] 네비게이션 바의 높이를 NAV_HEIGHT_PX로 고정 */}
-          <div
-            className="relative px-4 pt-2 pb-4 shadow-[0_-2px_5px_0_rgba(0,0,0,0.10)] rounded-t-[16px]"
-            style={{ height: `${NAV_HEIGHT_PX}px` }}
-          >
+          <div className="relative px-4 pt-2 pb-4 shadow-[0_-2px_5px_0_rgba(0,0,0,0.10)] rounded-t-[16px] h-[80px]">
             <div className="flex items-center justify-around">
               <button
                 onClick={() => setIsGridView(true)}
@@ -1422,7 +1412,7 @@ export function CommunityPage({
             style={{
               fontSize: `${item.size}px`,
               left: "50%",
-              bottom: NAV_HEIGHT_PX + 20, // 네비게이션 바 위에서 시작하도록 조정
+              bottom: 80,
             }}
           >
             {item.emoji}
