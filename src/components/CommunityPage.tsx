@@ -975,8 +975,8 @@ export function CommunityPage({
                                   // 이미지: w-12 h-12 (48px), -my-4, -ml-2
                                   className="w-12 h-12 rounded-full object-cover border-3 border-white -my-4 -ml-2 shadow-sm"
                                 />
-                                {/* [수정] max-w-[150px], truncate 유지, flex-shrink 추가 */}
-                                <p className="text-[15px] text-gray-900 font-bold leading-none max-w-[150px] truncate flex-shrink">
+                                {/* [수정] max-w-[150px] -> max-w-[130px] */}
+                                <p className="text-[15px] text-gray-900 font-bold leading-none max-w-[130px] truncate flex-shrink">
                                   {post.textOverlay || post.userName}
                                 </p>
                               </div>
@@ -1071,8 +1071,8 @@ export function CommunityPage({
                                 alt={post.userName}
                                 className="w-12 h-12 rounded-full object-cover border-3 border-white -my-4 -ml-2 shadow-sm"
                               />
-                              {/* [수정] max-w-[150px], truncate 유지, block과 flex-shrink 추가 */}
-                              <span className="text-[15px] text-gray-900 font-bold leading-none max-w-[150px] truncate block flex-shrink">
+                              {/* [수정] max-w-[150px] -> max-w-[130px] */}
+                              <span className="text-[15px] text-gray-900 font-bold leading-none max-w-[130px] truncate block flex-shrink">
                                 {post.textOverlay || post.userName}
                               </span>
                             </div>
