@@ -719,8 +719,8 @@ export function CommunityPage({
       </header>
 
       {/* Content Area */}
-      {/* [유지] flex-1 추가: 헤더와 하단 네비게이션을 제외한 나머지 공간을 모두 차지하도록 함 */}
-      <div className="w-full flex-1 overflow-y-auto scrollbar-hide [&::-webkit-scrollbar]:hidden">
+      {/* [수정] 스냅 기능 추가: snap-y snap-mandatory와 overflow-y-scroll 적용 */}
+      <div className="w-full flex-1 overflow-y-scroll scrollbar-hide snap-y snap-mandatory">
         {isReactionView ? (
           <div className="pb-20">
             {/* 리액션 필터 바 (가로 스크롤) */}
@@ -836,7 +836,7 @@ export function CommunityPage({
             </div>
           </div>
         ) : (
-          /* [수정] 스크롤 문제 해결: 하단 네비게이션(80px)의 터치 영역을 침범하지 않도록 정확한 패딩 적용 */
+          /* [수정] 스크롤 문제 해결 및 스냅 기능 적용을 위해 paddingBottom 유지 */
           <div
             className="w-full"
             style={{ paddingBottom: `${NAV_HEIGHT_PX}px` }}
@@ -844,9 +844,9 @@ export function CommunityPage({
             {filteredPosts.map((post) => {
               const isDeleting = postToDelete === post.id
               return (
-                /* [유지] w-full 변경하여 강제 높이 지정 해제 */
+                /* [수정] snap-start 적용 및 수직 패딩 조정 */
                 <div
-                  className={`w-full flex flex-col items-center px-5 xs:px-6 sm:px-8 py-4
+                  className={`w-full flex flex-col items-center px-5 xs:px-6 sm:px-8 pt-4 pb-20 snap-start
                   ${
                     isKeyboardVisible ? "justify-start pt-12" : "justify-center"
                   }`}
@@ -858,6 +858,7 @@ export function CommunityPage({
                         <Trash2 size={32} className="text-gray-400" />
                       </div>
                     )}
+                    {/* [유지] 가로 드래그 (삭제 기능) */}
                     <motion.div
                       className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg touch-none"
                       drag={
