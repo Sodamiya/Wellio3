@@ -558,9 +558,12 @@ export function CommunityPage({
     }
   }, [])
 
+  // 하단 네비게이션 바의 예상 높이 (80px)
+  const NAV_HEIGHT_PX = 80
+
   return (
-    // [수정] h-screen -> min-h-screen h-full
-    <div className="relative bg-white flex flex-col max-w-[500px] mx-auto **min-h-screen h-full** overflow-hidden">
+    // [유지] h-screen -> min-h-screen h-full
+    <div className="relative bg-white flex flex-col max-w-[500px] mx-auto min-h-screen h-full overflow-hidden">
       {/* Header */}
       <header className="sticky top-0 z-30 px-4 flex flex-col justify-center w-full bg-white min-h-[110px]">
         {isSearchActive ? (
@@ -716,8 +719,8 @@ export function CommunityPage({
       </header>
 
       {/* Content Area */}
-      {/* [수정] flex-1 추가: 헤더와 하단 네비게이션을 제외한 나머지 공간을 모두 차지하도록 함 */}
-      <div className="w-full **flex-1** overflow-y-auto scrollbar-hide [&::-webkit-scrollbar]:hidden">
+      {/* [유지] flex-1 추가: 헤더와 하단 네비게이션을 제외한 나머지 공간을 모두 차지하도록 함 */}
+      <div className="w-full flex-1 overflow-y-auto scrollbar-hide [&::-webkit-scrollbar]:hidden">
         {isReactionView ? (
           <div className="pb-20">
             {/* 리액션 필터 바 (가로 스크롤) */}
@@ -833,12 +836,15 @@ export function CommunityPage({
             </div>
           </div>
         ) : (
-          /* [수정] overflow-y-auto 제거, pb-24 추가(하단 탭바 공간 확보) */
-          <div className="w-full pb-24">
+          /* [수정] 스크롤 문제 해결: 하단 네비게이션(80px)의 터치 영역을 침범하지 않도록 정확한 패딩 적용 */
+          <div
+            className="w-full"
+            style={{ paddingBottom: `${NAV_HEIGHT_PX}px` }}
+          >
             {filteredPosts.map((post) => {
               const isDeleting = postToDelete === post.id
               return (
-                /* [수정] h-full -> w-full 변경하여 강제 높이 지정 해제 */
+                /* [유지] w-full 변경하여 강제 높이 지정 해제 */
                 <div
                   className={`w-full flex flex-col items-center px-5 xs:px-6 sm:px-8 py-4
                   ${
@@ -958,7 +964,7 @@ export function CommunityPage({
                           )}
                           {/* ================================================= */}
 
-                          {/* [수정: Pressed 상태의 캡슐 위치 및 스타일 통일] */}
+                          {/* [유지: Pressed 상태의 캡슐 위치 및 스타일 통일] */}
                           {(post.textOverlay || post.userName) && (
                             <div className="absolute bottom-4 left-4 flex items-center gap-3 z-20 max-w-[90%]">
                               {/* 1. 프로필 + 텍스트 캡슐 */}
@@ -978,20 +984,20 @@ export function CommunityPage({
                           {getAllComments(post.id, post.comments).length >
                             0 && (
                             <div
-                              // [수정] right-4 -> right-0 변경. p-4가 있으므로 시각적으로는 16px 떨어짐.
+                              // [유지] right-4 -> right-0 변경. p-4가 있으므로 시각적으로는 16px 떨어짐.
                               className="absolute bottom-20 right-0 flex flex-col gap-5 items-end max-w-[70%] max-h-[50vh] overflow-y-auto z-20 p-4 scrollbar-hide"
                             >
                               {getAllComments(post.id, post.comments).map(
                                 (comment, idx) => (
                                   <div
                                     key={`comment-${post.id}-${idx}-${comment.userName}-${comment.timestamp}`}
-                                    // [수정] 댓글 캡슐: 우측 정렬이므로 flex-row-reverse 및 padding 반전 (pl-5 pr-1)
+                                    // [유지] 댓글 캡슐: 우측 정렬이므로 flex-row-reverse 및 padding 반전 (pl-5 pr-1)
                                     className="inline-flex flex-row-reverse items-center bg-white/90 backdrop-blur-sm rounded-full pl-5 pr-1 py-3 gap-3 shadow-sm border border-white/20"
                                   >
                                     <ImageWithFallback
                                       src={comment.userAvatar}
                                       alt={comment.userName}
-                                      // [수정] 이미지: w-11 h-11, -my-4, -mr-2(오른쪽돌출)
+                                      // [유지] 이미지: w-11 h-11, -my-4, -mr-2(오른쪽돌출)
                                       className="w-9 h-9 rounded-full object-cover border-2 border-white -my-4 -mr-0.5 shadow-sm"
                                     />
                                     <p className="text-[15px] text-gray-900 whitespace-nowrap font-medium leading-none">
@@ -1050,7 +1056,7 @@ export function CommunityPage({
                               </div>
                             )}
 
-                          {/* === [수정된 부분: 하단 프로필 캡슐 및 댓글 카운트 (Outside State)] === */}
+                          {/* === [유지: 하단 프로필 캡슐 및 댓글 카운트 (Outside State)] === */}
                           {/* Pressed State와 완전히 동일한 크기/패딩/위치를 사용하여 
                                 전환 시 '점프' 현상을 방지함.
                             */}
@@ -1289,7 +1295,7 @@ export function CommunityPage({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-            // [수정] 닫기 핸들러 사용
+            // [유지] 닫기 핸들러 사용
             onClick={handleCloseLightbox}
           >
             <motion.div
@@ -1311,7 +1317,11 @@ export function CommunityPage({
       {/* 커뮤니티 전용 하단 네비게이션 */}
       {!isGridView && !isReactionView && (
         <div className="fixed bottom-0 left-0 right-0 z-50 max-w-[500px] mx-auto bg-white">
-          <div className="relative px-4 pt-2 pb-4 shadow-[0_-2px_5px_0_rgba(0,0,0,0.10)] rounded-t-[16px] h-[80px]">
+          {/* [수정] 네비게이션 바의 높이를 NAV_HEIGHT_PX로 고정 */}
+          <div
+            className="relative px-4 pt-2 pb-4 shadow-[0_-2px_5px_0_rgba(0,0,0,0.10)] rounded-t-[16px]"
+            style={{ height: `${NAV_HEIGHT_PX}px` }}
+          >
             <div className="flex items-center justify-around">
               <button
                 onClick={() => setIsGridView(true)}
@@ -1374,7 +1384,7 @@ export function CommunityPage({
             style={{
               fontSize: `${item.size}px`,
               left: "50%",
-              bottom: 80,
+              bottom: NAV_HEIGHT_PX + 20, // 네비게이션 바 위에서 시작하도록 조정
             }}
           >
             {item.emoji}
