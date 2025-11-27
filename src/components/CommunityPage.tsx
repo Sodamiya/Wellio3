@@ -725,7 +725,9 @@ export function CommunityPage({
         }}
       >
         {isReactionView ? (
-          <div className="pb-20">
+          <div className="pb-28">
+            {" "}
+            {/* 하단 여백: pb-28 (112px) */}
             {/* 리액션 필터 바 (가로 스크롤) */}
             <div className="px-4 py-4 flex gap-3 overflow-x-auto scrollbar-hide bg-white sticky top-0 z-20 justify-center">
               {/* ALL 버튼 */}
@@ -755,7 +757,6 @@ export function CommunityPage({
                 </button>
               ))}
             </div>
-
             <div className="px-4">
               {getFilteredReactionPosts().length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -809,7 +810,9 @@ export function CommunityPage({
             </div>
           </div>
         ) : isGridView ? (
-          <div className="px-4 py-4 pb-20">
+          <div className="px-4 py-4 pb-28">
+            {" "}
+            {/* 하단 여백: pb-28 (112px) */}
             <div className="grid grid-cols-3 gap-1">
               {filteredPosts.map((post) => (
                 <motion.div
@@ -839,18 +842,22 @@ export function CommunityPage({
             </div>
           </div>
         ) : (
-          <div className="w-full px-4 pt-4 pb-20">
+          <div className="w-full px-4 pt-4 pb-28">
+            {" "}
+            {/* 하단 여백: pb-28 (112px) */}
             {filteredPosts.map((post) => {
               const isDeleting = postToDelete === post.id
               return (
                 <div
-                  className={`flex flex-col items-center w-full mb-6 
+                  // [수정] mb-6 대신 15vh 마진 적용
+                  className={`flex flex-col items-center w-full 
                   ${
                     isKeyboardVisible
                       ? "justify-start pt-12 overflow-y-auto"
                       : ""
                   }`}
                   key={post.id}
+                  style={{ marginBottom: "15vh" }} // 피드 간 여백 15vh 적용
                 >
                   <div className="relative w-full mx-auto overflow-visible flex-shrink-0 aspect-[335/447]">
                     {post.userName === currentUser.userName && (
