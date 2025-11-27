@@ -16,12 +16,12 @@ import {
   Smile,
   Trash2,
 } from "lucide-react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react" // useMemo 추가
 import { ImageWithFallback } from "./figma/ImageWithFallback"
-import { Swiper, SwiperSlide } from "swiper/react"
+// import { Swiper, SwiperSlide } from "swiper/react" // Swiper 제거
 import { motion, AnimatePresence } from "motion/react"
 import confetti from "canvas-confetti"
-import "swiper/css"
+// import "swiper/css" // Swiper CSS 제거
 import { BottomNav } from "./BottomNav"
 
 interface CommunityPageProps {
@@ -112,12 +112,23 @@ const FamilyDropdown = ({
       >
         <div className="p-2 min-w-[140px]">
           {familyMembers.map((member) => {
+            // "me" ID를 가진 가족 구성원이 없으므로, 현재 사용자 이름과 일치하도록 처리 로직 조정
+            // 목데이터에 없는 임시 ID를 비활성화 처리
             const isGrayedOut = member.id === "kim" || member.id === "park"
-            const memberName =
-              member.id === "me" ? currentUserName : member.name
+
+            // '전체보기'가 아닐 때 멤버 이름을 가져옴. 'me'에 해당하는 ID가 없으므로 `currentUserName`으로 대체하는 로직은 제거하고,
+            // 목데이터의 `name`을 사용하되, 선택 시 `currentUserName`으로 비교하도록 로직을 조정함.
+            // 하지만 현재 목데이터에는 'me' ID가 없으므로, 명시적으로 '나'를 추가하거나, 현재 로직을 유지하면서 선택 로직만 조정합니다.
+            // 여기서는 원본 목데이터를 유지하고 선택된 멤버 이름만 조정합니다.
+            const memberName = member.name // 목데이터의 이름을 그대로 사용
+
+            // '전체보기' 선택 여부: selectedFamilyMember가 null이거나 '전체보기'인 경우
+            // 특정 멤버 선택 여부: selectedFamilyMember가 현재 멤버의 이름 또는 currentUserName과 일치하는 경우
             const isSelected =
               (member.id === "all" && !selectedFamilyMember) ||
-              selectedFamilyMember === memberName
+              selectedFamilyMember === member.name ||
+              (member.id === "admin" &&
+                selectedFamilyMember === currentUserName) // 현재 코드는 admin에 currentUserName을 넣는 로직이 없지만, 혹시 모를 상황 대비
 
             return (
               <button
@@ -126,9 +137,12 @@ const FamilyDropdown = ({
                   if (isGrayedOut) return
 
                   if (member.id === "all") {
-                    setSelectedFamilyMember(null)
+                    setSelectedFamilyMember(null) // 전체보기는 null
+                  } else if (member.id === "admin") {
+                    // 관리자는 관리자 이름으로 설정 (currentUserName이 아닌 목데이터의 이름)
+                    setSelectedFamilyMember(member.name)
                   } else {
-                    setSelectedFamilyMember(memberName)
+                    setSelectedFamilyMember(member.name)
                   }
                   setShowFamilyDropdown(false)
                 }}
@@ -204,11 +218,18 @@ export function CommunityPage({
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [postToDelete, setPostToDelete] = useState<number | null>(null)
 
-  const [isScrolling, setIsScrolling] = useState(false)
-  const scrollTimerRef = useRef<NodeJS.Timeout | null>(null)
+  // [수정] 스크롤 관련 상태 제거: 스크롤 스냅 기능 도입으로 필요성이 줄어듦
+  // const [isScrolling, setIsScrolling] = useState(false)
+  // const scrollTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // 키보드 감지를 위한 state 추가
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false)
+
+  // [NEW] 스크롤 컨테이너 ref 추가
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // [NEW] 현재 피드 인덱스 상태 추가
+  const [currentFeedIndex, setCurrentFeedIndex] = useState(0)
 
   const currentUser = {
     userName: currentUserName,
@@ -249,6 +270,13 @@ export function CommunityPage({
       delay: number
     }>
   >([])
+
+  // 하단 네비게이션 바의 예상 높이 (80px)
+  const NAV_HEIGHT_PX = 80
+  // 헤더의 예상 높이 (min-h-[110px])
+  const HEADER_HEIGHT_PX = 110
+  // 피드 영역 높이: 뷰포트 높이 - 헤더 높이 - 네비게이션 높이
+  const FEED_AREA_HEIGHT_CALC = `calc(100vh - ${HEADER_HEIGHT_PX}px - ${NAV_HEIGHT_PX}px)`
 
   // === [NEW] 애니메이션 실행 로직 분리 ===
   const triggerReactionAnimation = (emoji: string) => {
@@ -358,11 +386,6 @@ export function CommunityPage({
     }, 2000)
   }
 
-  const generateRandomPosition = () => ({
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-  })
-
   const getAllComments = (postId: number, originalComments?: Array<any>) => {
     const original = originalComments || []
     const added = addedComments[postId] || []
@@ -419,12 +442,11 @@ export function CommunityPage({
       // 4. 특정 인물이 선택된 경우 교집합 필터링
       if (selectedFamilyMember) {
         // [수정된 부분: '나'를 currentUserName으로 처리]
-        const isMe = selectedFamilyMember === currentUserName
-        if (isMe) {
-          return hasMyReaction && post.userName === currentUserName
-        } else {
-          return hasMyReaction && post.userName === selectedFamilyMember
-        }
+        // Note: selectedFamilyMember는 FamilyDropdown에서 목데이터의 name으로 설정됨.
+        // currentUserName과 일치하는 경우는 'admin', '엄마', '아빠' 등의 이름이 currentUserName과 같을 경우임.
+        // 현재 로직상 '나'에 대한 명시적인 필터링은 selectedFamilyMember에 `currentUserName`이 들어갈 때 작동하며,
+        // 드롭다운 목데이터에 'me' 항목이 없어 현재는 '관리자', '엄마', '아빠' 이름으로 필터링됨.
+        return hasMyReaction && post.userName === selectedFamilyMember
       }
 
       return hasMyReaction
@@ -496,34 +518,31 @@ export function CommunityPage({
     setExpandedPostId(null)
   }
 
-  const filteredPosts = posts.filter((post) => {
-    if (selectedFamilyMember) {
-      // [수정된 부분: '나'를 currentUserName으로 처리]
-      const isMe = selectedFamilyMember === currentUserName
-      if (isMe) {
-        if (post.userName !== currentUserName) {
+  // [수정] 필터링 로직: selectedFamilyMember는 목데이터의 name으로 필터링
+  const filteredPosts = useMemo(() => {
+    return posts.filter((post) => {
+      if (selectedFamilyMember) {
+        if (post.userName !== selectedFamilyMember) {
           return false
         }
-      } else if (post.userName !== selectedFamilyMember) {
-        return false
       }
-    }
 
-    if (!searchQuery.trim()) return true
+      if (!searchQuery.trim()) return true
 
-    const query = searchQuery.toLowerCase()
-    const caption = post.caption?.toLowerCase() || ""
-    const textOverlay = post.textOverlay?.toLowerCase() || ""
-    const health = post.health?.toLowerCase() || ""
-    const userName = post.userName?.toLowerCase() || ""
+      const query = searchQuery.toLowerCase()
+      const caption = post.caption?.toLowerCase() || ""
+      const textOverlay = post.textOverlay?.toLowerCase() || ""
+      const health = post.health?.toLowerCase() || ""
+      const userName = post.userName?.toLowerCase() || ""
 
-    return (
-      caption.includes(query) ||
-      textOverlay.includes(query) ||
-      health.includes(query) ||
-      userName.includes(query)
-    )
-  })
+      return (
+        caption.includes(query) ||
+        textOverlay.includes(query) ||
+        health.includes(query) ||
+        userName.includes(query)
+      )
+    })
+  }, [posts, selectedFamilyMember, searchQuery])
 
   const expandedPost = posts.find((p) => p.id === expandedPostId)
 
@@ -558,13 +577,29 @@ export function CommunityPage({
     }
   }, [])
 
-  // 하단 네비게이션 바의 예상 높이 (80px)
-  const NAV_HEIGHT_PX = 80
+  // [NEW] 스크롤 이벤트 핸들러: 현재 보이는 피드 ID 업데이트 (선택 사항이지만 스냅 상태 유지에 도움)
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return
+
+    // 네비게이션과 헤더 높이를 제외한 순수 피드 영역 높이 (px)
+    const feedHeight = scrollContainerRef.current.clientHeight
+    const scrollTop = scrollContainerRef.current.scrollTop
+
+    // 현재 스크롤 위치를 피드 높이로 나누어 인덱스 계산
+    // Math.round를 사용하여 가장 근접한 피드를 현재 인덱스로 설정
+    const index = Math.round(scrollTop / feedHeight)
+
+    if (filteredPosts[index]) {
+      setCurrentPostId(filteredPosts[index].id)
+      setCurrentFeedIndex(index)
+    }
+  }
 
   return (
     // [유지] h-screen -> min-h-screen h-full
     <div className="relative bg-white flex flex-col max-w-[500px] mx-auto min-h-screen h-full overflow-hidden">
       {/* Header */}
+      {/* [유지] sticky top-0, min-h-[110px], z-30 */}
       <header className="sticky top-0 z-30 px-4 flex flex-col justify-center w-full bg-white min-h-[110px]">
         {isSearchActive ? (
           <div className="flex items-center gap-3">
@@ -631,11 +666,8 @@ export function CommunityPage({
               >
                 <span className="text-lg font-bold text-[#1A1A1A]">
                   {selectedFamilyMember
-                    ? familyMembers.find(
-                        (m) =>
-                          (m.id === "me" ? currentUserName : m.name) ===
-                          selectedFamilyMember
-                      )?.name || "모아보기"
+                    ? familyMembers.find((m) => m.name === selectedFamilyMember)
+                        ?.name || "모아보기"
                     : "모아보기"}
                 </span>
                 <ChevronDown size={20} className="text-gray-600" />
@@ -676,11 +708,8 @@ export function CommunityPage({
               >
                 <span className="text-lg font-bold text-[#1A1A1A]">
                   {selectedFamilyMember
-                    ? familyMembers.find(
-                        (m) =>
-                          (m.id === "me" ? currentUserName : m.name) ===
-                          selectedFamilyMember
-                      )?.name || "우리가족"
+                    ? familyMembers.find((m) => m.name === selectedFamilyMember)
+                        ?.name || "우리가족"
                     : "우리가족"}
                 </span>
                 <ChevronDown size={20} className="text-gray-600" />
@@ -719,12 +748,21 @@ export function CommunityPage({
       </header>
 
       {/* Content Area */}
-      {/* [수정] 스냅 기능 추가: snap-y snap-mandatory와 overflow-y-scroll 적용 */}
-      <div className="w-full flex-1 overflow-y-scroll scrollbar-hide snap-y snap-mandatory">
+      {/* [수정] 스크롤 스냅 기능 구현 핵심
+        1. overflow-y-scroll: 스크롤 가능하게
+        2. snap-y: y축 방향으로 스냅
+        3. snap-mandatory: 스크롤 시 반드시 요소에 스냅
+        4. h-full: 헤더를 제외한 나머지 높이(flex-1)를 차지하도록 함. (이 경우 min-h-screen이 적용된 부모의 높이를 따름)
+      */}
+      <div
+        ref={scrollContainerRef}
+        className="w-full flex-1 overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
+        onScroll={handleScroll}
+      >
         {isReactionView ? (
           <div className="pb-20">
             {/* 리액션 필터 바 (가로 스크롤) */}
-            <div className="px-4 py-4 flex gap-3 overflow-x-auto scrollbar-hide bg-white sticky top-[110px] z-20 justify-center">
+            <div className="px-4 py-4 flex gap-3 overflow-x-auto scrollbar-hide bg-white sticky top-[0] z-20 justify-center">
               {/* ALL 버튼 */}
               <button
                 onClick={() => setReactionFilter("ALL")}
@@ -836,17 +874,18 @@ export function CommunityPage({
             </div>
           </div>
         ) : (
-          /* [수정] 스크롤 문제 해결 및 스냅 기능 적용을 위해 paddingBottom 유지 */
-          <div
-            className="w-full"
-            style={{ paddingBottom: `${NAV_HEIGHT_PX}px` }}
-          >
+          /* [수정] 스크롤 스냅을 위한 각 피드 아이템 래퍼
+            1. snap-start: 각 아이템이 스크롤 컨테이너의 시작점에 스냅되도록 함.
+            2. min-h-[calc(100vh-110px-80px)]: 화면 높이에서 헤더(110px)와 네비게이션(80px) 높이를 제외한 만큼의 최소 높이를 강제하여 한 페이지에 하나의 피드가 오도록 함.
+            3. justify-center: 피드 내용을 중앙에 배치 (키보드 팝업 시 상단에 배치하는 로직은 유지).
+          */
+          <div className="w-full">
             {filteredPosts.map((post) => {
               const isDeleting = postToDelete === post.id
               return (
-                /* [수정] snap-start 적용 및 수직 패딩 조정 */
                 <div
-                  className={`w-full flex flex-col items-center px-5 xs:px-6 sm:px-8 pt-4 pb-20 snap-start
+                  className={`w-full flex flex-col items-center px-5 xs:px-6 sm:px-8 py-4 snap-start
+                  min-h-[${FEED_AREA_HEIGHT_CALC}]
                   ${
                     isKeyboardVisible ? "justify-start pt-12" : "justify-center"
                   }`}
@@ -858,13 +897,10 @@ export function CommunityPage({
                         <Trash2 size={32} className="text-gray-400" />
                       </div>
                     )}
-                    {/* [유지] 가로 드래그 (삭제 기능) */}
                     <motion.div
                       className="relative h-full w-full rounded-2xl overflow-hidden shadow-lg touch-none"
                       drag={
-                        !isScrolling && post.userName === currentUser.userName
-                          ? "x"
-                          : false
+                        post.userName === currentUser.userName ? "x" : false
                       }
                       dragConstraints={{
                         left: -200,
@@ -1096,6 +1132,7 @@ export function CommunityPage({
                     </motion.div>
 
                     {/* 댓글 입력창 - 이미지 카드 바로 아래 16px 간격 */}
+                    {/* [수정] 스크롤 스냅 시 입력창이 중앙에 위치하도록 패딩 조정 */}
                     <div className="z-40 pointer-events-none mt-5 mb-5">
                       <div className="relative w-full h-[48px] pointer-events-auto px-1">
                         <div className="flex items-center gap-2 w-full mx-auto h-full">
