@@ -559,7 +559,8 @@ export function CommunityPage({
   }, [])
 
   return (
-    <div className="relative bg-white flex flex-col max-w-[500px] mx-auto h-screen overflow-hidden">
+    // [수정] h-screen -> min-h-screen h-full
+    <div className="relative bg-white flex flex-col max-w-[500px] mx-auto **min-h-screen h-full** overflow-hidden">
       {/* Header */}
       <header className="sticky top-0 z-30 px-4 flex flex-col justify-center w-full bg-white min-h-[110px]">
         {isSearchActive ? (
@@ -715,12 +716,8 @@ export function CommunityPage({
       </header>
 
       {/* Content Area */}
-      {/* [수정]
-        1. overflow-y-auto는 여기서만 관리 (nested scroll 제거를 위해)
-        2. scrollbar-hide 클래스 추가 (스크롤바 숨김)
-        3. [&::-webkit-scrollbar]:hidden (Tailwind 임의 값으로 스크롤바 숨김 보장)
-      */}
-      <div className="w-full overflow-y-auto scrollbar-hide [&::-webkit-scrollbar]:hidden">
+      {/* [수정] flex-1 추가: 헤더와 하단 네비게이션을 제외한 나머지 공간을 모두 차지하도록 함 */}
+      <div className="w-full **flex-1** overflow-y-auto scrollbar-hide [&::-webkit-scrollbar]:hidden">
         {isReactionView ? (
           <div className="pb-20">
             {/* 리액션 필터 바 (가로 스크롤) */}
