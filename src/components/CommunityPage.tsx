@@ -201,6 +201,7 @@ export function CommunityPage({
   const [isSearchFocused, setIsSearchFocused] = useState(false)
 
   const [dragStartX, setDragStartX] = useState<number | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [postToDelete, setPostToDelete] = useState<number | null>(null)
 
@@ -561,7 +562,7 @@ export function CommunityPage({
   return (
     <div className="relative bg-white flex flex-col max-w-[500px] mx-auto h-screen overflow-hidden">
       {/* Header (110px) */}
-      <header className="sticky top-0 z-30 px-4 flex flex-col justify-center w-full bg-white min-h-[110px]">
+      <header className="sticky top-0 z-30 px-4 flex flex-col justify-center w-full bg-white min-h-[80px]">
         {isSearchActive ? (
           <div className="flex items-center gap-3">
             <button
@@ -716,7 +717,7 @@ export function CommunityPage({
 
       {/* Content Area - Header(110px)와 BottomNav(80px)를 제외한 높이 계산 */}
       <div
-        className="w-full overflow-y-auto"
+        className="w-full overflow-hidden"
         style={{
           height:
             isGridView || isReactionView
@@ -839,29 +840,24 @@ export function CommunityPage({
             </div>
           </div>
         ) : (
-          <div className="w-full px-4 pt-4 pb-20">
+          <div className="w-full px-5 xs:px-6 sm:px-8 snap-y snap-mandatory overflow-y-auto h-full scrollbar-hide">
             {filteredPosts.map((post, index) => {
               const isDeleting = postToDelete === post.id
               return (
                 <div
-                  // [수정] mb-6 제거 및 style 속성 추가 (요청 사항)
-                  className={`flex flex-col items-center w-full 
-                  ${
-                    isKeyboardVisible
-                      ? "justify-start pt-12 overflow-y-auto"
-                      : ""
-                  }`}
+                  // [수정] 사진+댓글창 그룹을 한 화면에 정확히 표시
+                  className={`snap-start snap-always flex flex-col items-center w-full gap-4 py-5 xs:py-6 sm:py-8 justify-start
+                  ${isKeyboardVisible ? "pt-12 overflow-y-auto" : ""}`}
                   key={post.id}
                   style={{
-                    // 화면 높이의 15% 여백 적용: 마지막 게시물이 아닐 때만 적용
-                    marginBottom:
-                      index < filteredPosts.length - 1 ? "15vh" : "0",
+                    height: "calc(100vh - 190px)", // 헤더(110px) + nav(80px)
+                    minHeight: "calc(100vh - 190px)",
                   }}
                 >
-                  <div className="relative w-full mx-auto overflow-visible flex-shrink-0 aspect-[335/447]">
-                    {post.userName === currentUser.userName && (
-                      <div className="absolute inset-y-0 -right-2 w-32 flex items-center justify-center z-0">
-                        <Trash2 size={32} className="text-gray-400" />
+                  <div className="relative w-full mx-auto overflow-visible flex-shrink-0 aspect-[335/400] max-h-[calc(100vh-280px)]">
+                    {post.userName === currentUser.userName && isDragging && (
+                      <div className="absolute inset-y-0 -right-16 w-24 flex items-center justify-end z-0 pr-4">
+                        <Trash2 size={32} className="text-red-500" />
                       </div>
                     )}
                     <motion.div
@@ -872,7 +868,7 @@ export function CommunityPage({
                           : false
                       }
                       dragConstraints={{
-                        left: -200,
+                        left: -120,
                         right: 0,
                       }}
                       dragElastic={0.1}
@@ -885,13 +881,17 @@ export function CommunityPage({
                         damping: 30,
                       }}
                       whileDrag={{ scale: 0.98 }}
-                      onDragStart={(event, info) => setDragStartX(info.point.x)}
+                      onDragStart={(event, info) => {
+                        setDragStartX(info.point.x)
+                        setIsDragging(true)
+                      }}
                       onDragEnd={(event, info) => {
-                        if (info.offset.x < -120) {
+                        if (info.offset.x < -100) {
                           setPostToDelete(post.id)
                           setShowDeleteModal(true)
                         }
                         setDragStartX(null)
+                        setIsDragging(false)
                       }}
                       onClick={(e) => {
                         if (!dragStartX) setSelectedPostForReaction(post.id)
@@ -1098,9 +1098,9 @@ export function CommunityPage({
                     </motion.div>
 
                     {/* 댓글 입력창 - 이미지 카드 바로 아래 16px 간격 */}
-                    <div className="z-40 pointer-events-none mt-5 mb-5">
+                    <div className="z-40 pointer-events-none">
                       <div className="relative w-full h-[48px] pointer-events-auto px-1">
-                        <div className="flex items-center gap-2 w-full mx-auto h-full">
+                        <div className="flex items-center gap-2 w-full mx-auto h-full mt-4">
                           <button
                             className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors overflow-hidden relative"
                             onClick={() => {
@@ -1339,7 +1339,7 @@ export function CommunityPage({
               </button>
             </div>
             <button
-              className="absolute left-1/2 -translate-x-1/2 -top-[24px] w-14 h-14 bg-[#36D2C5] rounded-full flex items-center justify-center shadow-lg hover:bg-[#00C2B3] transition-colors"
+              className="absolute left-1/2 -translate-x-1/2 -top-[16px] w-14 h-14 bg-[#36D2C5] rounded-full flex items-center justify-center shadow-lg hover:bg-[#00C2B3] transition-colors"
               onClick={onUploadClick}
             >
               <Plus size={28} className="text-white" />
