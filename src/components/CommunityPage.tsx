@@ -840,8 +840,6 @@ export function CommunityPage({
           </div>
         ) : (
           <div className="w-full px-4 pt-4 pb-20">
-            {" "}
-            {/* [수정] 피드 리스트 전체에 상하좌우 패딩 적용 */}
             {filteredPosts.map((post) => {
               const isDeleting = postToDelete === post.id
               return (
@@ -969,15 +967,16 @@ export function CommunityPage({
                           {/* [수정: Pressed 상태의 캡슐 위치 및 스타일 통일] */}
                           {(post.textOverlay || post.userName) && (
                             <div className="absolute bottom-4 left-4 flex items-center gap-3 z-20 max-w-[90%]">
-                              {/* 1. 프로필 + 텍스트 캡슐 */}
-                              <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full pl-1 pr-5 py-3 gap-3 shadow-sm border border-white/20 shrink-0">
+                              {/* 1. 프로필 + 텍스트 캡슐 - shrink-0 제거 */}
+                              <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full pl-1 pr-5 py-3 gap-3 shadow-sm border border-white/20">
                                 <ImageWithFallback
                                   src={post.userAvatar}
                                   alt={post.userName}
                                   // 이미지: w-12 h-12 (48px), -my-4, -ml-2
                                   className="w-12 h-12 rounded-full object-cover border-3 border-white -my-4 -ml-2 shadow-sm"
                                 />
-                                <p className="text-[15px] text-gray-900 whitespace-nowrap font-bold leading-none">
+                                {/* [수정] max-w-[150px], truncate 유지, flex-shrink 추가 */}
+                                <p className="text-[15px] text-gray-900 font-bold leading-none max-w-[150px] truncate flex-shrink">
                                   {post.textOverlay || post.userName}
                                 </p>
                               </div>
@@ -1002,7 +1001,8 @@ export function CommunityPage({
                                       // [수정] 이미지: w-11 h-11, -my-4, -mr-2(오른쪽돌출)
                                       className="w-9 h-9 rounded-full object-cover border-2 border-white -my-4 -mr-0.5 shadow-sm"
                                     />
-                                    <p className="text-[15px] text-gray-900 whitespace-nowrap font-medium leading-none">
+                                    {/* [수정] max-w-[180px], truncate 유지, flex-shrink 추가 */}
+                                    <p className="text-[15px] text-gray-900 font-medium leading-none max-w-[180px] truncate flex-shrink">
                                       {comment.text}
                                     </p>
                                   </div>
@@ -1059,13 +1059,9 @@ export function CommunityPage({
                             )}
 
                           {/* === [수정된 부분: 하단 프로필 캡슐 및 댓글 카운트 (Outside State)] === */}
-                          {/* Pressed State와 완전히 동일한 크기/패딩/위치를 사용하여 
-                                전환 시 '점프' 현상을 방지함.
-                            */}
                           <div className="absolute bottom-4 left-4 flex items-center gap-3 z-10 max-w-[90%]">
-                            {/* 1. 프로필 + 텍스트 캡슐 */}
-                            {/* pl-1 pr-5 py-3 gap-3 사용 (Pressed State와 동일) */}
-                            <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full pl-1 pr-5 py-3 gap-3 shadow-sm border border-white/20 shrink-0">
+                            {/* 1. 프로필 + 텍스트 캡슐 - shrink-0 제거 */}
+                            <div className="inline-flex items-center bg-white/90 backdrop-blur-sm rounded-full pl-1 pr-5 py-3 gap-3 shadow-sm border border-white/20">
                               <ImageWithFallback
                                 src={
                                   post.userName === currentUserName
@@ -1073,11 +1069,10 @@ export function CommunityPage({
                                     : post.userAvatar
                                 }
                                 alt={post.userName}
-                                // 이미지: w-12 h-12, -my-4, -ml-2 (Pressed State와 동일)
                                 className="w-12 h-12 rounded-full object-cover border-3 border-white -my-4 -ml-2 shadow-sm"
                               />
-                              {/* 폰트: text-[15px] font-bold (Pressed State와 동일) */}
-                              <span className="text-[15px] text-gray-900 font-bold leading-none">
+                              {/* [수정] max-w-[150px], truncate 유지, block과 flex-shrink 추가 */}
+                              <span className="text-[15px] text-gray-900 font-bold leading-none max-w-[150px] truncate block flex-shrink">
                                 {post.textOverlay || post.userName}
                               </span>
                             </div>
