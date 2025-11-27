@@ -97,7 +97,7 @@ const familyMembers = [
 // 이모지 목록
 const emojis = ["❤️", "😊", "👍", "🎉"]
 
-// === [NEW] 드롭다운 컴포넌트 분리 (재사용성 및 가독성 향상) ===
+// === 드롭다운 컴포넌트 ===
 const FamilyDropdown = ({
   showFamilyDropdown,
   setShowFamilyDropdown,
@@ -120,7 +120,6 @@ const FamilyDropdown = ({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.2 }}
-        // [수정] absolute 위치, 버튼 아래에 붙고, 그림자/둥근 모서리 유지
         className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-fit bg-white rounded-2xl shadow-xl z-50 overflow-hidden border border-gray-100"
       >
         <div className="p-2 min-w-[140px]">
@@ -172,7 +171,7 @@ const FamilyDropdown = ({
 )
 // ========================================================
 
-// === [NEW] PostCard 컴포넌트 분리 (피드 이미지 + 댓글 입력창 묶음) ===
+// === PostCard 컴포넌트 (피드 이미지 + 댓글 입력창 묶음) ===
 interface PostCardProps {
   post: Post
   currentUser: User
@@ -228,8 +227,9 @@ const PostCard = ({
   getAllReactions,
 }: PostCardProps) => {
   return (
+    // [수정: pb-10 추가] 스크롤 끝에서 터치 인식을 돕기 위해 하단에 패딩 추가
     <div
-      className={`h-full flex flex-col items-center px-5 xs:px-6 sm:px-8 py-4
+      className={`h-full flex flex-col items-center px-5 xs:px-6 sm:px-8 py-4 pb-10 
           ${
             isKeyboardVisible
               ? "justify-start pt-12 overflow-y-auto"
@@ -667,7 +667,7 @@ export function CommunityPage({
     }>
   >([])
 
-  // === [NEW] 애니메이션 실행 로직 분리 (PostCard에 전달) ===
+  // === 애니메이션 실행 로직 분리 (PostCard에 전달) ===
   const triggerReactionAnimation = useCallback((emoji: string) => {
     // 폭죽 이모지일 때는 confetti만 발생하고 이모지는 안 떠오름
     if (emoji === "🎉") {
@@ -860,10 +860,8 @@ export function CommunityPage({
     },
     [addedReactions]
   )
-  // ... [나머지 CommunityPage 로직] ...
 
   const getFilteredReactionPosts = () => {
-    // ... [기존 getFilteredReactionPosts 로직] ...
     const myReactedPosts = posts.filter((post) => {
       // 1. 내가 작성한 댓글 확인
       const hasMyComment = addedComments[post.id]?.some(
@@ -885,7 +883,7 @@ export function CommunityPage({
 
       // 4. 특정 인물이 선택된 경우 교집합 필터링
       if (selectedFamilyMember) {
-        // [수정된 부분: '나'를 currentUserName으로 처리]
+        // '나'를 currentUserName으로 처리
         const isMe = selectedFamilyMember === currentUserName
         if (isMe) {
           return hasMyReaction && post.userName === currentUserName
@@ -920,8 +918,6 @@ export function CommunityPage({
       return hasAddedReaction || hasOriginalReaction
     })
   }
-
-  // ... [getFilteredReactionPosts 이후 로직도 대부분 동일] ...
 
   const handleConfirmDelete = () => {
     if (postToDelete && onDeletePost) {
@@ -998,13 +994,11 @@ export function CommunityPage({
       }
     }
   }, [])
-  // ... [나머지 CommunityPage 로직] ...
 
   return (
     <div className="relative bg-white flex flex-col max-w-[500px] mx-auto h-screen overflow-hidden">
       {/* Header */}
       <header className="sticky top-0 z-30 px-4 flex flex-col justify-center w-full bg-white min-h-[110px]">
-        {/* ... [Header 로직은 변경 없음] ... */}
         {isSearchActive ? (
           <div className="flex items-center gap-3">
             <button
@@ -1151,11 +1145,19 @@ export function CommunityPage({
         )}
       </header>
 
-      {/* Content Area */}
-      <div className="w-full overflow-y-auto">
+      {/* Content Area - [수정] 높이 계산 적용 */}
+      <div
+        className="w-full overflow-y-auto"
+        style={{
+          height:
+            isGridView || isReactionView
+              ? "calc(100vh - 110px)" // 그리드/리액션 뷰: Header(110px)만 제외
+              : "calc(100vh - 110px - 80px)", // 기본 뷰: Header(110px)와 BottomNav(80px) 제외
+        }}
+      >
         {isReactionView ? (
           <div className="pb-20">
-            {/* ... [리액션 뷰 로직은 변경 없음] ... */}
+            {/* 리액션 뷰 */}
             <div className="px-4 py-4 flex gap-3 overflow-x-auto scrollbar-hide bg-white sticky top-[110px] z-20 justify-center">
               {/* ALL 버튼 */}
               <button
@@ -1237,7 +1239,7 @@ export function CommunityPage({
           </div>
         ) : isGridView ? (
           <div className="px-4 py-4 pb-20">
-            {/* ... [그리드 뷰 로직은 변경 없음] ... */}
+            {/* 그리드 뷰 */}
             <div className="grid grid-cols-3 gap-1">
               {filteredPosts.map((post) => (
                 <motion.div
@@ -1267,8 +1269,8 @@ export function CommunityPage({
             </div>
           </div>
         ) : (
-          <div className="w-full overflow-y-auto">
-            {/* === [가장 중요한 변경: PostCard 컴포넌트 사용] === */}
+          <div className="w-full">
+            {/* 기본 피드 뷰 */}
             {filteredPosts.map((post) => {
               const isDeleting = postToDelete === post.id
               return (
@@ -1300,12 +1302,11 @@ export function CommunityPage({
                 />
               )
             })}
-            {/* ============================================= */}
           </div>
         )}
       </div>
 
-      {/* ... [모달 및 하단 네비게이션, 이모지 애니메이션 로직은 변경 없음] ... */}
+      {/* 모달 및 하단 네비게이션 */}
       <AnimatePresence>
         {showDeleteModal && (
           <>
